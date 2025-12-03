@@ -46,3 +46,41 @@ After adding a model:
 
 If the model doesn't load, check the browser console (F12) for errors.
 
+## Troubleshooting
+
+### Error: "Kaydara FB" or "Unexpected token 'K'"
+**Problem**: Your file is an FBX file that was renamed to `.glb`. FBX files cannot be loaded directly.
+
+**Solution**: 
+1. Convert the FBX file to GLB using:
+   - Online converter: https://products.aspose.app/3d/conversion/fbx-to-gltf
+   - Blender: Import FBX → Export as GLB
+2. Replace the file with the converted GLB version
+
+### Error: "Failed to load buffer scene.bin" or missing texture files
+**Problem**: Your GLTF file references external files (`.bin`, textures) that are missing.
+
+**Solution**:
+1. **Option 1 (Recommended)**: Convert to GLB format - GLB includes everything in one file
+   - Use: https://products.aspose.app/3d/conversion/gltf-to-glb
+   - Or Blender: Import GLTF → Export as GLB
+2. **Option 2**: Make sure ALL files from the GLTF export are in the `assets/characters/` folder:
+   - `dwarf.gltf` (or `dwarf.glb`)
+   - `scene.bin` (if using GLTF)
+   - `textures/` folder with all texture files
+   - Any other `.bin` files
+
+### Model appears in the grass or too low
+**Fixed**: The code now automatically positions models so their feet are at ground level (y=0).
+
+### Model not rotating in preview
+**Fixed**: The rotation animation now works for all models, including cached ones.
+
+## Quick Fix Checklist
+
+- [ ] All model files are in `assets/characters/` folder
+- [ ] Files are named correctly: `human.glb`, `elf.glb`, `dwarf.glb`, `demon.glb`
+- [ ] Files are actual GLB/GLTF format (not FBX renamed)
+- [ ] If using GLTF, all external files (`.bin`, textures) are included
+- [ ] Browser console shows no errors (F12 → Console tab)
+

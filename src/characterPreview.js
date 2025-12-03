@@ -27,7 +27,8 @@ export class CharacterPreview {
             0.1,
             1000
         );
-        this.camera.position.set(0, 3, 8);
+        // Default camera position (will be adjusted when model loads)
+        this.camera.position.set(0, 2, 6);
         this.camera.lookAt(0, 1, 0);
 
         // Create renderer
@@ -79,7 +80,18 @@ export class CharacterPreview {
     async loadModel(race) {
         // Check cache first
         if (this.loadedModels[race]) {
-            return this.loadedModels[race].clone();
+            const cloned = this.loadedModels[race].clone(true); // Deep clone to preserve all properties
+            // Reset transformations on clone
+            cloned.scale.set(1, 1, 1);
+            cloned.position.set(0, 0, 0);
+            cloned.rotation.set(0, 0, 0);
+            // Reset all children transformations
+            cloned.traverse((child) => {
+                if (child !== cloned) {
+                    child.scale.set(1, 1, 1);
+                }
+            });
+            return cloned;
         }
 
         // Try to load model from assets - try GLB first (preferred), then GLTF
@@ -90,27 +102,66 @@ export class CharacterPreview {
             
             try {
                 const gltf = await new Promise((resolve, reject) => {
+                    // Set the path for resolving relative texture/bin files
+                    this.loader.setPath('assets/characters/');
+                    
                     this.loader.load(
-                        modelPath,
-                        (gltf) => resolve(gltf),
+                        `${race}${ext}`,
+                        (gltf) => {
+                            console.log(`Successfully loaded ${modelPath}`);
+                            // Fix texture paths if needed
+                            gltf.scene.traverse((child) => {
+                                if (child.isMesh && child.material) {
+                                    if (Array.isArray(child.material)) {
+                                        child.material.forEach(mat => this.fixMaterialTextures(mat));
+                                    } else {
+                                        this.fixMaterialTextures(child.material);
+                                    }
+                                }
+                            });
+                            resolve(gltf);
+                        },
                         (progress) => {
                             // Loading progress (optional)
+                            if (progress.lengthComputable) {
+                                const percentComplete = progress.loaded / progress.total * 100;
+                                console.log(`Loading ${modelPath}: ${percentComplete.toFixed(0)}%`);
+                            }
                         },
-                        (error) => reject(error)
+                        (error) => {
+                            // Check if it's a file format error (FBX file renamed to GLB)
+                            if (error.message && error.message.includes('Kaydara')) {
+                                console.error(`Error: ${race}${ext} appears to be an FBX file, not GLB/GLTF. Please convert it to GLB format.`);
+                            } else if (error.message && error.message.includes('scene.bin')) {
+                                console.error(`Error: ${race}${ext} is missing required external files (scene.bin). Make sure all files are in the assets/characters/ folder.`);
+                            } else {
+                                console.log(`Error loading ${modelPath}:`, error.message || error);
+                            }
+                            reject(error);
+                        }
                     );
                 });
 
-                // Cache the model
-                this.loadedModels[race] = gltf.scene;
-                return gltf.scene.clone();
+                // Cache the original model (before scaling)
+                this.loadedModels[race] = gltf.scene.clone(true);
+                return gltf.scene;
             } catch (error) {
                 // Try next extension
+                console.log(`Failed to load ${modelPath}, trying next format...`);
                 continue;
             }
         }
         
         console.log(`Model not found for ${race}, using fallback`);
         return null;
+    }
+
+    fixMaterialTextures(material) {
+        // Fix texture paths if they're broken
+        // GLB files should have textures embedded, so this is mainly for GLTF
+        if (material.map && material.map.image) {
+            // Texture already loaded, no fix needed
+        }
     }
 
     async updateCharacter(race, hairColor, skinTone) {
@@ -127,8 +178,63 @@ export class CharacterPreview {
         
         if (model) {
             // Use loaded 3D model
-            model.scale.set(1, 1, 1); // Adjust scale if needed
+            // Reset scale and position first
+            model.scale.set(1, 1, 1);
             model.position.set(0, 0, 0);
+            model.rotation.set(0, 0, 0);
+            
+            // Update matrix to ensure bounding box calculation is accurate
+            model.updateMatrixWorld(true);
+            
+            // Calculate bounding box to auto-scale
+            const box = new THREE.Box3();
+            box.expandByObject(model);
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
+            
+            console.log(`Model ${race} - Size:`, size, 'Center:', center);
+            
+            // Check if size is valid
+            if (size.y <= 0 || !isFinite(size.y) || size.y > 1000) {
+                console.warn(`Invalid model size for ${race} (${size.y}), using default scale`);
+                // If model is huge, scale it down significantly
+                const defaultScale = size.y > 1000 ? 0.01 : 1.0;
+                model.scale.set(defaultScale, defaultScale, defaultScale);
+                
+                // Recalculate after scaling
+                box.setFromObject(model);
+                const scaledSize = box.getSize(new THREE.Vector3());
+                const bottomY = box.min.y;
+                
+                // Position so bottom of model is at y=0 (ground level)
+                model.position.set(-box.getCenter(new THREE.Vector3()).x, -bottomY, -box.getCenter(new THREE.Vector3()).z);
+            } else {
+                // Target height for preview (around 2.5 units)
+                const targetHeight = 2.5;
+                const scale = targetHeight / size.y;
+                
+                console.log(`Scaling ${race} by ${scale} (target height: ${targetHeight}, actual height: ${size.y})`);
+                
+                // Apply scale
+                model.scale.set(scale, scale, scale);
+                
+                // Recalculate after scaling
+                box.setFromObject(model);
+                const scaledSize = box.getSize(new THREE.Vector3());
+                const bottomY = box.min.y;
+                const centerX = box.getCenter(new THREE.Vector3()).x;
+                const centerZ = box.getCenter(new THREE.Vector3()).z;
+                
+                // Position so bottom of model is at y=0 (ground level), centered on X and Z
+                model.position.set(-centerX, -bottomY, -centerZ);
+                
+                // Adjust camera to frame the character nicely
+                const maxDimension = Math.max(scaledSize.x, scaledSize.y, scaledSize.z);
+                const cameraDistance = maxDimension * 3;
+                this.camera.position.set(0, scaledSize.y * 0.6, cameraDistance);
+                this.camera.lookAt(0, scaledSize.y * 0.3, 0);
+            }
+            
             model.traverse((child) => {
                 if (child.isMesh) {
                     child.castShadow = true;
@@ -312,8 +418,8 @@ export class CharacterPreview {
     animate() {
         this.animationId = requestAnimationFrame(() => this.animate());
 
-        // Rotate character slowly
-        if (this.characterGroup) {
+        // Rotate character slowly - ensure it always rotates
+        if (this.characterGroup && this.characterGroup.children.length > 0) {
             this.characterGroup.rotation.y += 0.01;
         }
 

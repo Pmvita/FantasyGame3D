@@ -28,14 +28,24 @@ export class UI {
             this.showMainMenu();
         });
 
+        // Create new character from selection screen
+        const createNewBtn = document.getElementById('createNewFromSelectionButton');
+        if (createNewBtn) {
+            createNewBtn.addEventListener('click', () => {
+                this.showCharacterCreation();
+            });
+        }
+
         // Race selection
         document.querySelectorAll('.race-button').forEach(button => {
-            button.addEventListener('click', () => {
+            button.addEventListener('click', async () => {
                 // Remove selected class from all
                 document.querySelectorAll('.race-button').forEach(b => b.classList.remove('selected'));
                 // Add to clicked
                 button.classList.add('selected');
                 this.selectedRace = button.dataset.race;
+                
+                console.log(`Race selected: ${this.selectedRace}`);
                 
                 // Apply race-specific default stats
                 const raceStats = this.getRaceDefaultStats(this.selectedRace);
@@ -48,7 +58,7 @@ export class UI {
                 document.getElementById('speedStat').value = raceStats.speed;
                 document.getElementById('speedValue').textContent = raceStats.speed;
                 
-                this.updatePreview();
+                await this.updatePreview();
             });
         });
 
@@ -66,13 +76,13 @@ export class UI {
             // Name doesn't affect preview
         });
 
-        document.getElementById('hairColor').addEventListener('input', (e) => {
-            this.updatePreview();
+        document.getElementById('hairColor').addEventListener('input', async (e) => {
+            await this.updatePreview();
         });
 
-        document.getElementById('skinTone').addEventListener('input', (e) => {
+        document.getElementById('skinTone').addEventListener('input', async (e) => {
             document.getElementById('skinToneValue').textContent = e.target.value;
-            this.updatePreview();
+            await this.updatePreview();
         });
 
         ['health', 'strength', 'magic', 'speed'].forEach(stat => {
@@ -125,13 +135,13 @@ export class UI {
         this.updatePreview();
     }
 
-    updatePreview() {
+    async updatePreview() {
         if (!this.characterPreview) return;
         
         const hairColor = document.getElementById('hairColor').value;
         const skinTone = parseFloat(document.getElementById('skinTone').value);
         
-        this.characterPreview.updateCharacter(this.selectedRace, hairColor, skinTone);
+        await this.characterPreview.updateCharacter(this.selectedRace, hairColor, skinTone);
     }
 
     showHUD() {
@@ -154,26 +164,66 @@ export class UI {
         const characters = this.getAllCharacters();
         
         if (characters.length === 0) {
-            list.innerHTML = '<p style="color: #ccc; text-align: center; padding: 20px;">No characters created yet. Create one to get started!</p>';
+            list.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <div class="empty-state-icon"><i class="fas fa-swords"></i></div>
+                    <h3>No Characters Yet</h3>
+                    <p>Create your first character to begin your adventure!</p>
+                    <button class="create-new-button" id="createFirstCharacterButton">Create Your First Character</button>
+                </div>
+            `;
+            // Add event listener for the create button
+            const createBtn = document.getElementById('createFirstCharacterButton');
+            if (createBtn) {
+                createBtn.addEventListener('click', () => {
+                    this.showCharacterCreation();
+                });
+            }
             return;
         }
 
         characters.forEach((char, index) => {
             const card = document.createElement('div');
             card.className = 'character-card';
-            const raceEmoji = {
-                human: '👤',
-                elf: '🧝',
-                dwarf: '⛏️',
-                demon: '😈'
-            }[char.race] || '👤';
+            const raceIcon = {
+                human: '<i class="fas fa-user"></i>',
+                elf: '<i class="fas fa-leaf"></i>',
+                dwarf: '<i class="fas fa-hammer"></i>',
+                demon: '<i class="fas fa-fire"></i>'
+            }[char.race] || '<i class="fas fa-user"></i>';
+            
+            const raceName = char.race ? char.race.charAt(0).toUpperCase() + char.race.slice(1) : 'Human';
+            
             card.innerHTML = `
-                <h3>${raceEmoji} ${char.name}</h3>
-                <p><strong>Race:</strong> ${char.race ? char.race.charAt(0).toUpperCase() + char.race.slice(1) : 'Human'}</p>
-                <p>Health: ${char.stats.health}/${char.stats.maxHealth}</p>
-                <p>Strength: ${char.stats.strength}</p>
-                <p>Magic: ${char.stats.magic}</p>
-                <p>Speed: ${char.stats.speed}</p>
+                <div class="character-card-header">
+                    <div class="character-card-icon">${raceIcon}</div>
+                    <div class="character-card-title">
+                        <h3>${char.name || 'Unnamed Character'}</h3>
+                        <div class="character-card-race">${raceName}</div>
+                    </div>
+                </div>
+                <div class="character-stats">
+                    <div class="stat-item health-stat">
+                        <span class="stat-icon"><i class="fas fa-heart"></i></span>
+                        <span class="stat-label">Health</span>
+                        <span class="stat-value">${char.stats.health}/${char.stats.maxHealth}</span>
+                    </div>
+                    <div class="stat-item strength-stat">
+                        <span class="stat-icon"><i class="fas fa-sword"></i></span>
+                        <span class="stat-label">Strength</span>
+                        <span class="stat-value">${char.stats.strength}</span>
+                    </div>
+                    <div class="stat-item magic-stat">
+                        <span class="stat-icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+                        <span class="stat-label">Magic</span>
+                        <span class="stat-value">${char.stats.magic}</span>
+                    </div>
+                    <div class="stat-item speed-stat">
+                        <span class="stat-icon"><i class="fas fa-bolt"></i></span>
+                        <span class="stat-label">Speed</span>
+                        <span class="stat-value">${char.stats.speed}</span>
+                    </div>
+                </div>
             `;
             card.addEventListener('click', () => {
                 this.selectCharacter(index);

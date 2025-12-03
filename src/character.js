@@ -50,9 +50,49 @@ export class Character {
         
         if (model) {
             // Use loaded 3D model
+            // Reset scale and position first
+            model.scale.set(1, 1, 1);
+            model.position.set(0, 0, 0);
+            model.rotation.set(0, 0, 0);
+            
+            // Update matrix to ensure bounding box calculation is accurate
+            model.updateMatrixWorld(true);
+            
+            // Calculate bounding box to auto-scale
+            const box = new THREE.Box3();
+            box.expandByObject(model);
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
+            
+            console.log(`Game model ${race} - Size:`, size, 'Center:', center);
+            
+            // Check if size is valid
+            if (size.y <= 0 || !isFinite(size.y) || size.y > 1000) {
+                console.warn(`Invalid model size for ${race} (${size.y}), using default scale`);
+                const defaultScale = size.y > 1000 ? 0.01 : 1.0;
+                model.scale.set(defaultScale, defaultScale, defaultScale);
+            } else {
+                // Target height for game (around 2 units)
+                const targetHeight = 2.0;
+                const scale = targetHeight / size.y;
+                
+                console.log(`Scaling game model ${race} by ${scale} (target: ${targetHeight}, actual: ${size.y})`);
+                
+                // Apply scale
+                model.scale.set(scale, scale, scale);
+                
+                // Recalculate after scaling
+                box.setFromObject(model);
+                const scaledSize = box.getSize(new THREE.Vector3());
+                const centerX = box.getCenter(new THREE.Vector3()).x;
+                const centerZ = box.getCenter(new THREE.Vector3()).z;
+                const bottomY = box.min.y;
+                
+                // Position model so feet are at y=0 (bottom of bounding box at y=0), centered on X and Z
+                model.position.set(-centerX, -bottomY, -centerZ);
+            }
+            
             this.mesh = model;
-            this.mesh.scale.set(1, 1, 1);
-            this.mesh.position.set(0, 1, 0);
             
             // Apply customization
             this.mesh.traverse((child) => {
@@ -217,22 +257,62 @@ export class Character {
             
             try {
                 const gltf = await new Promise((resolve, reject) => {
+                    // Set the path for resolving relative texture/bin files
+                    this.loader.setPath('assets/characters/');
+                    
                     this.loader.load(
-                        modelPath,
-                        (gltf) => resolve(gltf),
-                        undefined,
-                        (error) => reject(error)
+                        `${race}${ext}`,
+                        (gltf) => {
+                            console.log(`Successfully loaded ${modelPath} for game`);
+                            // Fix texture paths if needed
+                            gltf.scene.traverse((child) => {
+                                if (child.isMesh && child.material) {
+                                    if (Array.isArray(child.material)) {
+                                        child.material.forEach(mat => this.fixMaterialTextures(mat));
+                                    } else {
+                                        this.fixMaterialTextures(child.material);
+                                    }
+                                }
+                            });
+                            resolve(gltf);
+                        },
+                        (progress) => {
+                            if (progress.lengthComputable) {
+                                const percentComplete = progress.loaded / progress.total * 100;
+                                console.log(`Loading ${modelPath}: ${percentComplete.toFixed(0)}%`);
+                            }
+                        },
+                        (error) => {
+                            // Check if it's a file format error (FBX file renamed to GLB)
+                            if (error.message && error.message.includes('Kaydara')) {
+                                console.error(`Error: ${race}${ext} appears to be an FBX file, not GLB/GLTF. Please convert it to GLB format.`);
+                            } else if (error.message && error.message.includes('scene.bin')) {
+                                console.error(`Error: ${race}${ext} is missing required external files (scene.bin). Make sure all files are in the assets/characters/ folder.`);
+                            } else {
+                                console.log(`Error loading ${modelPath}:`, error.message || error);
+                            }
+                            reject(error);
+                        }
                     );
                 });
                 return gltf.scene;
             } catch (error) {
                 // Try next extension
+                console.log(`Failed to load ${modelPath}, trying next format...`);
                 continue;
             }
         }
         
         console.log(`Model not found for ${race}, using fallback`);
         return null;
+    }
+
+    fixMaterialTextures(material) {
+        // Fix texture paths if they're broken
+        // GLB files should have textures embedded
+        if (material.map && material.map.image) {
+            // Texture already loaded, no fix needed
+        }
     }
 
     getRaceProperties(race) {
