@@ -1,0 +1,25 @@
+{
+  "name": "fantasy-game-3d",
+  "version": "1.0.0",
+  "description": "Fantasy character 3D game built with Three.js",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server . -p 3000 -o",
+    "dev": "npx http-server . -p 3000 -o"
+  },
+  "keywords": [
+    "threejs",
+    "3d",
+    "game",
+    "fantasy"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
+

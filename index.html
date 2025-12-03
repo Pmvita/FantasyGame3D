@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Character 3D Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #ui > * {
+            pointer-events: auto;
+        }
+
+        /* Main Menu */
+        #mainMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 300px;
+        }
+
+        #mainMenu h1 {
+            color: #fff;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .menu-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .menu-button:hover {
+            background: #357abd;
+        }
+
+        /* Character Selection */
+        #characterSelection {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            min-width: 500px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+        }
+
+        #characterSelection h2 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        #characterList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .character-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .character-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .character-card h3 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .character-card p {
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        /* Character Creation */
+        #characterCreation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            min-width: 900px;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: none;
+        }
+
+        #characterCreationContent {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+        }
+
+        #characterPreviewContainer {
+            background: rgba(20, 20, 30, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            min-height: 500px;
+        }
+
+        #characterPreviewCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 5px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
+        }
+
+        .race-selection {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .race-button {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .race-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #4a90e2;
+        }
+
+        .race-button.selected {
+            background: rgba(74, 144, 226, 0.3);
+            border-color: #4a90e2;
+        }
+
+        .race-button h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .race-button p {
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        .creation-section {
+            margin-bottom: 20px;
+        }
+
+        .creation-section h3 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .creation-section label {
+            display: block;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+
+        .creation-section input[type="text"],
+        .creation-section input[type="color"],
+        .creation-section input[type="range"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #222;
+            color: #fff;
+        }
+
+        .creation-section input[type="range"] {
+            width: 100%;
+        }
+
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            display: none;
+        }
+
+        #hud .stat {
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+
+        /* Controls Info */
+        #controlsInfo {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
+            display: none;
+        }
+
+        /* Loading */
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="ui">
+            <!-- Main Menu -->
+            <div id="mainMenu">
+                <h1>Fantasy Game</h1>
+                <button class="menu-button" id="startButton">Start Game</button>
+                <button class="menu-button" id="characterSelectButton">Character Selection</button>
+                <button class="menu-button" id="createCharacterButton">Create Character</button>
+            </div>
+
+            <!-- Character Selection -->
+            <div id="characterSelection">
+                <h2>Select Character</h2>
+                <div id="characterList"></div>
+                <button class="menu-button" id="backFromSelectionButton">Back</button>
+            </div>
+
+            <!-- Character Creation -->
+            <div id="characterCreation">
+                <h2 style="color: #fff; margin-bottom: 20px; text-align: center;">Create Character</h2>
+                <div id="characterCreationContent">
+                    <div>
+                        <!-- Race Selection -->
+                        <div class="creation-section">
+                            <h3>Select Race</h3>
+                            <div class="race-selection">
+                                <div class="race-button" data-race="human">
+                                    <h3>👤 Human</h3>
+                                    <p>Balanced stats, versatile</p>
+                                </div>
+                                <div class="race-button" data-race="elf">
+                                    <h3>🧝 Elf</h3>
+                                    <p>High magic, agile</p>
+                                </div>
+                                <div class="race-button" data-race="dwarf">
+                                    <h3>⛏️ Dwarf</h3>
+                                    <p>High strength, sturdy</p>
+                                </div>
+                                <div class="race-button" data-race="demon">
+                                    <h3>😈 Demon</h3>
+                                    <p>High magic & strength</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="creation-section">
+                            <label>Character Name:</label>
+                            <input type="text" id="characterName" placeholder="Enter name">
+                        </div>
+                        <div class="creation-section">
+                            <label>Hair Color:</label>
+                            <input type="color" id="hairColor" value="#8B4513">
+                        </div>
+                        <div class="creation-section">
+                            <label>Skin Tone:</label>
+                            <input type="range" id="skinTone" min="0" max="1" step="0.1" value="0.5">
+                            <span id="skinToneValue">0.5</span>
+                        </div>
+                        <div class="creation-section">
+                            <label>Health: <span id="healthValue">50</span></label>
+                            <input type="range" id="healthStat" min="0" max="100" value="50">
+                        </div>
+                        <div class="creation-section">
+                            <label>Strength: <span id="strengthValue">10</span></label>
+                            <input type="range" id="strengthStat" min="0" max="100" value="10">
+                        </div>
+                        <div class="creation-section">
+                            <label>Magic: <span id="magicValue">10</span></label>
+                            <input type="range" id="magicStat" min="0" max="100" value="10">
+                        </div>
+                        <div class="creation-section">
+                            <label>Speed: <span id="speedValue">10</span></label>
+                            <input type="range" id="speedStat" min="0" max="100" value="10">
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="menu-button" id="saveCharacterButton" style="flex: 1;">Save Character</button>
+                            <button class="menu-button" id="cancelCreationButton" style="flex: 1;">Cancel</button>
+                        </div>
+                    </div>
+
+                    <!-- 3D Preview -->
+                    <div id="characterPreviewContainer">
+                        <h3 style="color: #fff; margin-bottom: 15px; text-align: center;">Character Preview</h3>
+                        <canvas id="characterPreviewCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HUD -->
+            <div id="hud">
+                <div class="stat">Health: <span id="hudHealth">100</span>/<span id="hudMaxHealth">100</span></div>
+                <div class="stat">Strength: <span id="hudStrength">10</span></div>
+                <div class="stat">Magic: <span id="hudMagic">10</span></div>
+                <div class="stat">Speed: <span id="hudSpeed">10</span></div>
+            </div>
+
+            <!-- Controls Info -->
+            <div id="controlsInfo">
+                <div>Arrow Keys / WASD: Move</div>
+                <div>Mouse: Look Around</div>
+                <div>E: Interact</div>
+            </div>
+
+            <!-- Loading -->
+            <div id="loading">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Three.js from CDN -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module" src="src/app.js"></script>
+</body>
+</html>
+
