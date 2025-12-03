@@ -1,9 +1,19 @@
 #!/bin/bash
 
-# Initialize git repository if it doesn't exist
+# Check if git repository exists
 if [ ! -d .git ]; then
     echo "Initializing git repository..."
     git init
+fi
+
+# Check if remote exists, if not add it
+if ! git remote | grep -q origin; then
+    echo "Adding GitHub remote..."
+    git remote add origin https://github.com/Pmvita/FantasyGame3D.git
+else
+    echo "Remote already configured."
+    # Update remote URL in case it changed
+    git remote set-url origin https://github.com/Pmvita/FantasyGame3D.git
 fi
 
 # Add all files
@@ -12,26 +22,16 @@ git add .
 
 # Commit changes
 echo "Committing changes..."
-git commit -m "Update fantasy game: improved UI, modern icons, character preview layout"
+git commit -m "Update fantasy game: improved UI with modern icons, enhanced character preview layout, better race selection styling"
 
-# Check if remote exists
-if ! git remote | grep -q origin; then
-    echo ""
-    echo "⚠️  No remote repository found!"
-    echo "Please add your GitHub repository as origin:"
-    echo "  git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git"
-    echo ""
-    echo "Or if you already have a GitHub repo, run:"
-    echo "  git remote add origin YOUR_REPO_URL"
-    echo ""
-    read -p "Press Enter after adding the remote, or Ctrl+C to cancel..."
-fi
+# Ensure we're on main branch
+git branch -M main
 
 # Push to GitHub
 echo "Pushing to GitHub..."
-git branch -M main
 git push -u origin main
 
 echo ""
 echo "✅ Done! Your code has been pushed to GitHub."
+echo "View your repository at: https://github.com/Pmvita/FantasyGame3D"
 
