@@ -1,5 +1,6 @@
 // Character system
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export class Character {
     constructor(scene, data = null) {
@@ -8,8 +9,12 @@ export class Character {
         this.mesh = null;
         this.velocity = new THREE.Vector3();
         this.speed = 5.0 * (0.5 + (this.data.stats.speed / 100.0) * 1.5); // Speed based on stat
+        this.loader = new GLTFLoader();
         
-        this.createCharacter();
+        // Create character (async, but don't wait)
+        this.createCharacter().catch(err => {
+            console.log('Error creating character:', err);
+        });
     }
 
     createDefaultData() {
@@ -37,11 +42,44 @@ export class Character {
         };
     }
 
-    createCharacter() {
+    async createCharacter() {
         const race = this.data.race || 'human';
+        
+        // Try to load 3D model first
+        const model = await this.loadModel(race);
+        
+        if (model) {
+            // Use loaded 3D model
+            this.mesh = model;
+            this.mesh.scale.set(1, 1, 1);
+            this.mesh.position.set(0, 1, 0);
+            
+            // Apply customization
+            this.mesh.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    
+                    if (child.material) {
+                        // Update hair color
+                        if (child.material.name && child.material.name.toLowerCase().includes('hair')) {
+                            child.material.color.setStyle(this.data.appearance.hairColor);
+                        }
+                        // Update skin tone
+                        if (child.material.name && child.material.name.toLowerCase().includes('skin')) {
+                            const skinColor = this.getSkinColor(race);
+                            child.material.color.copy(skinColor);
+                        }
+                    }
+                }
+            });
+            
+            this.scene.add(this.mesh);
+            return;
+        }
+        
+        // Fallback to simple geometry
         const raceProps = this.getRaceProperties(race);
-
-        // Create character group
         this.mesh = new THREE.Group();
 
         // Create body
@@ -168,6 +206,33 @@ export class Character {
 
         this.mesh.position.set(0, 1, 0);
         this.scene.add(this.mesh);
+    }
+
+    async loadModel(race) {
+        // Try GLB first (preferred - single file), then GLTF
+        const extensions = ['.glb', '.gltf'];
+        
+        for (const ext of extensions) {
+            const modelPath = `assets/characters/${race}${ext}`;
+            
+            try {
+                const gltf = await new Promise((resolve, reject) => {
+                    this.loader.load(
+                        modelPath,
+                        (gltf) => resolve(gltf),
+                        undefined,
+                        (error) => reject(error)
+                    );
+                });
+                return gltf.scene;
+            } catch (error) {
+                // Try next extension
+                continue;
+            }
+        }
+        
+        console.log(`Model not found for ${race}, using fallback`);
+        return null;
     }
 
     getRaceProperties(race) {

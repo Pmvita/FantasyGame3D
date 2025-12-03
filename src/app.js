@@ -55,13 +55,16 @@ class FantasyGame {
         document.getElementById('loading').style.display = 'none';
     }
 
-    startGame(characterData) {
+    async startGame(characterData) {
         // Hide menus
         this.ui.hideAllMenus();
         this.ui.showHUD();
 
-        // Create character
+        // Create character (will load model if available)
         this.character = new Character(this.scene, characterData);
+        
+        // Wait a bit for model to load if needed
+        await new Promise(resolve => setTimeout(resolve, 100));
         
         // Set up camera to follow character
         this.camera.position.set(

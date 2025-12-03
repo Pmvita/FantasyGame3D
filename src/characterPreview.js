@@ -1,5 +1,6 @@
 // 3D Character Preview for Character Creation
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export class CharacterPreview {
     constructor(canvasId) {
@@ -10,7 +11,10 @@ export class CharacterPreview {
         this.characterMesh = null;
         this.characterGroup = null;
         this.currentRace = 'human';
+        this.currentModel = null;
+        this.loader = new GLTFLoader();
         this.animationId = null;
+        this.loadedModels = {}; // Cache loaded models
         
         this.init();
     }
@@ -62,7 +66,7 @@ export class CharacterPreview {
         ground.receiveShadow = true;
         this.scene.add(ground);
 
-        // Create initial character
+        // Create initial character (fallback to simple if no model)
         this.updateCharacter('human', '#8B4513', 0.5);
 
         // Start animation loop
@@ -72,7 +76,44 @@ export class CharacterPreview {
         window.addEventListener('resize', () => this.onWindowResize());
     }
 
-    updateCharacter(race, hairColor, skinTone) {
+    async loadModel(race) {
+        // Check cache first
+        if (this.loadedModels[race]) {
+            return this.loadedModels[race].clone();
+        }
+
+        // Try to load model from assets - try GLB first (preferred), then GLTF
+        const extensions = ['.glb', '.gltf'];
+        
+        for (const ext of extensions) {
+            const modelPath = `assets/characters/${race}${ext}`;
+            
+            try {
+                const gltf = await new Promise((resolve, reject) => {
+                    this.loader.load(
+                        modelPath,
+                        (gltf) => resolve(gltf),
+                        (progress) => {
+                            // Loading progress (optional)
+                        },
+                        (error) => reject(error)
+                    );
+                });
+
+                // Cache the model
+                this.loadedModels[race] = gltf.scene;
+                return gltf.scene.clone();
+            } catch (error) {
+                // Try next extension
+                continue;
+            }
+        }
+        
+        console.log(`Model not found for ${race}, using fallback`);
+        return null;
+    }
+
+    async updateCharacter(race, hairColor, skinTone) {
         // Remove old character
         if (this.characterGroup) {
             this.scene.remove(this.characterGroup);
@@ -81,10 +122,47 @@ export class CharacterPreview {
         this.currentRace = race;
         this.characterGroup = new THREE.Group();
 
-        // Get race-specific properties
+        // Try to load 3D model
+        const model = await this.loadModel(race);
+        
+        if (model) {
+            // Use loaded 3D model
+            model.scale.set(1, 1, 1); // Adjust scale if needed
+            model.position.set(0, 0, 0);
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    
+                    // Apply customization if possible
+                    if (child.material) {
+                        // Try to update hair color
+                        if (child.material.name && child.material.name.toLowerCase().includes('hair')) {
+                            child.material.color.setStyle(hairColor);
+                        }
+                        // Try to update skin tone
+                        if (child.material.name && child.material.name.toLowerCase().includes('skin')) {
+                            const skinColor = this.getSkinColor(skinTone, race);
+                            child.material.color.copy(skinColor);
+                        }
+                    }
+                }
+            });
+            
+            this.characterGroup.add(model);
+        } else {
+            // Fallback to simple geometry if model not found
+            this.createFallbackCharacter(race, hairColor, skinTone);
+        }
+
+        this.scene.add(this.characterGroup);
+    }
+
+    createFallbackCharacter(race, hairColor, skinTone) {
+        // Simple fallback character (original code)
         const raceProps = this.getRaceProperties(race);
 
-        // Create body based on race
+        // Create body
         const bodyGeometry = new THREE.BoxGeometry(
             raceProps.bodyWidth,
             raceProps.bodyHeight,
@@ -129,53 +207,7 @@ export class CharacterPreview {
         hair.position.y = raceProps.bodyHeight + raceProps.headSize + raceProps.hairHeight / 2;
         this.characterGroup.add(hair);
 
-        // Race-specific features
-        if (race === 'elf') {
-            // Pointed ears
-            const earGeometry = new THREE.ConeGeometry(0.15, 0.4, 8);
-            const earMaterial = new THREE.MeshStandardMaterial({
-                color: this.getSkinColor(skinTone, race)
-            });
-            const leftEar = new THREE.Mesh(earGeometry, earMaterial);
-            leftEar.position.set(-raceProps.headSize / 2 - 0.1, raceProps.bodyHeight + raceProps.headSize * 0.7, 0);
-            leftEar.rotation.z = -Math.PI / 6;
-            this.characterGroup.add(leftEar);
-
-            const rightEar = new THREE.Mesh(earGeometry, earMaterial);
-            rightEar.position.set(raceProps.headSize / 2 + 0.1, raceProps.bodyHeight + raceProps.headSize * 0.7, 0);
-            rightEar.rotation.z = Math.PI / 6;
-            this.characterGroup.add(rightEar);
-        } else if (race === 'dwarf') {
-            // Beard
-            const beardGeometry = new THREE.BoxGeometry(raceProps.headSize * 0.8, 0.4, raceProps.headSize * 0.6);
-            const beardMaterial = new THREE.MeshStandardMaterial({
-                color: hairColor
-            });
-            const beard = new THREE.Mesh(beardGeometry, beardMaterial);
-            beard.position.set(0, raceProps.bodyHeight + raceProps.headSize * 0.3, raceProps.headSize / 2 + 0.1);
-            this.characterGroup.add(beard);
-        } else if (race === 'demon') {
-            // Horns
-            const hornGeometry = new THREE.ConeGeometry(0.1, 0.6, 8);
-            const hornMaterial = new THREE.MeshStandardMaterial({
-                color: 0x2a2a2a
-            });
-            const leftHorn = new THREE.Mesh(hornGeometry, hornMaterial);
-            leftHorn.position.set(-raceProps.headSize * 0.3, raceProps.bodyHeight + raceProps.headSize + 0.3, 0);
-            leftHorn.rotation.z = -Math.PI / 6;
-            this.characterGroup.add(leftHorn);
-
-            const rightHorn = new THREE.Mesh(hornGeometry, hornMaterial);
-            rightHorn.position.set(raceProps.headSize * 0.3, raceProps.bodyHeight + raceProps.headSize + 0.3, 0);
-            rightHorn.rotation.z = Math.PI / 6;
-            this.characterGroup.add(rightHorn);
-
-            // Red tint for demon
-            bodyMaterial.color.setRGB(0.7, 0.4, 0.4);
-            headMaterial.color.setRGB(0.7, 0.4, 0.4);
-        }
-
-        // Add arms
+        // Add arms and legs (simplified)
         const armGeometry = new THREE.BoxGeometry(0.3, raceProps.armLength, 0.3);
         const armMaterial = new THREE.MeshStandardMaterial({
             color: this.getSkinColor(skinTone, race),
@@ -193,7 +225,6 @@ export class CharacterPreview {
         rightArm.castShadow = true;
         this.characterGroup.add(rightArm);
 
-        // Add legs
         const legGeometry = new THREE.BoxGeometry(0.4, raceProps.legLength, 0.4);
         const legMaterial = new THREE.MeshStandardMaterial({
             color: this.getSkinColor(skinTone, race),
@@ -210,9 +241,6 @@ export class CharacterPreview {
         rightLeg.position.set(raceProps.bodyWidth / 3, raceProps.legLength / 2, 0);
         rightLeg.castShadow = true;
         this.characterGroup.add(rightLeg);
-
-        this.characterGroup.position.set(0, 0, 0);
-        this.scene.add(this.characterGroup);
     }
 
     getRaceProperties(race) {
@@ -262,22 +290,18 @@ export class CharacterPreview {
         
         switch(race) {
             case 'elf':
-                // Elves have lighter, more ethereal skin
                 baseColor = { r: 0.9, g: 0.8, b: 0.7 };
                 break;
             case 'dwarf':
-                // Dwarves have more tanned, earthy skin
                 baseColor = { r: 0.6, g: 0.5, b: 0.4 };
                 break;
             case 'demon':
-                // Demons have reddish tint
                 baseColor = { r: 0.7, g: 0.4, b: 0.4 };
                 break;
-            default: // human
+            default:
                 baseColor = { r: 0.8, g: 0.6, b: 0.5 };
         }
 
-        // Apply tone variation
         const r = baseColor.r + (tone * 0.2);
         const g = baseColor.g + (tone * 0.2);
         const b = baseColor.b + (tone * 0.2);
@@ -309,7 +333,5 @@ export class CharacterPreview {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
         }
-        // Clean up resources if needed
     }
 }
-
