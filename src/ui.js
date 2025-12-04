@@ -10,6 +10,7 @@ export class UI {
         this.selectedRace = 'human';
         this.inventorySystem = null;
         this.skillsSystem = null;
+        this.skillCooldowns = {}; // Track cooldowns for each skill slot
         this.setupEventListeners();
         this.initializeInventory();
     }
@@ -150,10 +151,8 @@ export class UI {
                     skillKey = parsed;
                 }
             }
-            if (skillKey !== null && this.game.character) {
-                if (this.skillsSystem) {
-                    this.skillsSystem.useSkill(skillKey);
-                }
+            if (skillKey !== null) {
+                this.activateSkill(skillKey);
             }
         });
     }
@@ -235,6 +234,59 @@ export class UI {
         if (this.game.character) {
             this.inventorySystem = new InventorySystem(this.game.character);
             this.skillsSystem = new SkillsSystem(this.game.character);
+        }
+        
+        // Setup click handlers for skill slots
+        this.setupSkillSlotClicks();
+    }
+    
+    setupSkillSlotClicks() {
+        // Get all skill slots (excluding auto-attack)
+        const skillSlots = document.querySelectorAll('.skill-slot[data-slot]:not([data-slot="auto"])');
+        
+        skillSlots.forEach(slot => {
+            slot.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent event bubbling
+                const slotIdentifier = slot.dataset.slot;
+                
+                // Handle numeric slots (1-0) and string slots (potion1, potion2, elixir1, elixir2)
+                let skillKey = null;
+                if (slotIdentifier === '0') {
+                    skillKey = 0;
+                } else if (!isNaN(parseInt(slotIdentifier))) {
+                    skillKey = parseInt(slotIdentifier);
+                } else {
+                    // Handle potion/elixir slots (potion1, potion2, elixir1, elixir2)
+                    skillKey = slotIdentifier;
+                }
+                
+                if (skillKey !== null) {
+                    this.activateSkill(skillKey);
+                }
+            });
+        });
+    }
+    
+    activateSkill(skillKey) {
+        if (!this.game || !this.game.character) return;
+        
+        // Check if skill is on cooldown
+        if (this.isSkillOnCooldown(skillKey)) {
+            return; // Don't activate if on cooldown
+        }
+        
+        // Start cooldown
+        this.startSkillCooldown(skillKey);
+        
+        // Trigger mystical animation on the corresponding skill slot
+        this.triggerSkillAnimation(skillKey);
+        
+        // Only use skills system for numeric slots (1-0)
+        if (this.skillsSystem && typeof skillKey === 'number') {
+            this.skillsSystem.useSkill(skillKey);
+        } else if (typeof skillKey === 'string') {
+            // Handle potion/elixir usage (can be implemented later)
+            console.log(`Using ${skillKey}`);
         }
     }
 
@@ -488,6 +540,48 @@ export class UI {
             // Normal state - default color
             energyIcon.className = 'fas fa-bolt energy-normal';
         }
+    }
+
+    triggerSkillAnimation(slotNumber) {
+        // Find the skill slot element by data-slot attribute
+        const skillSlot = document.querySelector(`.skill-slot[data-slot="${slotNumber}"]`);
+        if (!skillSlot) return;
+        
+        // Remove any existing animation class
+        skillSlot.classList.remove('activated');
+        
+        // Force reflow to restart animation
+        void skillSlot.offsetWidth;
+        
+        // Add the activated class to trigger animation
+        skillSlot.classList.add('activated');
+        
+        // Remove the class after animation completes
+        setTimeout(() => {
+            skillSlot.classList.remove('activated');
+        }, 600); // Match animation duration
+    }
+
+    isSkillOnCooldown(slotNumber) {
+        return this.skillCooldowns[slotNumber] === true;
+    }
+
+    startSkillCooldown(slotNumber) {
+        // Find the skill slot element
+        const skillSlot = document.querySelector(`.skill-slot[data-slot="${slotNumber}"]`);
+        if (!skillSlot) return;
+        
+        // Mark as on cooldown
+        this.skillCooldowns[slotNumber] = true;
+        
+        // Add cooldown class to show visual effect
+        skillSlot.classList.add('on-cooldown');
+        
+        // Remove cooldown after 3 seconds
+        setTimeout(() => {
+            this.skillCooldowns[slotNumber] = false;
+            skillSlot.classList.remove('on-cooldown');
+        }, 3000);
     }
 
     getRaceDefaultStats(race) {
