@@ -17,7 +17,7 @@ export class Character {
         this.isRunning = false; // Running state (double-tap)
         this.targetPosition = null; // Target position for click-to-move
         this.moveThreshold = 0.1; // Distance threshold to stop moving
-        this.baseSpeed = 3.5 * (0.5 + (this.data.stats.speed / 100.0) * 1.5); // Base speed (reduced from 5.0)
+        this.baseSpeed = 3.0 * (0.5 + (this.data.stats.speed / 100.0) * 1.5); // Base speed (reduced from 3.5)
         this.speed = this.baseSpeed; // Current speed (can be modified for running)
         
         // Create character (async, but don't wait)
