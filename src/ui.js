@@ -424,11 +424,27 @@ export class UI {
 
     updateHUD(characterData) {
         if (characterData) {
-            document.getElementById('hudHealth').textContent = characterData.stats.health;
-            document.getElementById('hudMaxHealth').textContent = characterData.stats.maxHealth;
-            document.getElementById('hudStrength').textContent = characterData.stats.strength;
-            document.getElementById('hudMagic').textContent = characterData.stats.magic;
-            document.getElementById('hudSpeed').textContent = characterData.stats.speed;
+            // Update health bar
+            const health = characterData.stats.health || 0;
+            const maxHealth = characterData.stats.maxHealth || 100;
+            const healthPercent = maxHealth > 0 ? (health / maxHealth) * 100 : 0;
+            
+            document.getElementById('hudHealth').textContent = health;
+            document.getElementById('hudMaxHealth').textContent = maxHealth;
+            document.getElementById('healthBarFill').style.width = `${healthPercent}%`;
+            
+            // Update magic bar (using magic stat as current, max is same as magic stat for now)
+            const magic = characterData.stats.magic || 0;
+            const maxMagic = characterData.stats.magic || 10; // Use magic stat as max for now
+            const magicPercent = maxMagic > 0 ? (magic / maxMagic) * 100 : 0;
+            
+            document.getElementById('hudMagic').textContent = magic;
+            document.getElementById('hudMaxMagic').textContent = maxMagic;
+            document.getElementById('magicBarFill').style.width = `${magicPercent}%`;
+            
+            // Update stats
+            document.getElementById('hudStrength').textContent = characterData.stats.strength || 10;
+            document.getElementById('hudSpeed').textContent = characterData.stats.speed || 10;
         }
     }
 
