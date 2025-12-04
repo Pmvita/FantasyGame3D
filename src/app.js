@@ -231,8 +231,14 @@ class FantasyGame {
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); // Ground plane at y=0
+        
+        // Double-tap detection
+        let lastClickTime = 0;
+        let lastClickPosition = null;
+        const doubleTapDelay = 300; // milliseconds
+        const doubleTapDistance = 50; // pixels
 
-        const handleClick = (e) => {
+        const handleClick = (e, isDoubleTap = false) => {
             // Only handle clicks if game is active and character exists
             if (!this.character || !this.character.mesh) return;
             
@@ -252,27 +258,69 @@ class FantasyGame {
 
             // Move character to clicked position
             if (intersectPoint) {
-                this.character.moveTo(intersectPoint);
+                this.character.moveTo(intersectPoint, isDoubleTap);
                 
                 // Create ripple effect at click position
                 this.createRipple(e, canvas);
             }
         };
 
-        // Mouse click
-        canvas.addEventListener('click', handleClick);
+        // Mouse click with double-tap detection
+        canvas.addEventListener('click', (e) => {
+            const currentTime = Date.now();
+            const clickX = e.clientX;
+            const clickY = e.clientY;
+            
+            // Check if this is a double-tap
+            if (lastClickTime > 0 && 
+                (currentTime - lastClickTime) < doubleTapDelay &&
+                lastClickPosition &&
+                Math.abs(clickX - lastClickPosition.x) < doubleTapDistance &&
+                Math.abs(clickY - lastClickPosition.y) < doubleTapDistance) {
+                // Double tap detected
+                handleClick(e, true);
+                lastClickTime = 0; // Reset to prevent triple-tap
+            } else {
+                // Single tap
+                handleClick(e, false);
+                lastClickTime = currentTime;
+                lastClickPosition = { x: clickX, y: clickY };
+            }
+        });
 
-        // Touch support for mobile
+        // Touch support for mobile with double-tap
+        let lastTouchTime = 0;
+        let lastTouchPosition = null;
+        
         canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
             if (e.changedTouches.length > 0) {
                 const touch = e.changedTouches[0];
+                const currentTime = Date.now();
+                const touchX = touch.clientX;
+                const touchY = touch.clientY;
+                
+                // Check if this is a double-tap
+                const isDoubleTap = lastTouchTime > 0 && 
+                    (currentTime - lastTouchTime) < doubleTapDelay &&
+                    lastTouchPosition &&
+                    Math.abs(touchX - lastTouchPosition.x) < doubleTapDistance &&
+                    Math.abs(touchY - lastTouchPosition.y) < doubleTapDistance;
+                
                 const fakeEvent = {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY,
+                    clientX: touchX,
+                    clientY: touchY,
                     target: canvas
                 };
-                handleClick(fakeEvent);
+                
+                handleClick(fakeEvent, isDoubleTap);
+                
+                if (isDoubleTap) {
+                    lastTouchTime = 0;
+                } else {
+                    lastTouchTime = currentTime;
+                    lastTouchPosition = { x: touchX, y: touchY };
+                }
             }
         }, { passive: false });
     }
@@ -295,6 +343,21 @@ class FantasyGame {
         // Update camera to follow character (third-person camera)
         if (this.character && this.character.mesh && this.controls) {
             const charPos = this.character.mesh.position;
+            const charRotation = this.character.mesh.rotation.y;
+            
+            // If character is moving to a target, rotate camera to face character's direction
+            if (this.character.targetPosition) {
+                // Smoothly rotate camera to match character's facing direction
+                const targetCameraAngle = charRotation;
+                let angleDiff = targetCameraAngle - this.controls.cameraAngleY;
+                
+                // Normalize angle difference to [-PI, PI]
+                while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                
+                // Smoothly rotate camera
+                this.controls.cameraAngleY += angleDiff * 0.1;
+            }
             
             // Calculate camera position using spherical coordinates
             // Horizontal distance based on pitch angle

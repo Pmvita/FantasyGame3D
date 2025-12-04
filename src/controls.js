@@ -14,6 +14,11 @@ export class Controls {
         this.cameraAngleY = 0; // Horizontal rotation (yaw)
         this.cameraDistance = 10; // Distance from character
         this.cameraHeight = 5; // Height above character
+        
+        // Double-tap detection for running
+        this.lastKeyPress = {}; // Track last key press time and key
+        this.doubleTapDelay = 300; // milliseconds
+        this.isRunning = false; // Running state
 
         this.setupEventListeners();
     }
@@ -21,12 +26,24 @@ export class Controls {
     setupEventListeners() {
         // Keyboard events
         document.addEventListener('keydown', (e) => {
-            this.keys[e.key.toLowerCase()] = true;
-            this.handleKeyPress(e.key);
+            const key = e.key.toLowerCase();
+            this.keys[key] = true;
+            this.handleKeyPress(key);
         });
 
         document.addEventListener('keyup', (e) => {
-            this.keys[e.key.toLowerCase()] = false;
+            const key = e.key.toLowerCase();
+            this.keys[key] = false;
+            
+            // Stop running when movement key is released
+            const movementKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+            if (movementKeys.includes(key)) {
+                // Check if any movement key is still pressed
+                const anyMovementKeyPressed = movementKeys.some(k => this.keys[k]);
+                if (!anyMovementKeyPressed) {
+                    this.isRunning = false;
+                }
+            }
         });
 
         // Camera rotation with Q/E keys (optional)
@@ -34,12 +51,22 @@ export class Controls {
     }
 
     handleKeyPress(key) {
-        // Q/E to rotate camera around character (optional)
-        if (key.toLowerCase() === 'q') {
-            this.cameraAngleY -= 0.1;
-        }
-        if (key.toLowerCase() === 'e') {
-            this.cameraAngleY += 0.1;
+        // Detect double-tap for WASD/Arrow keys to trigger running
+        const movementKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+        
+        if (movementKeys.includes(key)) {
+            const currentTime = Date.now();
+            const lastPress = this.lastKeyPress[key];
+            
+            // Check if this is a double-tap (same key pressed within doubleTapDelay)
+            if (lastPress && (currentTime - lastPress) < this.doubleTapDelay) {
+                // Double-tap detected - enable running
+                this.isRunning = true;
+                this.lastKeyPress[key] = 0; // Reset to prevent triple-tap
+            } else {
+                // Single tap - normal movement (running will be disabled if key is released)
+                this.lastKeyPress[key] = currentTime;
+            }
         }
     }
 
@@ -71,11 +98,11 @@ export class Controls {
             const worldMoveVector = moveVector.clone();
             worldMoveVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.cameraAngleY);
             
-            // Move character
-            this.character.move(worldMoveVector);
+            // Move character with running state
+            this.character.move(worldMoveVector, this.isRunning);
             
             // Make character face movement direction smoothly
-            const targetAngle = Math.atan2(worldMoveVector.x, worldMoveVector.z);
+            const targetAngle = Math.atan2(-worldMoveVector.x, -worldMoveVector.z);
             // Smooth rotation towards target angle
             let currentAngle = this.character.mesh.rotation.y;
             let angleDiff = targetAngle - currentAngle;
@@ -86,9 +113,20 @@ export class Controls {
             
             // Smoothly rotate towards target
             this.character.mesh.rotation.y += angleDiff * 0.2;
+        } else {
+            // No movement keys pressed - stop running
+            if (this.isRunning) {
+                this.isRunning = false;
+            }
         }
 
-        // Camera follows character automatically (no mouse control)
+        // Camera rotation with Q/E keys (continuous while held)
+        if (this.keys['e']) {
+            this.cameraAngleY -= 0.07 * deltaTime * 60; // Pan left (counter-clockwise) - reduced from 0.1
+        }
+        if (this.keys['q']) {
+            this.cameraAngleY += 0.07 * deltaTime * 60; // Pan right (clockwise) - reduced from 0.1
+        }
     }
 }
 

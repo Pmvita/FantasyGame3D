@@ -8,15 +8,17 @@ export class Character {
         this.data = data || this.createDefaultData();
         this.mesh = null;
         this.velocity = new THREE.Vector3();
-        this.speed = 5.0 * (0.5 + (this.data.stats.speed / 100.0) * 1.5); // Speed based on stat
         this.loader = new GLTFLoader();
         this.readyPromise = null;
         this.mixer = null; // Animation mixer for GLTF animations
         this.animations = {}; // Store animation actions
         this.currentAnimation = null;
         this.isMoving = false;
+        this.isRunning = false; // Running state (double-tap)
         this.targetPosition = null; // Target position for click-to-move
         this.moveThreshold = 0.1; // Distance threshold to stop moving
+        this.baseSpeed = 3.5 * (0.5 + (this.data.stats.speed / 100.0) * 1.5); // Base speed (reduced from 5.0)
+        this.speed = this.baseSpeed; // Current speed (can be modified for running)
         
         // Create character (async, but don't wait)
         this.readyPromise = this.createCharacter().catch(err => {
@@ -121,23 +123,81 @@ export class Character {
             if (animations.length > 0) {
                 this.mixer = new THREE.AnimationMixer(model);
                 
-                // Find walking/idle animations
+                console.log(`Found ${animations.length} animations:`);
+                animations.forEach((clip) => {
+                    console.log(`  - ${clip.name}`);
+                });
+                
+                // Find walking/idle/run animations
                 animations.forEach((clip) => {
                     const action = this.mixer.clipAction(clip);
                     const clipName = clip.name.toLowerCase();
                     
-                    // Store animations by type
-                    if (clipName.includes('walk') || clipName.includes('run') || clipName.includes('move')) {
-                        this.animations['walk'] = action;
-                    } else if (clipName.includes('idle') || clipName.includes('stand')) {
-                        this.animations['idle'] = action;
-                    } else {
-                        // Store first animation as default
+                    // Store animations by type - more flexible matching
+                    if (clipName.includes('run') || clipName.includes('sprint')) {
+                        if (!this.animations['run']) {
+                            this.animations['run'] = action;
+                            console.log(`  → Assigned as RUN: ${clip.name}`);
+                        }
+                    } else if (clipName.includes('walk') || clipName.includes('move') || 
+                               clipName.includes('forward') || clipName.includes('locomotion') ||
+                               clipName.includes('motion')) {
+                        // "Motion" is typically a walking animation
+                        if (!this.animations['walk']) {
+                            this.animations['walk'] = action;
+                            console.log(`  → Assigned as WALK: ${clip.name}`);
+                        }
+                    } else if (clipName.includes('idle') || clipName.includes('stand') || 
+                               clipName.includes('breathing') || clipName.includes('wait')) {
                         if (!this.animations['idle']) {
                             this.animations['idle'] = action;
+                            console.log(`  → Assigned as IDLE: ${clip.name}`);
                         }
                     }
                 });
+                
+                // If we only have one animation and it's called "Motion", use it as walk
+                if (animations.length === 1 && !this.animations['walk'] && !this.animations['idle']) {
+                    const clip = animations[0];
+                    const clipName = clip.name.toLowerCase();
+                    if (clipName.includes('motion') || clipName.includes('walk') || clipName.includes('move')) {
+                        this.animations['walk'] = this.mixer.clipAction(clip);
+                        console.log(`  → Using as WALK: ${clip.name}`);
+                    } else {
+                        // Use as both walk and idle if it's the only animation
+                        this.animations['walk'] = this.mixer.clipAction(clip);
+                        this.animations['idle'] = this.mixer.clipAction(clip);
+                        console.log(`  → Using as WALK and IDLE: ${clip.name}`);
+                    }
+                } else {
+                    // If we didn't find a walk animation, use the first non-idle animation
+                    if (!this.animations['walk'] && animations.length > 0) {
+                        const firstNonIdle = animations.find(clip => {
+                            const name = clip.name.toLowerCase();
+                            return !name.includes('idle') && !name.includes('stand');
+                        });
+                        if (firstNonIdle) {
+                            this.animations['walk'] = this.mixer.clipAction(firstNonIdle);
+                            console.log(`  → Using as WALK (fallback): ${firstNonIdle.name}`);
+                        }
+                    }
+                    
+                    // If we didn't find an idle animation, try to find one or use walk
+                    if (!this.animations['idle']) {
+                        const idleClip = animations.find(clip => {
+                            const name = clip.name.toLowerCase();
+                            return name.includes('idle') || name.includes('stand');
+                        });
+                        if (idleClip) {
+                            this.animations['idle'] = this.mixer.clipAction(idleClip);
+                            console.log(`  → Using as IDLE: ${idleClip.name}`);
+                        } else if (this.animations['walk']) {
+                            // If no idle, use walk animation but at slower speed
+                            this.animations['idle'] = this.animations['walk'];
+                            console.log(`  → Using WALK as IDLE (no idle animation found)`);
+                        }
+                    }
+                }
                 
                 // Play idle animation by default
                 if (this.animations['idle']) {
@@ -439,9 +499,18 @@ export class Character {
         return new THREE.Color(r, g, b);
     }
 
-    move(direction) {
+    move(direction, isRunning = false) {
         // Normalize direction and apply speed
         direction.normalize();
+        
+        // Set running state and adjust speed
+        this.isRunning = isRunning;
+        if (isRunning) {
+            this.speed = this.baseSpeed * 1.5;
+        } else {
+            this.speed = this.baseSpeed;
+        }
+        
         this.velocity.x = direction.x * this.speed;
         this.velocity.z = direction.z * this.speed;
         
@@ -450,34 +519,73 @@ export class Character {
         
         // Update moving state for animation
         const wasMoving = this.isMoving;
+        const wasRunning = this.isRunning;
         this.isMoving = Math.abs(this.velocity.x) > 0.1 || Math.abs(this.velocity.z) > 0.1;
         
-        // Switch animations based on movement
-        if (this.isMoving !== wasMoving) {
+        // Switch animations based on movement or running state change
+        if (this.isMoving !== wasMoving || this.isRunning !== wasRunning) {
             this.updateAnimation();
         }
     }
     
-    moveTo(targetPosition) {
+    moveTo(targetPosition, isRunning = false) {
         // Set target position for click-to-move
         this.targetPosition = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
+        this.isRunning = isRunning;
+        
+        // Adjust speed for running
+        if (isRunning) {
+            this.speed = this.baseSpeed * 1.5;
+        } else {
+            this.speed = this.baseSpeed;
+        }
+        
+        // Update animation immediately
+        if (this.isMoving !== true) {
+            this.isMoving = true;
+            this.updateAnimation();
+        }
     }
     
     updateAnimation() {
         if (!this.mixer) return;
         
-        // Fade out current animation
-        if (this.currentAnimation && this.animations[this.currentAnimation]) {
-            this.animations[this.currentAnimation].fadeOut(0.2);
+        // Determine which animation to play
+        let targetAnimation = null;
+        if (this.isMoving) {
+            if (this.isRunning && this.animations['run']) {
+                targetAnimation = 'run';
+            } else if (this.animations['walk']) {
+                targetAnimation = 'walk';
+            }
+        } else {
+            if (this.animations['idle']) {
+                targetAnimation = 'idle';
+            }
         }
         
-        // Play appropriate animation
-        if (this.isMoving && this.animations['walk']) {
-            this.animations['walk'].reset().fadeIn(0.2).play();
-            this.currentAnimation = 'walk';
-        } else if (!this.isMoving && this.animations['idle']) {
-            this.animations['idle'].reset().fadeIn(0.2).play();
-            this.currentAnimation = 'idle';
+        // Only switch if animation changed
+        if (targetAnimation && targetAnimation !== this.currentAnimation) {
+            // Fade out current animation
+            if (this.currentAnimation && this.animations[this.currentAnimation]) {
+                this.animations[this.currentAnimation].fadeOut(0.2);
+            }
+            
+            // Play new animation
+            if (this.animations[targetAnimation]) {
+                const action = this.animations[targetAnimation];
+                action.reset().fadeIn(0.2).play();
+                
+                // Adjust speed for running
+                if (targetAnimation === 'run' || (targetAnimation === 'walk' && this.isRunning)) {
+                    action.timeScale = 1.5; // Run animation 1.5x faster
+                } else {
+                    action.timeScale = 1.0; // Normal speed
+                }
+                
+                this.currentAnimation = targetAnimation;
+                console.log(`Playing ${targetAnimation} animation`);
+            }
         }
     }
 
@@ -511,7 +619,8 @@ export class Character {
                 this.velocity.z = direction.z * this.speed;
                 
                 // Rotate character to face movement direction
-                const targetAngle = Math.atan2(direction.x, direction.z);
+                // Use -direction.z because character models often face -Z by default
+                const targetAngle = Math.atan2(-direction.x, -direction.z);
                 let currentAngle = this.mesh.rotation.y;
                 let angleDiff = targetAngle - currentAngle;
                 
@@ -522,13 +631,22 @@ export class Character {
                 // Smoothly rotate towards target
                 this.mesh.rotation.y += angleDiff * 0.15;
                 
-                this.isMoving = true;
+                // Update moving state and animation
+                if (!this.isMoving) {
+                    this.isMoving = true;
+                    this.updateAnimation();
+                }
             } else {
                 // Reached target
                 this.targetPosition = null;
+                this.isRunning = false;
+                this.speed = this.baseSpeed; // Reset to base speed
                 this.velocity.x = 0;
                 this.velocity.z = 0;
-                this.isMoving = false;
+                if (this.isMoving) {
+                    this.isMoving = false;
+                    this.updateAnimation();
+                }
             }
         }
         
@@ -547,13 +665,13 @@ export class Character {
         if (!this.targetPosition) {
             this.velocity.x *= 0.9;
             this.velocity.z *= 0.9;
-        }
-        
-        // Update animation state if velocity changed
-        const isMovingNow = Math.abs(this.velocity.x) > 0.1 || Math.abs(this.velocity.z) > 0.1 || this.targetPosition !== null;
-        if (isMovingNow !== this.isMoving) {
-            this.isMoving = isMovingNow;
-            this.updateAnimation();
+            
+            // Update animation state if velocity changed (for keyboard movement)
+            const isMovingNow = Math.abs(this.velocity.x) > 0.1 || Math.abs(this.velocity.z) > 0.1;
+            if (isMovingNow !== this.isMoving) {
+                this.isMoving = isMovingNow;
+                this.updateAnimation();
+            }
         }
     }
 
