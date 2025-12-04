@@ -795,6 +795,29 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
+        /* Minimap */
+        #minimapContainer {
+            position: absolute;
+            top: 20px;
+            right: 80px;
+            width: 200px;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            display: none;
+            z-index: 150;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        #minimapCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
         /* Settings Button */
         #settingsButton {
             position: absolute;
@@ -1166,6 +1189,11 @@
                 <div class="stat">Strength: <span id="hudStrength">10</span></div>
                 <div class="stat">Magic: <span id="hudMagic">10</span></div>
                 <div class="stat">Speed: <span id="hudSpeed">10</span></div>
+            </div>
+
+            <!-- Minimap -->
+            <div id="minimapContainer">
+                <canvas id="minimapCanvas"></canvas>
             </div>
 
             <!-- Settings Button -->

@@ -4,6 +4,7 @@ import { Character } from './character.js';
 import { World } from './world.js';
 import { Controls } from './controls.js';
 import { UI } from './ui.js';
+import { Minimap } from './minimap.js';
 
 class FantasyGame {
     constructor() {
@@ -14,6 +15,7 @@ class FantasyGame {
         this.world = null;
         this.controls = null;
         this.ui = null;
+        this.minimap = null;
         this.clock = new THREE.Clock();
         
         this.init();
@@ -33,6 +35,8 @@ class FantasyGame {
             2000
         );
         this.camera.position.set(0, 10, 20);
+        this.camera.layers.disable(1); // Disable minimap layer for main camera
+        this.scene.userData.mainCamera = this.camera; // Store for minimap
 
         // Create renderer
         const canvas = document.getElementById('gameCanvas');
@@ -103,6 +107,9 @@ class FantasyGame {
 
         // Update HUD
         this.ui.updateHUD(characterData);
+
+        // Initialize minimap
+        this.minimap = new Minimap(this.scene, this.character, this.world);
 
         // Start game loop
         this.animate();
@@ -378,6 +385,11 @@ class FantasyGame {
             const lookAtPos = charPos.clone();
             lookAtPos.y += 1; // Look at character's head/upper body
             this.camera.lookAt(lookAtPos);
+        }
+
+        // Update minimap
+        if (this.minimap) {
+            this.minimap.update();
         }
 
         // Always render the scene (even if character isn't ready)

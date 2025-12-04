@@ -221,6 +221,7 @@ export class UI {
         document.getElementById('settingsButton').style.display = 'flex';
         document.getElementById('skillsSection').style.display = 'flex';
         document.getElementById('inventoryButton').style.display = 'flex';
+        document.getElementById('minimapContainer').style.display = 'block';
         
         // Initialize inventory and skills systems
         if (this.game.character) {
@@ -239,6 +240,7 @@ export class UI {
         document.getElementById('skillsSection').style.display = 'none';
         document.getElementById('inventoryButton').style.display = 'none';
         document.getElementById('inventoryMenu').style.display = 'none';
+        document.getElementById('minimapContainer').style.display = 'none';
     }
 
     toggleSettings() {
