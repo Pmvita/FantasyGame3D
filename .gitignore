@@ -48,9 +48,12 @@ out/
 *.bak
 *.backup
 
-# Optional: Large asset files (uncomment if you don't want to commit large .glb files)
-# *.glb
-# *.gltf
-# *.fbx
-# *.bin
+# Large asset files (excluded due to GitHub 100MB file size limit)
+*.glb
+*.gltf
+*.fbx
+*.bin
+*.tga
+# Keep only essential small assets
+!assets/characters/README.md
 
