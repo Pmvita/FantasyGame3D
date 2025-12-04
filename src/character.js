@@ -20,6 +20,15 @@ export class Character {
         this.baseSpeed = 3.0 * (0.5 + (this.data.stats.speed / 100.0) * 1.5); // Base speed (reduced from 3.5)
         this.speed = this.baseSpeed; // Current speed (can be modified for running)
         
+        // Energy system (starts at 100, uses speed stat as max)
+        this.energy = 100;
+        this.maxEnergy = 100;
+        this.energyDepletionRate = 100 / 300; // Energy per second when running (0.33/sec = 300 seconds/5 minutes from full to empty)
+        this.energyRegenRate = 1; // Energy per 10 seconds
+        this.energyRegenInterval = 10; // seconds
+        this.energyRegenTimer = 0; // current timer
+        this.minEnergyToRun = 10; // Minimum energy needed to run
+        
         // Create character (async, but don't wait)
         this.readyPromise = this.createCharacter().catch(err => {
             console.log('Error creating character:', err);
@@ -503,6 +512,11 @@ export class Character {
         // Normalize direction and apply speed
         direction.normalize();
         
+        // Check if we can run (need energy >= minEnergyToRun)
+        if (isRunning && this.energy < this.minEnergyToRun) {
+            isRunning = false; // Force walking if not enough energy
+        }
+        
         // Set running state and adjust speed
         this.isRunning = isRunning;
         if (isRunning) {
@@ -529,6 +543,11 @@ export class Character {
     }
     
     moveTo(targetPosition, isRunning = false) {
+        // Check if we can run (need energy >= minEnergyToRun)
+        if (isRunning && this.energy < this.minEnergyToRun) {
+            isRunning = false; // Force walking if not enough energy
+        }
+        
         // Set target position for click-to-move
         this.targetPosition = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
         this.isRunning = isRunning;
@@ -595,6 +614,9 @@ export class Character {
 
     update(deltaTime) {
         if (!this.mesh) return;
+        
+        // Update energy system
+        this.updateEnergy(deltaTime);
         
         // Update animation mixer
         if (this.mixer) {
@@ -675,8 +697,48 @@ export class Character {
         }
     }
 
+    updateEnergy(deltaTime) {
+        // Deplete energy when running
+        if (this.isRunning && this.isMoving) {
+            this.energy -= this.energyDepletionRate * deltaTime;
+            if (this.energy <= 0) {
+                this.energy = 0;
+                // Force stop running if energy depleted
+                this.isRunning = false;
+                this.speed = this.baseSpeed;
+                this.updateAnimation();
+            }
+        }
+        
+        // Regenerate energy when not running (only if below max)
+        if (!this.isRunning && this.energy < this.maxEnergy) {
+            this.energyRegenTimer += deltaTime;
+            
+            // Regenerate 1 energy every 10 seconds
+            if (this.energyRegenTimer >= this.energyRegenInterval) {
+                this.energy += this.energyRegenRate;
+                if (this.energy > this.maxEnergy) {
+                    this.energy = this.maxEnergy;
+                }
+                this.energyRegenTimer = 0; // Reset timer
+            }
+        } else if (this.isRunning) {
+            // Reset regeneration timer when running
+            this.energyRegenTimer = 0;
+        }
+    }
+
     getData() {
         return this.data;
+    }
+    
+    getEnergy() {
+        return {
+            current: Math.floor(this.energy),
+            max: this.maxEnergy,
+            regenTimer: this.energyRegenTimer,
+            regenInterval: this.energyRegenInterval
+        };
     }
 }
 

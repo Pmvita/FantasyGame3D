@@ -60,8 +60,10 @@ export class Controls {
             
             // Check if this is a double-tap (same key pressed within doubleTapDelay)
             if (lastPress && (currentTime - lastPress) < this.doubleTapDelay) {
-                // Double-tap detected - enable running
-                this.isRunning = true;
+                // Double-tap detected - enable running only if enough energy
+                if (this.character && this.character.energy >= this.character.minEnergyToRun) {
+                    this.isRunning = true;
+                }
                 this.lastKeyPress[key] = 0; // Reset to prevent triple-tap
             } else {
                 // Single tap - normal movement (running will be disabled if key is released)
@@ -97,6 +99,11 @@ export class Controls {
             // Rotate movement vector based on camera's horizontal rotation
             const worldMoveVector = moveVector.clone();
             worldMoveVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.cameraAngleY);
+            
+            // Check energy before allowing running
+            if (this.isRunning && this.character && this.character.energy < this.character.minEnergyToRun) {
+                this.isRunning = false;
+            }
             
             // Move character with running state
             this.character.move(worldMoveVector, this.isRunning);

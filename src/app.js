@@ -265,7 +265,12 @@ class FantasyGame {
 
             // Move character to clicked position
             if (intersectPoint) {
-                this.character.moveTo(intersectPoint, isDoubleTap);
+                // Check energy before allowing running
+                let canRun = isDoubleTap;
+                if (canRun && this.character.energy < this.character.minEnergyToRun) {
+                    canRun = false;
+                }
+                this.character.moveTo(intersectPoint, canRun);
                 
                 // Create ripple effect at click position
                 this.createRipple(e, canvas);
@@ -390,6 +395,11 @@ class FantasyGame {
         // Update minimap
         if (this.minimap) {
             this.minimap.update();
+        }
+
+        // Update UI (energy display, etc.)
+        if (this.ui && this.character) {
+            this.ui.updateEnergyDisplay(this.character);
         }
 
         // Always render the scene (even if character isn't ready)

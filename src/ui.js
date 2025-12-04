@@ -444,7 +444,41 @@ export class UI {
             
             // Update stats
             document.getElementById('hudStrength').textContent = characterData.stats.strength || 10;
-            document.getElementById('hudSpeed').textContent = characterData.stats.speed || 10;
+            
+            // Initialize energy display (starts at 100)
+            const energy = characterData.stats.speed || 100;
+            document.getElementById('hudEnergy').textContent = 100;
+        }
+    }
+    
+    updateEnergyDisplay(character) {
+        if (!character) return;
+        
+        const energyData = character.getEnergy();
+        const energyIcon = document.getElementById('energyIcon');
+        const energyTimer = document.getElementById('energyTimer');
+        
+        // Update energy value
+        document.getElementById('hudEnergy').textContent = energyData.current;
+        
+        // Update timer display (countdown from 10s to 0s)
+        const timeRemaining = Math.ceil(energyData.regenInterval - energyData.regenTimer);
+        if (energyData.current < energyData.max) {
+            energyTimer.textContent = `${timeRemaining}s`;
+        } else {
+            energyTimer.textContent = '';
+        }
+        
+        // Update icon color based on state
+        if (character.isRunning && character.isMoving) {
+            // Running and depleting - red
+            energyIcon.className = 'fas fa-bolt energy-depleting';
+        } else if (!character.isRunning && energyData.current < energyData.max) {
+            // Regenerating - green
+            energyIcon.className = 'fas fa-bolt energy-regenerating';
+        } else {
+            // Normal state - default color
+            energyIcon.className = 'fas fa-bolt energy-normal';
         }
     }
 
