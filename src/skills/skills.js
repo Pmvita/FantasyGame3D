@@ -5,34 +5,40 @@ export class SkillsSystem {
     constructor(character) {
         this.character = character;
         this.skills = [];
-        this.skillSlots = new Map(); // Maps slot number (1-6) to skill
-        this.maxSlots = 6;
+        this.skillSlots = new Map(); // Maps slot number (1-0, where 0 = slot 10) to skill
+        this.maxSlots = 10;
     }
 
     // Add a skill to a specific slot
     addSkillToSlot(skill, slotNumber) {
-        if (slotNumber < 1 || slotNumber > this.maxSlots) {
-            console.error(`Invalid slot number: ${slotNumber}. Must be between 1 and ${this.maxSlots}`);
+        // Convert 0 to 10 for internal storage
+        const internalSlot = slotNumber === 0 ? 10 : slotNumber;
+        if (slotNumber < 0 || slotNumber > 9 || (slotNumber !== 0 && slotNumber < 1)) {
+            console.error(`Invalid slot number: ${slotNumber}. Must be between 1-9 or 0`);
             return false;
         }
 
-        this.skillSlots.set(slotNumber, skill);
+        this.skillSlots.set(internalSlot, skill);
         return true;
     }
 
     // Remove a skill from a slot
     removeSkillFromSlot(slotNumber) {
-        if (slotNumber < 1 || slotNumber > this.maxSlots) {
+        // Convert 0 to 10 for internal storage
+        const internalSlot = slotNumber === 0 ? 10 : slotNumber;
+        if (slotNumber < 0 || slotNumber > 9 || (slotNumber !== 0 && slotNumber < 1)) {
             return false;
         }
 
-        this.skillSlots.delete(slotNumber);
+        this.skillSlots.delete(internalSlot);
         return true;
     }
 
     // Get skill in a specific slot
     getSkillInSlot(slotNumber) {
-        return this.skillSlots.get(slotNumber) || null;
+        // Convert 0 to 10 for internal storage
+        const internalSlot = slotNumber === 0 ? 10 : slotNumber;
+        return this.skillSlots.get(internalSlot) || null;
     }
 
     // Use a skill from a slot

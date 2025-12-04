@@ -140,9 +140,17 @@ export class UI {
             if (e.key === 'Escape') {
                 this.closeAllMenus();
             }
-            // Number keys 1-6 for skills
-            const skillKey = parseInt(e.key);
-            if (skillKey >= 1 && skillKey <= 6 && this.game.character) {
+            // Number keys 1-9 and 0 for skills (0 = slot 10)
+            let skillKey = null;
+            if (e.key === '0') {
+                skillKey = 0; // Slot 0 (internally slot 10)
+            } else {
+                const parsed = parseInt(e.key);
+                if (parsed >= 1 && parsed <= 9) {
+                    skillKey = parsed;
+                }
+            }
+            if (skillKey !== null && this.game.character) {
                 if (this.skillsSystem) {
                     this.skillsSystem.useSkill(skillKey);
                 }

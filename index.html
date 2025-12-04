@@ -1108,6 +1108,40 @@
             border-radius: 3px;
         }
 
+        /* Auto Attack Slot */
+        .skill-slot.auto-attack {
+            background: linear-gradient(135deg, rgba(139, 0, 0, 0.8) 0%, rgba(100, 0, 0, 0.8) 100%);
+            border-color: rgba(255, 100, 100, 0.5);
+        }
+
+        .skill-slot.auto-attack:hover {
+            background: linear-gradient(135deg, rgba(160, 0, 0, 0.9) 0%, rgba(120, 0, 0, 0.9) 100%);
+            border-color: rgba(255, 150, 150, 0.8);
+        }
+
+        .skill-slot.auto-attack i {
+            font-size: 1.3em;
+            color: rgba(255, 200, 200, 0.9);
+        }
+
+        /* Attack Slots (1-2) */
+        .skill-slot.attack-slot {
+            border-color: rgba(255, 150, 0, 0.4);
+        }
+
+        .skill-slot.attack-slot:hover {
+            border-color: rgba(255, 180, 0, 0.7);
+        }
+
+        /* Spell Slots (3-4) */
+        .skill-slot.spell-slot {
+            border-color: rgba(150, 100, 255, 0.4);
+        }
+
+        .skill-slot.spell-slot:hover {
+            border-color: rgba(180, 130, 255, 0.7);
+        }
+
         /* Inventory Button */
         #inventoryButton {
             position: absolute;
@@ -1434,23 +1468,42 @@
 
             <!-- Skills Section -->
             <div id="skillsSection">
-                <div class="skill-slot empty" data-slot="1">
+                <!-- Auto Attack (no keybind) -->
+                <div class="skill-slot auto-attack" data-slot="auto">
+                    <i class="fas fa-sword"></i>
+                </div>
+                <!-- Custom Attacks (1-2) -->
+                <div class="skill-slot empty attack-slot" data-slot="1">
                     <div class="skill-keybind">1</div>
                 </div>
-                <div class="skill-slot empty" data-slot="2">
+                <div class="skill-slot empty attack-slot" data-slot="2">
                     <div class="skill-keybind">2</div>
                 </div>
-                <div class="skill-slot empty" data-slot="3">
+                <!-- Custom Spells (3-4) -->
+                <div class="skill-slot empty spell-slot" data-slot="3">
                     <div class="skill-keybind">3</div>
                 </div>
-                <div class="skill-slot empty" data-slot="4">
+                <div class="skill-slot empty spell-slot" data-slot="4">
                     <div class="skill-keybind">4</div>
                 </div>
+                <!-- Other Skills (5-0) -->
                 <div class="skill-slot empty" data-slot="5">
                     <div class="skill-keybind">5</div>
                 </div>
                 <div class="skill-slot empty" data-slot="6">
                     <div class="skill-keybind">6</div>
+                </div>
+                <div class="skill-slot empty" data-slot="7">
+                    <div class="skill-keybind">7</div>
+                </div>
+                <div class="skill-slot empty" data-slot="8">
+                    <div class="skill-keybind">8</div>
+                </div>
+                <div class="skill-slot empty" data-slot="9">
+                    <div class="skill-keybind">9</div>
+                </div>
+                <div class="skill-slot empty" data-slot="0">
+                    <div class="skill-keybind">0</div>
                 </div>
             </div>
 
