@@ -8,9 +8,12 @@ export class Controls {
         this.scene = scene;
         
         this.keys = {};
-        this.mouse = { x: 0, y: 0 };
-        this.mouseDelta = { x: 0, y: 0 };
-        this.isPointerLocked = false;
+        
+        // Camera rotation angles (fixed or controlled by keys)
+        this.cameraAngleX = 0.3; // Vertical rotation (pitch) - slight downward angle
+        this.cameraAngleY = 0; // Horizontal rotation (yaw)
+        this.cameraDistance = 10; // Distance from character
+        this.cameraHeight = 5; // Height above character
 
         this.setupEventListeners();
     }
@@ -26,43 +29,22 @@ export class Controls {
             this.keys[e.key.toLowerCase()] = false;
         });
 
-        // Mouse movement
-        document.addEventListener('mousemove', (e) => {
-            if (this.isPointerLocked) {
-                this.mouseDelta.x = e.movementX * 0.002;
-                this.mouseDelta.y = e.movementY * 0.002;
-            }
-        });
-
-        // Pointer lock
-        document.addEventListener('click', () => {
-            if (!this.isPointerLocked) {
-                document.body.requestPointerLock();
-            }
-        });
-
-        document.addEventListener('pointerlockchange', () => {
-            this.isPointerLocked = document.pointerLockElement !== null;
-        });
-
-        // Arrow keys
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp') this.character.move(new THREE.Vector3(0, 0, -1));
-            if (e.key === 'ArrowDown') this.character.move(new THREE.Vector3(0, 0, 1));
-            if (e.key === 'ArrowLeft') this.character.rotate(-0.1);
-            if (e.key === 'ArrowRight') this.character.rotate(0.1);
-        });
+        // Camera rotation with Q/E keys (optional)
+        // Q/E can rotate camera around character if needed
     }
 
     handleKeyPress(key) {
-        // ESC to unlock pointer
-        if (key === 'Escape') {
-            document.exitPointerLock();
+        // Q/E to rotate camera around character (optional)
+        if (key.toLowerCase() === 'q') {
+            this.cameraAngleY -= 0.1;
+        }
+        if (key.toLowerCase() === 'e') {
+            this.cameraAngleY += 0.1;
         }
     }
 
     update(deltaTime) {
-        if (!this.character) return;
+        if (!this.character || !this.character.mesh) return;
 
         const moveVector = new THREE.Vector3();
 
@@ -80,25 +62,33 @@ export class Controls {
             moveVector.x += 1;
         }
 
-        // Apply movement
+        // Apply movement relative to camera direction
         if (moveVector.length() > 0) {
-            // Rotate movement vector based on character rotation
-            moveVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.character.mesh.rotation.y);
-            this.character.move(moveVector);
+            // Normalize movement vector
+            moveVector.normalize();
+            
+            // Rotate movement vector based on camera's horizontal rotation
+            const worldMoveVector = moveVector.clone();
+            worldMoveVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.cameraAngleY);
+            
+            // Move character
+            this.character.move(worldMoveVector);
+            
+            // Make character face movement direction smoothly
+            const targetAngle = Math.atan2(worldMoveVector.x, worldMoveVector.z);
+            // Smooth rotation towards target angle
+            let currentAngle = this.character.mesh.rotation.y;
+            let angleDiff = targetAngle - currentAngle;
+            
+            // Normalize angle difference to [-PI, PI]
+            while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+            while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+            
+            // Smoothly rotate towards target
+            this.character.mesh.rotation.y += angleDiff * 0.2;
         }
 
-        // Mouse look
-        if (this.isPointerLocked) {
-            // Rotate character horizontally
-            this.character.mesh.rotation.y -= this.mouseDelta.x;
-            
-            // Rotate camera vertically (with limits)
-            this.camera.rotation.x -= this.mouseDelta.y;
-            this.camera.rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, this.camera.rotation.x));
-            
-            this.mouseDelta.x = 0;
-            this.mouseDelta.y = 0;
-        }
+        // Camera follows character automatically (no mouse control)
     }
 }
 

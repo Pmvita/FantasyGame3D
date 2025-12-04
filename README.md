@@ -36,7 +36,10 @@ A lightweight fantasy game built with **Three.js** that runs entirely in your we
 - ✅ Character selection and creation
 - ✅ Arrow key movement
 - ✅ WASD movement
-- ✅ Mouse camera control
+- ✅ Third-person camera (follows character automatically)
+- ✅ Mouse interaction with objects (cursor changes on hover)
+- ✅ Ripple animation on click/touch
+- ✅ Interactive 3D objects (buildings, trees)
 - ✅ 3D fantasy world
 - ✅ Save/load characters (localStorage)
 - ✅ No installation needed!
@@ -65,10 +68,10 @@ FantasyGame3D/
 
 ## Controls
 
-- **Arrow Keys**: Move character
-- **WASD**: Move character
-- **Mouse**: Rotate camera
-- **E**: Interact with NPCs/objects
+- **Arrow Keys / WASD**: Move character
+- **Q / E**: Rotate camera around character
+- **Mouse**: Interact with objects (cursor changes on hover)
+- **Click**: Creates ripple animation and interacts with objects
 
 ## Browser Compatibility
 

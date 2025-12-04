@@ -1,12 +1,17 @@
 // UI system
 import { CharacterPreview } from './characterPreview.js';
+import { InventorySystem } from './inventory/inventory.js';
+import { SkillsSystem } from './skills/skills.js';
 
 export class UI {
     constructor(game) {
         this.game = game;
         this.characterPreview = null;
         this.selectedRace = 'human';
+        this.inventorySystem = null;
+        this.skillsSystem = null;
         this.setupEventListeners();
+        this.initializeInventory();
     }
 
     setupEventListeners() {
@@ -90,6 +95,73 @@ export class UI {
                 document.getElementById(`${stat}Value`).textContent = e.target.value;
             });
         });
+
+        // Settings button
+        document.getElementById('settingsButton').addEventListener('click', () => {
+            this.toggleSettings();
+        });
+
+        // Close settings when clicking outside
+        document.addEventListener('click', (e) => {
+            const settingsMenu = document.getElementById('settingsMenu');
+            const settingsButton = document.getElementById('settingsButton');
+            if (settingsMenu && settingsButton && 
+                !settingsMenu.contains(e.target) && 
+                !settingsButton.contains(e.target) &&
+                settingsMenu.style.display !== 'none') {
+                settingsMenu.style.display = 'none';
+            }
+        });
+
+        // Inventory button
+        document.getElementById('inventoryButton').addEventListener('click', () => {
+            this.toggleInventory();
+        });
+
+        // Close inventory when clicking outside
+        document.addEventListener('click', (e) => {
+            const inventoryMenu = document.getElementById('inventoryMenu');
+            const inventoryButton = document.getElementById('inventoryButton');
+            if (inventoryMenu && inventoryButton && 
+                !inventoryMenu.contains(e.target) && 
+                !inventoryButton.contains(e.target) &&
+                inventoryMenu.style.display !== 'none') {
+                inventoryMenu.style.display = 'none';
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // B key for inventory
+            if (e.key.toLowerCase() === 'b' && this.game.character) {
+                this.toggleInventory();
+            }
+            // ESC to close menus
+            if (e.key === 'Escape') {
+                this.closeAllMenus();
+            }
+            // Number keys 1-6 for skills
+            const skillKey = parseInt(e.key);
+            if (skillKey >= 1 && skillKey <= 6 && this.game.character) {
+                if (this.skillsSystem) {
+                    this.skillsSystem.useSkill(skillKey);
+                }
+            }
+        });
+    }
+
+    initializeInventory() {
+        // Initialize inventory grid
+        const inventoryGrid = document.getElementById('inventoryGrid');
+        if (inventoryGrid) {
+            inventoryGrid.innerHTML = '';
+            for (let i = 0; i < 30; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot empty';
+                slot.dataset.slot = i;
+                inventoryGrid.appendChild(slot);
+            }
+        }
     }
 
     showMainMenu() {
@@ -146,7 +218,15 @@ export class UI {
 
     showHUD() {
         document.getElementById('hud').style.display = 'block';
-        document.getElementById('controlsInfo').style.display = 'block';
+        document.getElementById('settingsButton').style.display = 'flex';
+        document.getElementById('skillsSection').style.display = 'flex';
+        document.getElementById('inventoryButton').style.display = 'flex';
+        
+        // Initialize inventory and skills systems
+        if (this.game.character) {
+            this.inventorySystem = new InventorySystem(this.game.character);
+            this.skillsSystem = new SkillsSystem(this.game.character);
+        }
     }
 
     hideAllMenus() {
@@ -154,7 +234,59 @@ export class UI {
         document.getElementById('characterSelection').style.display = 'none';
         document.getElementById('characterCreation').style.display = 'none';
         document.getElementById('hud').style.display = 'none';
-        document.getElementById('controlsInfo').style.display = 'none';
+        document.getElementById('settingsButton').style.display = 'none';
+        document.getElementById('settingsMenu').style.display = 'none';
+        document.getElementById('skillsSection').style.display = 'none';
+        document.getElementById('inventoryButton').style.display = 'none';
+        document.getElementById('inventoryMenu').style.display = 'none';
+    }
+
+    toggleSettings() {
+        const settingsMenu = document.getElementById('settingsMenu');
+        if (settingsMenu.style.display === 'none' || settingsMenu.style.display === '') {
+            settingsMenu.style.display = 'block';
+        } else {
+            settingsMenu.style.display = 'none';
+        }
+    }
+
+    toggleInventory() {
+        const inventoryMenu = document.getElementById('inventoryMenu');
+        if (inventoryMenu.style.display === 'none' || inventoryMenu.style.display === '') {
+            inventoryMenu.style.display = 'block';
+            this.updateInventoryDisplay();
+        } else {
+            inventoryMenu.style.display = 'none';
+        }
+    }
+
+    closeAllMenus() {
+        document.getElementById('settingsMenu').style.display = 'none';
+        document.getElementById('inventoryMenu').style.display = 'none';
+    }
+
+    updateInventoryDisplay() {
+        if (!this.inventorySystem) return;
+
+        const inventoryGrid = document.getElementById('inventoryGrid');
+        if (!inventoryGrid) return;
+
+        const slots = inventoryGrid.querySelectorAll('.inventory-slot');
+        slots.forEach((slot, index) => {
+            const item = this.inventorySystem.getItemAtSlot(index);
+            if (item) {
+                slot.className = 'inventory-slot';
+                slot.innerHTML = `<i class="fas ${item.icon}"></i>`;
+                if (item.quantity > 1) {
+                    slot.innerHTML += `<span style="position: absolute; bottom: 2px; right: 4px; font-size: 0.7em; background: rgba(0,0,0,0.7); padding: 2px 4px; border-radius: 3px;">${item.quantity}</span>`;
+                }
+                slot.title = `${item.name}\n${item.description}`;
+            } else {
+                slot.className = 'inventory-slot empty';
+                slot.innerHTML = '';
+                slot.title = '';
+            }
+        });
     }
 
     loadCharacterList() {

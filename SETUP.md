@@ -55,11 +55,11 @@ The game should open in your browser. You can:
 
 ## Controls
 
-- **Arrow Keys**: Move character
-- **WASD**: Move character
-- **Mouse**: Look around (click to lock pointer)
-- **ESC**: Unlock mouse pointer
-- **E**: Interact (when implemented)
+- **Arrow Keys / WASD**: Move character
+- **Q / E**: Rotate camera around character
+- **Mouse**: Interact with objects (cursor changes to pointer on interactive objects)
+- **Click**: Creates ripple animation and interacts with objects
+- **Touch**: Works on mobile devices with ripple animation
 
 ## Features
 
@@ -67,7 +67,11 @@ The game should open in your browser. You can:
 ✅ Character selection
 ✅ Arrow key movement
 ✅ WASD movement
-✅ Mouse camera control
+✅ Third-person camera (follows character automatically)
+✅ Mouse interaction with objects
+✅ Ripple animation on click/touch
+✅ Interactive 3D objects (buildings, trees)
+✅ Cursor changes on hover (crosshair/pointer)
 ✅ 3D world with buildings and trees
 ✅ Save/load characters (localStorage)
 ✅ Stats system
@@ -82,7 +86,9 @@ The game should open in your browser. You can:
 
 ### Controls don't work
 - Click on the game window first to focus it
-- For mouse look, click to lock pointer
+- Make sure the game window has focus (click on it)
+- Mouse is for interaction, not camera control
+- Use Q/E keys to rotate camera if needed
 
 ### Characters don't save
 - Check browser allows localStorage

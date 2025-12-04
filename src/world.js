@@ -48,6 +48,9 @@ export class World {
         building.position.set(x, y + height / 2, z);
         building.castShadow = true;
         building.receiveShadow = true;
+        // Mark as interactive object
+        building.userData.interactive = true;
+        building.userData.type = 'building';
         this.scene.add(building);
 
         // Add roof
@@ -59,25 +62,36 @@ export class World {
         roof.position.set(x, y + height + 1, z);
         roof.rotation.y = Math.PI / 4;
         roof.castShadow = true;
+        // Mark roof as part of interactive building
+        roof.userData.interactive = true;
+        roof.userData.type = 'building';
         this.scene.add(roof);
     }
 
     createTree(x, z) {
+        // Create a group for the tree
+        const treeGroup = new THREE.Group();
+        treeGroup.userData.interactive = true;
+        treeGroup.userData.type = 'tree';
+        
         // Trunk
         const trunkGeometry = new THREE.CylinderGeometry(0.3, 0.3, 3, 8);
         const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x654321 });
         const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-        trunk.position.set(x, 1.5, z);
+        trunk.position.set(0, 1.5, 0);
         trunk.castShadow = true;
-        this.scene.add(trunk);
+        treeGroup.add(trunk);
 
         // Leaves
         const leavesGeometry = new THREE.ConeGeometry(2, 4, 8);
         const leavesMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
         const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
-        leaves.position.set(x, 4, z);
+        leaves.position.set(0, 4, 0);
         leaves.castShadow = true;
-        this.scene.add(leaves);
+        treeGroup.add(leaves);
+        
+        treeGroup.position.set(x, 0, z);
+        this.scene.add(treeGroup);
     }
 
     createLighting() {

@@ -10,11 +10,31 @@ export class Character {
         this.velocity = new THREE.Vector3();
         this.speed = 5.0 * (0.5 + (this.data.stats.speed / 100.0) * 1.5); // Speed based on stat
         this.loader = new GLTFLoader();
+        this.readyPromise = null;
+        this.mixer = null; // Animation mixer for GLTF animations
+        this.animations = {}; // Store animation actions
+        this.currentAnimation = null;
+        this.isMoving = false;
+        this.targetPosition = null; // Target position for click-to-move
+        this.moveThreshold = 0.1; // Distance threshold to stop moving
         
         // Create character (async, but don't wait)
-        this.createCharacter().catch(err => {
+        this.readyPromise = this.createCharacter().catch(err => {
             console.log('Error creating character:', err);
         });
+    }
+
+    async waitForReady() {
+        if (this.readyPromise) {
+            await this.readyPromise;
+        }
+        // Additional wait to ensure mesh is set
+        let attempts = 0;
+        while (!this.mesh && attempts < 100) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
+        }
+        return this.mesh !== null;
     }
 
     createDefaultData() {
@@ -46,9 +66,12 @@ export class Character {
         const race = this.data.race || 'human';
         
         // Try to load 3D model first
-        const model = await this.loadModel(race);
+        const gltfData = await this.loadModel(race);
         
-        if (model) {
+        if (gltfData && gltfData.scene) {
+            const model = gltfData.scene;
+            const animations = gltfData.animations || [];
+            
             // Use loaded 3D model
             // Reset scale and position first
             model.scale.set(1, 1, 1);
@@ -93,6 +116,35 @@ export class Character {
             }
             
             this.mesh = model;
+            
+            // Setup animations if available
+            if (animations.length > 0) {
+                this.mixer = new THREE.AnimationMixer(model);
+                
+                // Find walking/idle animations
+                animations.forEach((clip) => {
+                    const action = this.mixer.clipAction(clip);
+                    const clipName = clip.name.toLowerCase();
+                    
+                    // Store animations by type
+                    if (clipName.includes('walk') || clipName.includes('run') || clipName.includes('move')) {
+                        this.animations['walk'] = action;
+                    } else if (clipName.includes('idle') || clipName.includes('stand')) {
+                        this.animations['idle'] = action;
+                    } else {
+                        // Store first animation as default
+                        if (!this.animations['idle']) {
+                            this.animations['idle'] = action;
+                        }
+                    }
+                });
+                
+                // Play idle animation by default
+                if (this.animations['idle']) {
+                    this.animations['idle'].play();
+                    this.currentAnimation = 'idle';
+                }
+            }
             
             // Apply customization
             this.mesh.traverse((child) => {
@@ -244,7 +296,10 @@ export class Character {
         rightLeg.castShadow = true;
         this.mesh.add(rightLeg);
 
-        this.mesh.position.set(0, 1, 0);
+        // Position fallback character so feet are at y=0
+        // The legs are positioned at legLength/2, so the bottom of legs is at y=0
+        // We don't need to offset the mesh position - it's already correct
+        this.mesh.position.set(0, 0, 0);
         this.scene.add(this.mesh);
     }
 
@@ -264,6 +319,8 @@ export class Character {
                         `${race}${ext}`,
                         (gltf) => {
                             console.log(`Successfully loaded ${modelPath} for game`);
+                            console.log(`Animations found: ${gltf.animations.length}`);
+                            
                             // Fix texture paths if needed
                             gltf.scene.traverse((child) => {
                                 if (child.isMesh && child.material) {
@@ -274,7 +331,7 @@ export class Character {
                                     }
                                 }
                             });
-                            resolve(gltf);
+                            resolve(gltf); // Return full GLTF object with animations
                         },
                         (progress) => {
                             if (progress.lengthComputable) {
@@ -295,7 +352,7 @@ export class Character {
                         }
                     );
                 });
-                return gltf.scene;
+                return gltf; // Return full GLTF object
             } catch (error) {
                 // Try next extension
                 console.log(`Failed to load ${modelPath}, trying next format...`);
@@ -387,6 +444,41 @@ export class Character {
         direction.normalize();
         this.velocity.x = direction.x * this.speed;
         this.velocity.z = direction.z * this.speed;
+        
+        // Clear click-to-move target when using keyboard
+        this.targetPosition = null;
+        
+        // Update moving state for animation
+        const wasMoving = this.isMoving;
+        this.isMoving = Math.abs(this.velocity.x) > 0.1 || Math.abs(this.velocity.z) > 0.1;
+        
+        // Switch animations based on movement
+        if (this.isMoving !== wasMoving) {
+            this.updateAnimation();
+        }
+    }
+    
+    moveTo(targetPosition) {
+        // Set target position for click-to-move
+        this.targetPosition = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
+    }
+    
+    updateAnimation() {
+        if (!this.mixer) return;
+        
+        // Fade out current animation
+        if (this.currentAnimation && this.animations[this.currentAnimation]) {
+            this.animations[this.currentAnimation].fadeOut(0.2);
+        }
+        
+        // Play appropriate animation
+        if (this.isMoving && this.animations['walk']) {
+            this.animations['walk'].reset().fadeIn(0.2).play();
+            this.currentAnimation = 'walk';
+        } else if (!this.isMoving && this.animations['idle']) {
+            this.animations['idle'].reset().fadeIn(0.2).play();
+            this.currentAnimation = 'idle';
+        }
     }
 
     rotate(angle) {
@@ -394,18 +486,75 @@ export class Character {
     }
 
     update(deltaTime) {
+        if (!this.mesh) return;
+        
+        // Update animation mixer
+        if (this.mixer) {
+            this.mixer.update(deltaTime);
+        }
+        
+        // Handle click-to-move
+        if (this.targetPosition) {
+            const currentPos = this.mesh.position;
+            const direction = new THREE.Vector3(
+                this.targetPosition.x - currentPos.x,
+                0,
+                this.targetPosition.z - currentPos.z
+            );
+            
+            const distance = direction.length();
+            
+            if (distance > this.moveThreshold) {
+                // Move towards target
+                direction.normalize();
+                this.velocity.x = direction.x * this.speed;
+                this.velocity.z = direction.z * this.speed;
+                
+                // Rotate character to face movement direction
+                const targetAngle = Math.atan2(direction.x, direction.z);
+                let currentAngle = this.mesh.rotation.y;
+                let angleDiff = targetAngle - currentAngle;
+                
+                // Normalize angle difference to [-PI, PI]
+                while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                
+                // Smoothly rotate towards target
+                this.mesh.rotation.y += angleDiff * 0.15;
+                
+                this.isMoving = true;
+            } else {
+                // Reached target
+                this.targetPosition = null;
+                this.velocity.x = 0;
+                this.velocity.z = 0;
+                this.isMoving = false;
+            }
+        }
+        
         // Apply velocity
         this.mesh.position.x += this.velocity.x * deltaTime;
         this.mesh.position.z += this.velocity.z * deltaTime;
 
-        // Keep character on ground
-        if (this.mesh.position.y < 1) {
-            this.mesh.position.y = 1;
+        // Keep character on ground (y=0 is ground level)
+        // For 3D models, the mesh is already positioned so feet are at y=0
+        // For fallback geometry, we need to maintain the correct height
+        if (this.mesh.position.y < 0) {
+            this.mesh.position.y = 0;
         }
 
-        // Apply friction
-        this.velocity.x *= 0.9;
-        this.velocity.z *= 0.9;
+        // Apply friction (only if not moving to target)
+        if (!this.targetPosition) {
+            this.velocity.x *= 0.9;
+            this.velocity.z *= 0.9;
+        }
+        
+        // Update animation state if velocity changed
+        const isMovingNow = Math.abs(this.velocity.x) > 0.1 || Math.abs(this.velocity.z) > 0.1 || this.targetPosition !== null;
+        if (isMovingNow !== this.isMoving) {
+            this.isMoving = isMovingNow;
+            this.updateAnimation();
+        }
     }
 
     getData() {

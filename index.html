@@ -23,6 +23,7 @@
             width: 100vw;
             height: 100vh;
             position: relative;
+            overflow: hidden;
         }
 
         #ui {
@@ -781,21 +782,234 @@
             left: 20px;
             color: white;
             display: none;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
         }
 
         #hud .stat {
             margin: 5px 0;
             font-size: 1.1em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
-        /* Controls Info */
-        #controlsInfo {
+        /* Settings Button */
+        #settingsButton {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 200;
+            backdrop-filter: blur(5px);
+        }
+
+        #settingsButton:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        /* Settings Menu */
+        #settingsMenu {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(20, 20, 35, 0.98) 100%);
+            padding: 25px;
+            border-radius: 15px;
+            min-width: 300px;
+            max-width: 400px;
+            display: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #settingsMenu h3 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(74, 144, 226, 0.3);
+        }
+
+        #settingsMenu .instruction-item {
+            color: #e0e0e0;
+            margin: 12px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid #4a90e2;
+            font-size: 1em;
+        }
+
+        #settingsMenu .instruction-item i {
+            margin-right: 10px;
+            color: #4a90e2;
+        }
+
+        /* Skills Section */
+        #skillsSection {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            flex-direction: row;
+            gap: 10px;
+            z-index: 150;
+        }
+
+        .skill-slot {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+            position: relative;
+        }
+
+        .skill-slot:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(74, 144, 226, 0.8);
+            transform: scale(1.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .skill-slot.empty {
+            border-style: dashed;
+        }
+
+        .skill-slot .skill-keybind {
+            position: absolute;
+            bottom: 2px;
+            right: 4px;
+            font-size: 0.6em;
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        /* Inventory Button */
+        #inventoryButton {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9em;
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.8em;
+            cursor: pointer;
             display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 150;
+            backdrop-filter: blur(5px);
+        }
+
+        #inventoryButton:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(74, 144, 226, 0.8);
+            transform: scale(1.1);
+        }
+
+        /* Inventory Menu */
+        #inventoryMenu {
+            position: absolute;
+            bottom: 90px;
+            left: 20px;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(20, 20, 35, 0.98) 100%);
+            padding: 25px;
+            border-radius: 15px;
+            width: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #inventoryMenu h3 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(74, 144, 226, 0.3);
+        }
+
+        #inventoryGrid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+        }
+
+        .inventory-slot {
+            aspect-ratio: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .inventory-slot:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: rgba(74, 144, 226, 0.5);
+        }
+
+        .inventory-slot.empty {
+            border-style: dashed;
+        }
+
+        /* Custom Scrollbar for Inventory */
+        #inventoryMenu::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #inventoryMenu::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        #inventoryMenu::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #4a90e2, #8b5cf6);
+            border-radius: 10px;
         }
 
         /* Loading */
@@ -806,6 +1020,29 @@
             transform: translate(-50%, -50%);
             color: white;
             font-size: 1.5em;
+        }
+
+        /* Cursor styles - will be controlled by JavaScript */
+        #gameCanvas {
+            cursor: crosshair;
+        }
+
+        /* Ripple animation */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -931,11 +1168,61 @@
                 <div class="stat">Speed: <span id="hudSpeed">10</span></div>
             </div>
 
-            <!-- Controls Info -->
-            <div id="controlsInfo">
-                <div>Arrow Keys / WASD: Move</div>
-                <div>Mouse: Look Around</div>
-                <div>E: Interact</div>
+            <!-- Settings Button -->
+            <button id="settingsButton" title="Settings">
+                <i class="fas fa-cog"></i>
+            </button>
+
+            <!-- Settings Menu -->
+            <div id="settingsMenu">
+                <h3><i class="fas fa-cog"></i> Settings & Controls</h3>
+                <div class="instruction-item">
+                    <i class="fas fa-keyboard"></i>
+                    <strong>Arrow Keys / WASD:</strong> Move character
+                </div>
+                <div class="instruction-item">
+                    <i class="fas fa-mouse"></i>
+                    <strong>Mouse:</strong> Interact with objects
+                </div>
+                <div class="instruction-item">
+                    <i class="fas fa-sync-alt"></i>
+                    <strong>Q / E:</strong> Rotate camera
+                </div>
+            </div>
+
+            <!-- Skills Section -->
+            <div id="skillsSection">
+                <div class="skill-slot empty" data-slot="1">
+                    <div class="skill-keybind">1</div>
+                </div>
+                <div class="skill-slot empty" data-slot="2">
+                    <div class="skill-keybind">2</div>
+                </div>
+                <div class="skill-slot empty" data-slot="3">
+                    <div class="skill-keybind">3</div>
+                </div>
+                <div class="skill-slot empty" data-slot="4">
+                    <div class="skill-keybind">4</div>
+                </div>
+                <div class="skill-slot empty" data-slot="5">
+                    <div class="skill-keybind">5</div>
+                </div>
+                <div class="skill-slot empty" data-slot="6">
+                    <div class="skill-keybind">6</div>
+                </div>
+            </div>
+
+            <!-- Inventory Button -->
+            <button id="inventoryButton" title="Inventory (B)">
+                <i class="fas fa-shopping-bag"></i>
+            </button>
+
+            <!-- Inventory Menu -->
+            <div id="inventoryMenu">
+                <h3><i class="fas fa-shopping-bag"></i> Inventory</h3>
+                <div id="inventoryGrid">
+                    <!-- Inventory slots will be generated dynamically -->
+                </div>
             </div>
 
             <!-- Loading -->
