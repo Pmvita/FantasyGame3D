@@ -4,22 +4,53 @@ node_modules/
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
 # OS files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
 
 # Editor files
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
 
 # Build files
 dist/
 build/
+out/
+.next/
+.cache/
 
 # Environment
 .env
 .env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Optional: Large asset files (uncomment if you don't want to commit large .glb files)
+# *.glb
+# *.gltf
+# *.fbx
+# *.bin
 
