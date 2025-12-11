@@ -1,98 +1,126 @@
-# Fantasy3D - Web Version
+# Fantasy3D
 
-A lightweight 3D fantasy game built with **Three.js** that runs entirely in your web browser. No installation required!
+A 3D fantasy game built with **Three.js** that runs entirely in your web browser. Features user authentication, cloud-synced character data, and a full 3D world to explore.
 
-## Why Three.js?
+## 🎮 Features
 
-- ✅ **Zero installation** - Just open in browser
-- ✅ **Tiny size** - Only ~5-10 MB total
-- ✅ **Runs anywhere** - Works on any device with a browser
-- ✅ **Easy to share** - Just send a link
-- ✅ **Free and open source**
+- ✅ **Character Customization** - Create and customize characters with appearance and stats
+- ✅ **Character Management** - Save, load, and delete characters
+- ✅ **User Authentication** - Secure account creation and login with JWT
+- ✅ **Cloud Sync** - Character data synced to MongoDB Atlas
+- ✅ **3D World** - Interactive fantasy world with buildings and objects
+- ✅ **Movement Controls** - Arrow keys or WASD movement
+- ✅ **Third-Person Camera** - Camera follows character automatically
+- ✅ **Inventory System** - Manage items and equipment
+- ✅ **Skills System** - Character skills and abilities
+- ✅ **Minimap** - Navigate with the minimap
+- ✅ **No Installation Required** - Runs entirely in browser
 
-## Space Requirements
+## 🚀 Quick Start
 
-- **Project files**: ~5-10 MB
-- **Node modules** (if using): ~50-100 MB
-- **Total**: Less than 100 MB (vs 50+ GB for Unreal!)
+### Local Development
 
-## Quick Start
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-### Option 1: Simple HTML (No Installation)
+2. **Set up environment variables** (create `.env.local` file):
+   ```bash
+   MONGODB_URI=mongodb+srv://pmvita_db_user:tKEwhFA3e8v0pLcW@fantasy3d.scuo4fx.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
+   JWT_SECRET=t3hXEbVbtNNnNpEVHHq7/z2cucAV2SUEduvNqWjT5rE=
+   JWT_EXPIRES_IN=7d
+   FRONTEND_URL=http://localhost:3000
+   ```
 
-1. Open `index.html` in your browser
-2. That's it! Game runs immediately
+3. **Start development server**:
+   ```bash
+   npm start
+   ```
+   
+   This starts an Express server that handles both static files and API endpoints.
 
-### Option 2: With Node.js (For Development)
+4. **Open browser**: Navigate to `http://localhost:3000`
 
-1. Install Node.js (if not installed): https://nodejs.org/ (~50 MB)
-2. Run: `npm install`
-3. Run: `npm start`
-4. Open browser to `http://localhost:3000`
+### Production Deployment
 
-## Features
+The project is configured for deployment to **Vercel**. See `DEPLOYMENT.md` for complete instructions.
 
-- ✅ Character customization (appearance, stats, equipment)
-- ✅ Character selection and creation
-- ✅ Character deletion with confirmation dialog
-- ✅ Arrow key movement
-- ✅ WASD movement
-- ✅ Third-person camera (follows character automatically)
-- ✅ Mouse interaction with objects (cursor changes on hover)
-- ✅ Ripple animation on click/touch
-- ✅ Interactive 3D objects (buildings, trees)
-- ✅ 3D fantasy world
-- ✅ Save/load characters (MongoDB + LocalStorage fallback)
-- ✅ User authentication (JWT)
-- ✅ Account creation and login
-- ✅ Character data synced to cloud
-- ✅ No installation needed!
+**Current Status**: 
+- ✅ MongoDB Atlas database configured
+- ✅ Backend API endpoints ready
+- ⏳ Vercel deployment pending (fix applied, awaiting deployment)
 
-## Technology Stack
+## 🛠️ Technology Stack
 
 ### Frontend
-- **Three.js** - 3D graphics library
-- **JavaScript (ES6 Modules)** - Game logic
-- **HTML/CSS** - UI
+- **Three.js** - 3D graphics and rendering
+- **JavaScript (ES6 Modules)** - Game logic and UI
+- **HTML5/CSS3** - User interface
 - **Font Awesome** - Icons
 - **Google Fonts** - Typography
 
 ### Backend
-- **Node.js** - Runtime
+- **Node.js** - Runtime environment
 - **Express.js** - API framework (via Vercel serverless functions)
-- **MongoDB Atlas** - Database (free tier)
-- **JWT** - Authentication
+- **MongoDB Atlas** - Cloud database (free tier)
+- **JWT** - Authentication tokens
 - **bcryptjs** - Password hashing
+- **CORS** - Cross-origin resource sharing
 
 ### Deployment
 - **Vercel** - Hosting and serverless functions
+- **MongoDB Atlas** - Database hosting
 
-## File Structure
+## 📁 Project Structure
 
 ```
-Fantasy3D/
-├── index.html          # Main HTML file
-├── src/
-│   ├── app.js         # Main game logic
-│   ├── character.js   # Character system
-│   ├── characterPreview.js  # Character preview in creation
-│   ├── world.js       # World creation
-│   ├── controls.js    # Input handling
-│   ├── minimap.js     # Minimap system
-│   ├── ui.js          # UI system (menus, character selection)
-│   ├── inventory/     # Inventory system
-│   │   └── inventory.js
-│   └── skills/        # Skills system
-│       └── skills.js
-├── assets/            # Models, textures (optional)
-│   ├── characters/    # Character 3D models
-│   └── animations/     # Animation files
-├── tests/             # Test files
-│   └── ui.test.js     # UI functionality tests
-└── package.json       # Dependencies (if using npm)
+FantasyGame3D/
+├── api/                    # Backend API endpoints (7 serverless functions)
+│   ├── auth/
+│   │   ├── login.js
+│   │   ├── register.js
+│   │   └── verify.js
+│   └── characters/
+│       ├── get.js
+│       ├── create.js
+│       ├── update.js
+│       └── delete.js
+├── lib/                    # Shared backend code (not serverless functions)
+│   ├── middleware/
+│   │   ├── auth.js
+│   │   ├── cors.js
+│   │   └── errorHandler.js
+│   └── utils/
+│       ├── errors.js
+│       ├── jwt.js
+│       ├── mongodb.js
+│       └── validation.js
+├── src/                    # Frontend game code
+│   ├── api/                # API client
+│   │   ├── auth.js
+│   │   ├── characters.js
+│   │   └── client.js
+│   ├── app.js              # Main game logic
+│   ├── character.js        # Character system
+│   ├── characterPreview.js # Character preview
+│   ├── controls.js         # Input handling
+│   ├── minimap.js          # Minimap system
+│   ├── ui.js               # UI system
+│   ├── world.js            # World creation
+│   ├── inventory/          # Inventory system
+│   └── skills/             # Skills system
+├── assets/                 # 3D models and textures
+│   ├── characters/         # Character models
+│   └── animations/         # Animation files
+├── tests/                  # Test files
+├── index.html              # Main HTML file
+├── package.json            # Dependencies
+├── vercel.json             # Vercel configuration
+└── README.md               # This file
 ```
 
-## Controls
+## 🎯 Controls
 
 - **Arrow Keys / WASD**: Move character
 - **Q / E**: Rotate camera around character
@@ -103,36 +131,35 @@ Fantasy3D/
 - **ESC**: Close menus
 - **1-0 Keys**: Activate skills
 
-## Character Management
+## 📚 Documentation
 
-- **Create Character**: Design your character with custom appearance and stats
-- **Select Character**: Choose from your saved characters to play
-- **Delete Character**: Click the X button on any character card to delete (with confirmation)
+- **`SETUP.md`** - Local development setup guide
+- **`DEPLOYMENT.md`** - Production deployment to Vercel
+- **`MONGODB_SETUP.md`** - MongoDB Atlas setup reference
+- **`IMPLEMENTATION_STATUS.md`** - Current implementation status
+- **`QUICK_MODEL_SETUP.md`** - Guide for adding 3D character models
+- **`ADMIN_USERS.md`** - Admin user management and authorization
+- **`CHANGELOG.md`** - Project changelog
 
-## Browser Compatibility
+## 🔐 Environment Variables
+
+For production deployment, set these in Vercel:
+
+```
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/fantasy3d?retryWrites=true&w=majority
+JWT_SECRET=your-secret-key-here
+JWT_EXPIRES_IN=7d
+FRONTEND_URL=https://your-project.vercel.app
+```
+
+## 🌐 Browser Compatibility
 
 Works in all modern browsers:
-- Chrome/Edge (recommended)
-- Firefox
-- Safari
-- Opera
+- ✅ Chrome/Edge (recommended)
+- ✅ Firefox
+- ✅ Safari
+- ✅ Opera
 
-## Setup & Deployment
+## 📝 License
 
-### Quick Start (Local Development)
-1. Install dependencies: `npm install`
-2. Set up MongoDB Atlas (see `MONGODB_SETUP.md`)
-3. Copy `env.example` to `.env.local` and fill in values
-4. Run: `npm start`
-5. Open browser to `http://localhost:3000`
-
-### Production Deployment
-See `DEPLOYMENT.md` for complete deployment instructions to Vercel.
-
-## Documentation
-
-- `SETUP.md` - Detailed setup instructions
-- `MONGODB_SETUP.md` - MongoDB Atlas setup guide
-- `DEPLOYMENT.md` - Vercel deployment guide
-- `IMPLEMENTATION_STATUS.md` - Current implementation status
-
+MIT

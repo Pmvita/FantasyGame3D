@@ -1,154 +1,203 @@
-# Deployment Guide for Fantasy3D
+# Deployment Guide - Fantasy3D
+
+Complete guide for deploying Fantasy3D to Vercel with MongoDB Atlas.
 
 ## Prerequisites
 
-1. **MongoDB Atlas Account** - See `MONGODB_SETUP.md` for setup instructions
-2. **Vercel Account** - Sign up at [vercel.com](https://vercel.com) (free tier)
-3. **GitHub Repository** (optional but recommended)
+- ✅ MongoDB Atlas account (free tier)
+- ✅ Vercel account (free tier)
+- ✅ GitHub repository (for Git integration)
 
-## Pre-Deployment Checklist
+## Current Deployment Status
 
-- [ ] MongoDB Atlas cluster created and connection string obtained
-- [ ] Environment variables prepared (see `env.example`)
-- [ ] Dependencies installed (`npm install`)
-- [ ] Code tested locally (if possible)
+**Latest Commit**: `4604f27` - "trigger: force Vercel to deploy latest commit with fix"
+**Fix Commit**: `392e469` - "Implement deployment fixes..."
 
-## Step 1: Install Dependencies
+**Status**: Fix applied and pushed. Vercel should auto-deploy within 1-2 minutes.
 
-```bash
-npm install
+## Step 1: MongoDB Atlas Setup
+
+### Database Configuration
+- ✅ **Database**: `fantasy3d`
+- ✅ **Collections**: `users`, `characters`
+- ✅ **Indexes**: Created for optimal performance
+
+### Connection String
+```
+mongodb+srv://pmvita_db_user:tKEwhFA3e8v0pLcW@fantasy3d.scuo4fx.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
 ```
 
-This installs:
-- `express` - Web framework for API
-- `mongodb` - MongoDB driver
-- `jsonwebtoken` - JWT authentication
-- `bcryptjs` - Password hashing
-- `cors` - CORS middleware
+**Note**: MongoDB setup is complete. See `MONGODB_SETUP.md` for reference.
 
-## Step 2: Set Up MongoDB
+## Step 2: Deploy to Vercel
 
-Follow the instructions in `MONGODB_SETUP.md` to:
-1. Create MongoDB Atlas account
-2. Create M0 free cluster
-3. Create database user
-4. Whitelist IP addresses
-5. Get connection string
+### Option A: Git Integration (Recommended)
 
-## Step 3: Configure Environment Variables
+1. **Connect Repository**:
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Click "Add New Project" or import existing
+   - Select GitHub repository: `Pmvita/FantasyGame3D`
+   - Vercel will auto-detect settings from `vercel.json`
 
-### Local Development
+2. **Configure Environment Variables**:
+   - Go to Project Settings → Environment Variables
+   - Add the following:
+     ```
+     MONGODB_URI=mongodb+srv://pmvita_db_user:tKEwhFA3e8v0pLcW@fantasy3d.scuo4fx.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
+     JWT_SECRET=t3hXEbVbtNNnNpEVHHq7/z2cucAV2SUEduvNqWjT5rE=
+     JWT_EXPIRES_IN=7d
+     FRONTEND_URL=https://fantasy-game3-d-pierres-projects-3ccb9894.vercel.app
+     ```
 
-1. Copy `env.example` to `.env.local`:
-   ```bash
-   cp env.example .env.local
-   ```
+3. **Deploy**:
+   - Vercel will automatically deploy on every push to `main`
+   - Or click "Redeploy" in the dashboard
 
-2. Edit `.env.local` and fill in:
-   - `MONGODB_URI` - Your MongoDB connection string
-   - `JWT_SECRET` - Generate with: `openssl rand -base64 32`
-   - `JWT_EXPIRES_IN` - "7d" (7 days)
-   - `FRONTEND_URL` - "http://localhost:3000"
+### Option B: Vercel CLI
 
-### Vercel Production
-
-1. Go to your Vercel project settings
-2. Navigate to "Environment Variables"
-3. Add the same variables as above, but:
-   - `FRONTEND_URL` - Your Vercel deployment URL (e.g., `https://fantasy3d.vercel.app`)
-
-## Step 4: Deploy to Vercel
-
-### Option A: Using Vercel CLI
-
-1. Install Vercel CLI:
+1. **Install and Login**:
    ```bash
    npm i -g vercel
-   ```
-
-2. Login to Vercel:
-   ```bash
    vercel login
    ```
 
-3. Deploy:
+2. **Deploy**:
    ```bash
-   vercel
+   cd FantasyGame3D
+   vercel --prod
    ```
 
-4. Follow the prompts to:
-   - Link to existing project or create new
-   - Set environment variables
-   - Deploy
+3. **Set Environment Variables**:
+   - Go to Vercel dashboard
+   - Project Settings → Environment Variables
+   - Add the variables listed above
 
-### Option B: Using Vercel Dashboard
+## Step 3: Verify Deployment
 
-1. Go to [vercel.com](https://vercel.com)
-2. Click "New Project"
-3. Import your GitHub repository (or drag and drop files)
-4. Configure:
-   - Framework Preset: "Other"
-   - Root Directory: `./`
-   - Build Command: (leave empty, static site)
-   - Output Directory: `./`
-5. Add environment variables (see Step 3)
-6. Click "Deploy"
+### Check Deployment Status
 
-## Step 5: Verify Deployment
-
-After deployment, test the following:
-
-1. **Frontend loads**: Visit your Vercel URL
-2. **API endpoints work**: Test registration and login
-3. **MongoDB connection**: Create an account and verify it's saved
+1. **Vercel Dashboard**: https://vercel.com/pierres-projects-3ccb9894/fantasy-game3-d
+2. **Look for**:
+   - ✅ Build logs show commit `392e469` or newer
+   - ✅ Only 7 serverless functions created
+   - ✅ Deployment status: "Ready"
 
 ### Test API Endpoints
 
-You can test using curl or Postman:
-
 ```bash
-# Register a user
+# Test registration
 curl -X POST https://your-app.vercel.app/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"username":"testuser","password":"testpass123"}'
+  -d '{"username":"testuser","password":"testpass123","email":"test@example.com"}'
 
-# Login
+# Test login
 curl -X POST https://your-app.vercel.app/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","password":"testpass123"}'
 ```
 
+### Test Frontend
+
+1. Visit your Vercel deployment URL
+2. Create an account
+3. Create a character
+4. Verify character saves to MongoDB
+
+## Project Structure for Deployment
+
+```
+FantasyGame3D/
+├── api/                    # 7 serverless functions ✅
+│   ├── auth/
+│   │   ├── login.js
+│   │   ├── register.js
+│   │   └── verify.js
+│   └── characters/
+│       ├── get.js
+│       ├── create.js
+│       ├── update.js
+│       └── delete.js
+├── lib/                    # Shared code (not functions) ✅
+│   ├── middleware/
+│   └── utils/
+├── src/                    # Frontend code
+├── index.html              # Main entry point
+├── vercel.json             # Vercel configuration
+└── package.json            # Dependencies
+```
+
+## Environment Variables Reference
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `MONGODB_URI` | MongoDB connection string | `mongodb+srv://...` |
+| `JWT_SECRET` | Secret key for JWT tokens | `t3hXEbVbtNNnNpEVHHq7/z2cucAV2SUEduvNqWjT5rE=` |
+| `JWT_EXPIRES_IN` | Token expiration time | `7d` |
+| `FRONTEND_URL` | Frontend deployment URL | `https://your-app.vercel.app` |
+
 ## Troubleshooting
 
+### Deployment Fails with "12 Serverless Functions" Error
+
+**Status**: ✅ **FIXED** - This issue was resolved in commit `392e469`
+
+**Solution Applied**:
+- Moved `api/middleware/` → `lib/middleware/`
+- Moved `api/utils/` → `lib/utils/`
+- Result: Only 7 functions remain (under 12 limit)
+
 ### API Returns 500 Error
-- Check Vercel function logs in dashboard
-- Verify MongoDB connection string is correct
-- Ensure environment variables are set in Vercel
+
+1. **Check Vercel Function Logs**:
+   - Go to Vercel dashboard → Deployments → Function Logs
+   - Look for error messages
+
+2. **Verify Environment Variables**:
+   - Ensure all variables are set in Vercel dashboard
+   - Check `MONGODB_URI` is correct
+
+3. **Check MongoDB Connection**:
+   - Verify IP whitelist includes `0.0.0.0/0` (or Vercel IPs)
+   - Ensure cluster is running (not paused)
 
 ### CORS Errors
+
 - Verify `FRONTEND_URL` matches your Vercel deployment URL
 - Check that CORS middleware is applied in API routes
-
-### MongoDB Connection Failed
-- Verify IP whitelist includes `0.0.0.0/0` (or Vercel IP ranges)
-- Check username and password in connection string
-- Ensure cluster is running (not paused)
+- Ensure frontend uses relative API paths (already configured)
 
 ### JWT Token Issues
-- Verify `JWT_SECRET` is set and consistent between environments
+
+- Verify `JWT_SECRET` is set and consistent
 - Check token expiration settings
+- Ensure tokens are stored in localStorage
 
-## Post-Deployment
+## Post-Deployment Checklist
 
-1. **Update Frontend API URL**: The frontend uses relative paths, so it should work automatically if API and frontend are on the same domain
-2. **Test User Registration**: Create a test account
-3. **Test Character Creation**: Create a character and verify it saves
-4. **Monitor Logs**: Check Vercel function logs for any errors
+- [ ] Deployment successful (status: "Ready")
+- [ ] Environment variables set in Vercel
+- [ ] Frontend loads correctly
+- [ ] User registration works
+- [ ] User login works
+- [ ] Character creation works
+- [ ] Character data saves to MongoDB
+- [ ] Character retrieval works
+- [ ] Character update works
+- [ ] Character deletion works
 
-## Next Steps
+## Next Steps After Deployment
 
-- Set up custom domain (optional)
-- Configure MongoDB indexes for better performance
-- Add rate limiting for API endpoints
-- Set up monitoring and alerts
+1. **Update FRONTEND_URL** with actual Vercel URL
+2. **Test All Features** - Registration, login, character management
+3. **Monitor Logs** - Check Vercel function logs for errors
+4. **Set Up Custom Domain** (optional)
+5. **Configure Rate Limiting** (recommended for production)
+6. **Set Up Monitoring** (optional)
 
+## Support
+
+For issues or questions:
+- Check Vercel function logs
+- Review MongoDB Atlas logs
+- Check browser console for frontend errors
+- See `IMPLEMENTATION_STATUS.md` for current status

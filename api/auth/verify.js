@@ -30,13 +30,14 @@ async function verifyHandler(req, res) {
       throw new AuthenticationError('Invalid or expired token');
     }
 
-    // Return token info
+    // Return token info (include role if present)
     return res.status(200).json({
       error: false,
       message: 'Token is valid',
       data: {
         userId: decoded.userId,
         username: decoded.username,
+        role: decoded.role || 'user', // Include role if present
       },
     });
   } catch (error) {

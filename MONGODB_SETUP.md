@@ -1,30 +1,47 @@
 # MongoDB Atlas Setup Guide
 
-## Step 1: Create MongoDB Atlas Account
+**Note**: This is a reference guide. MongoDB setup has been completed via MCP tools.
+
+## Current Database Status
+
+✅ **Database**: `fantasy3d`  
+✅ **Collections**: `users`, `characters`  
+✅ **Indexes**: Created for optimal performance
+
+## Connection String
+
+```
+mongodb+srv://pmvita_db_user:tKEwhFA3e8v0pLcW@fantasy3d.scuo4fx.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
+```
+
+## Manual Setup (Reference Only)
+
+If you need to set up a new MongoDB Atlas cluster manually:
+
+### Step 1: Create MongoDB Atlas Account
 
 1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Sign up for a free account (if you don't have one)
+2. Sign up for a free account
 3. Create a new project named "Fantasy3D"
 
-## Step 2: Create Free Cluster
+### Step 2: Create Free Cluster
 
 1. Click "Build a Database"
 2. Choose **M0 Free** tier
-3. Select a region (choose the same region as your Vercel deployment for best performance)
-4. Name your cluster (e.g., "fantasy3d-cluster")
+3. Select a region (same as Vercel deployment for best performance)
+4. Name your cluster
 5. Click "Create"
 
-## Step 3: Create Database User
+### Step 3: Create Database User
 
 1. Go to "Database Access" in the left sidebar
 2. Click "Add New Database User"
 3. Choose "Password" authentication
-4. Enter a username (e.g., `fantasy3d_user`)
-5. Generate a secure password (save it securely!)
-6. Set user privileges to "Read and write to any database"
-7. Click "Add User"
+4. Enter username and generate secure password
+5. Set privileges to "Read and write to any database"
+6. Click "Add User"
 
-## Step 4: Configure Network Access
+### Step 4: Configure Network Access
 
 1. Go to "Network Access" in the left sidebar
 2. Click "Add IP Address"
@@ -32,7 +49,7 @@
    - **Note**: For production, consider restricting to Vercel IP ranges
 4. Click "Confirm"
 
-## Step 5: Get Connection String
+### Step 5: Get Connection String
 
 1. Go to "Database" in the left sidebar
 2. Click "Connect" on your cluster
@@ -40,20 +57,26 @@
 4. Select "Node.js" and version "5.5 or later"
 5. Copy the connection string
 6. Replace `<password>` with your database user password
-7. Add database name: `?retryWrites=true&w=majority&appName=fantasy3d`
+7. Add database name: `/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d`
 
-**Example connection string:**
+**Example connection string format:**
 ```
-mongodb+srv://fantasy3d_user:YOUR_PASSWORD@fantasy3d-cluster.xxxxx.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
+mongodb+srv://username:password@cluster.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
 ```
 
 ## Step 6: Set Environment Variables
 
 ### For Local Development:
-1. Copy `env.example` to `.env.local`
-2. Paste your MongoDB connection string into `MONGODB_URI`
+1. Create a `.env.local` file in the project root
+2. Add the following variables:
+   ```
+   MONGODB_URI=your-connection-string-here
+   JWT_SECRET=your-secret-key-here
+   JWT_EXPIRES_IN=7d
+   FRONTEND_URL=http://localhost:3000
+   ```
 3. Generate a JWT secret: `openssl rand -base64 32`
-4. Set `JWT_SECRET` to the generated value
+4. Paste your MongoDB connection string into `MONGODB_URI`
 
 ### For Vercel:
 1. Go to your Vercel project settings
@@ -62,24 +85,23 @@ mongodb+srv://fantasy3d_user:YOUR_PASSWORD@fantasy3d-cluster.xxxxx.mongodb.net/f
    - `MONGODB_URI` - Your MongoDB connection string
    - `JWT_SECRET` - Your JWT secret (same as local)
    - `JWT_EXPIRES_IN` - "7d" (or your preferred expiration)
-   - `FRONTEND_URL` - Your Vercel deployment URL (optional)
+   - `FRONTEND_URL` - Your Vercel deployment URL
 
-## Step 7: Create Database and Collections
+## Collections and Indexes
 
-Once you have the connection string, the application will automatically create the database and collections on first use. However, you can also create them manually using MongoDB MCP tools or MongoDB Compass.
+### Collections
+- `users` - User accounts with authentication data
+- `characters` - Character data linked to users
 
-### Collections to Create:
-- `users` - User accounts
-- `characters` - Character data
+### Indexes
+- `users.username` (unique) - Fast username lookups
+- `users.email` (unique, sparse) - Fast email lookups
+- `characters.userId` - Fast character queries by user
 
-### Indexes to Create:
-- `users.username` (unique)
-- `users.email` (unique, sparse)
-- `characters.userId` (for fast lookups)
+**Note**: Collections and indexes have been created automatically via MCP tools.
 
 ## Troubleshooting
 
 - **Connection timeout**: Check that your IP is whitelisted in Network Access
 - **Authentication failed**: Verify username and password in connection string
 - **Database not found**: The database will be created automatically on first use
-
