@@ -178,7 +178,7 @@ export class UI {
 
     showCharacterSelection() {
         this.hideAllMenus();
-        document.getElementById('characterSelection').style.display = 'block';
+        document.getElementById('characterSelection').style.display = 'flex';
         this.loadCharacterList();
     }
 
@@ -351,6 +351,10 @@ export class UI {
         });
     }
 
+    /**
+     * Loads and displays the list of saved characters in the character selection screen.
+     * Each character card includes a delete button for character management.
+     */
     loadCharacterList() {
         const list = document.getElementById('characterList');
         list.innerHTML = '';
@@ -379,6 +383,7 @@ export class UI {
         characters.forEach((char, index) => {
             const card = document.createElement('div');
             card.className = 'character-card';
+            card.dataset.characterIndex = index;
             const raceIcon = {
                 human: '<i class="fas fa-user"></i>',
                 elf: '<i class="fas fa-leaf"></i>',
@@ -389,6 +394,9 @@ export class UI {
             const raceName = char.race ? char.race.charAt(0).toUpperCase() + char.race.slice(1) : 'Human';
             
             card.innerHTML = `
+                <button class="character-delete-button" data-character-index="${index}" aria-label="Delete character">
+                    <i class="fas fa-times"></i>
+                </button>
                 <div class="character-card-header">
                     <div class="character-card-icon">${raceIcon}</div>
                     <div class="character-card-title">
@@ -419,16 +427,43 @@ export class UI {
                     </div>
                 </div>
             `;
-            card.addEventListener('click', () => {
-                this.selectCharacter(index);
+            
+            // Add click handler for card selection (but not when clicking delete button)
+            card.addEventListener('click', (e) => {
+                // Don't select if clicking the delete button
+                if (!e.target.closest('.character-delete-button')) {
+                    this.selectCharacter(index);
+                }
             });
+            
+            // Add click handler for delete button
+            const deleteButton = card.querySelector('.character-delete-button');
+            if (deleteButton) {
+                deleteButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent card selection
+                    this.showDeleteConfirmation(index, char.name || 'Unnamed Character');
+                });
+            }
+            
             list.appendChild(card);
         });
     }
 
+    /**
+     * Retrieves all saved characters from localStorage.
+     * @returns {Array} - Array of character objects, or empty array if none exist
+     */
     getAllCharacters() {
-        const saved = localStorage.getItem('fantasyGameCharacters');
-        return saved ? JSON.parse(saved) : [];
+        try {
+            const saved = localStorage.getItem('fantasyGameCharacters');
+            if (!saved) {
+                return [];
+            }
+            return JSON.parse(saved);
+        } catch (error) {
+            console.error('Error loading characters from localStorage:', error);
+            return [];
+        }
     }
 
     saveCharacter() {
@@ -470,6 +505,65 @@ export class UI {
         const characters = this.getAllCharacters();
         if (characters[index]) {
             this.game.startGame(characters[index]);
+        }
+    }
+
+    /**
+     * Shows a confirmation dialog before deleting a character.
+     * @param {number} characterIndex - The index of the character to delete
+     * @param {string} characterName - The name of the character to display in confirmation
+     */
+    showDeleteConfirmation(characterIndex, characterName) {
+        const confirmed = confirm(
+            `Are you sure you want to delete "${characterName}"?\n\nThis action cannot be undone.`
+        );
+        
+        if (confirmed) {
+            this.deleteCharacter(characterIndex);
+        }
+    }
+
+    /**
+     * Deletes a character from localStorage and updates the UI.
+     * @param {number} characterIndex - The index of the character to delete
+     * @returns {boolean} - Returns true if deletion was successful, false otherwise
+     */
+    deleteCharacter(characterIndex) {
+        try {
+            const characters = this.getAllCharacters();
+            
+            // Validate index
+            if (characterIndex < 0 || characterIndex >= characters.length) {
+                console.error('Invalid character index for deletion:', characterIndex);
+                alert('Error: Invalid character index. Please refresh the page and try again.');
+                return false;
+            }
+            
+            // Store character name for feedback
+            const deletedCharacterName = characters[characterIndex].name || 'Unnamed Character';
+            
+            // Remove character from array
+            characters.splice(characterIndex, 1);
+            
+            // Save updated list
+            try {
+                localStorage.setItem('fantasyGameCharacters', JSON.stringify(characters));
+            } catch (storageError) {
+                console.error('Failed to save characters to localStorage:', storageError);
+                alert('Error: Failed to save changes. Please check your browser storage settings.');
+                return false;
+            }
+            
+            // Reload character list to reflect changes
+            this.loadCharacterList();
+            
+            // Show feedback
+            console.log(`Character "${deletedCharacterName}" deleted successfully`);
+            return true;
+        } catch (error) {
+            console.error('Error deleting character:', error);
+            alert('An unexpected error occurred while deleting the character. Please try again.');
+            return false;
         }
     }
 

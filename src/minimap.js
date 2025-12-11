@@ -50,7 +50,8 @@ export class Minimap {
         this.markers = {
             character: null,
             buildings: [],
-            trees: []
+            trees: [],
+            rocks: []
         };
         
         this.createMarkers();
@@ -107,6 +108,26 @@ export class Minimap {
                 this.markers.trees.push(marker);
                 this.scene.add(marker);
             }
+            
+            // Rock markers (gray circles)
+            if (object.userData && object.userData.type === 'rock' && object.isGroup && !object.userData.isMinimapMarker) {
+                const rockGeometry = new THREE.CircleGeometry(1.2, 16);
+                const rockMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x696969,
+                    side: THREE.DoubleSide
+                });
+                const marker = new THREE.Mesh(rockGeometry, rockMaterial);
+                marker.rotation.x = -Math.PI / 2;
+                marker.position.set(
+                    object.position.x,
+                    1,
+                    object.position.z
+                );
+                marker.userData.isMinimapMarker = true;
+                marker.layers.set(1); // Only visible to minimap camera
+                this.markers.rocks.push(marker);
+                this.scene.add(marker);
+            }
         });
     }
     
@@ -142,6 +163,12 @@ export class Minimap {
         });
         
         this.markers.trees.forEach(marker => {
+            this.scene.remove(marker);
+            marker.geometry.dispose();
+            marker.material.dispose();
+        });
+        
+        this.markers.rocks.forEach(marker => {
             this.scene.remove(marker);
             marker.geometry.dispose();
             marker.material.dispose();

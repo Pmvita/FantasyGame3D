@@ -34,6 +34,7 @@ A lightweight fantasy game built with **Three.js** that runs entirely in your we
 
 - ✅ Character customization (appearance, stats, equipment)
 - ✅ Character selection and creation
+- ✅ Character deletion with confirmation dialog
 - ✅ Arrow key movement
 - ✅ WASD movement
 - ✅ Third-person camera (follows character automatically)
@@ -59,10 +60,20 @@ FantasyGame3D/
 ├── src/
 │   ├── app.js         # Main game logic
 │   ├── character.js   # Character system
+│   ├── characterPreview.js  # Character preview in creation
 │   ├── world.js       # World creation
 │   ├── controls.js    # Input handling
-│   └── ui.js          # UI system
+│   ├── minimap.js     # Minimap system
+│   ├── ui.js          # UI system (menus, character selection)
+│   ├── inventory/     # Inventory system
+│   │   └── inventory.js
+│   └── skills/        # Skills system
+│       └── skills.js
 ├── assets/            # Models, textures (optional)
+│   ├── characters/    # Character 3D models
+│   └── animations/     # Animation files
+├── tests/             # Test files
+│   └── ui.test.js     # UI functionality tests
 └── package.json       # Dependencies (if using npm)
 ```
 
@@ -72,6 +83,16 @@ FantasyGame3D/
 - **Q / E**: Rotate camera around character
 - **Mouse**: Interact with objects (cursor changes on hover)
 - **Click**: Creates ripple animation and interacts with objects
+- **Double-tap/Click**: Run (1.5x speed, consumes energy)
+- **B Key**: Open inventory
+- **ESC**: Close menus
+- **1-0 Keys**: Activate skills
+
+## Character Management
+
+- **Create Character**: Design your character with custom appearance and stats
+- **Select Character**: Choose from your saved characters to play
+- **Delete Character**: Click the X button on any character card to delete (with confirmation)
 
 ## Browser Compatibility
 
