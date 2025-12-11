@@ -39,18 +39,18 @@ function testDeleteCharacter() {
         { name: 'Test Character 3', race: 'dwarf', stats: { health: 60, maxHealth: 60 } }
     ];
     
-    mockStorage.setItem('fantasyGameCharacters', JSON.stringify(testCharacters));
+    mockStorage.setItem('fantasy3DCharacters', JSON.stringify(testCharacters));
     
     // Simulate delete operation
-    const characters = JSON.parse(mockStorage.getItem('fantasyGameCharacters'));
+    const characters = JSON.parse(mockStorage.getItem('fantasy3DCharacters'));
     const indexToDelete = 1; // Delete second character
     
     if (indexToDelete >= 0 && indexToDelete < characters.length) {
         const deletedName = characters[indexToDelete].name;
         characters.splice(indexToDelete, 1);
-        mockStorage.setItem('fantasyGameCharacters', JSON.stringify(characters));
+        mockStorage.setItem('fantasy3DCharacters', JSON.stringify(characters));
         
-        const remaining = JSON.parse(mockStorage.getItem('fantasyGameCharacters'));
+        const remaining = JSON.parse(mockStorage.getItem('fantasy3DCharacters'));
         
         // Verify deletion
         if (remaining.length === 2 && 
@@ -75,10 +75,10 @@ function testInvalidIndex() {
         { name: 'Test Character', race: 'human', stats: { health: 50, maxHealth: 50 } }
     ];
     
-    mockStorage.setItem('fantasyGameCharacters', JSON.stringify(testCharacters));
+    mockStorage.setItem('fantasy3DCharacters', JSON.stringify(testCharacters));
     
     // Try to delete with invalid index
-    const characters = JSON.parse(mockStorage.getItem('fantasyGameCharacters'));
+    const characters = JSON.parse(mockStorage.getItem('fantasy3DCharacters'));
     const invalidIndex = 999;
     
     if (invalidIndex < 0 || invalidIndex >= characters.length) {

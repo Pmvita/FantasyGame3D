@@ -1,6 +1,6 @@
 # Inventory System
 
-This folder contains the inventory system for the Fantasy Game 3D.
+This folder contains the inventory system for Fantasy3D.
 
 ## Files
 

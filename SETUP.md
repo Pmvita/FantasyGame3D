@@ -1,4 +1,4 @@
-# Setup Guide - Three.js Fantasy Game
+# Setup Guide - Fantasy3D
 
 ## Space Requirements
 
@@ -105,7 +105,7 @@ The game should open in your browser. You can:
 ## File Structure
 
 ```
-FantasyGame3D/
+Fantasy3D/
 ├── index.html          # Main HTML file
 ├── package.json        # Dependencies
 ├── src/
@@ -151,5 +151,5 @@ Works in:
 - Use Chrome/Edge for best performance
 - Reduce quality settings if needed (edit in `world.js`)
 
-Enjoy your lightweight 3D fantasy game! 🎮
+Enjoy Fantasy3D! 🎮
 

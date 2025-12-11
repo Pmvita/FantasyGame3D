@@ -1,6 +1,6 @@
-# Fantasy Character 3D Game - Web Version
+# Fantasy3D - Web Version
 
-A lightweight fantasy game built with **Three.js** that runs entirely in your web browser. No installation required!
+A lightweight 3D fantasy game built with **Three.js** that runs entirely in your web browser. No installation required!
 
 ## Why Three.js?
 
@@ -42,20 +42,35 @@ A lightweight fantasy game built with **Three.js** that runs entirely in your we
 - ✅ Ripple animation on click/touch
 - ✅ Interactive 3D objects (buildings, trees)
 - ✅ 3D fantasy world
-- ✅ Save/load characters (localStorage)
+- ✅ Save/load characters (MongoDB + LocalStorage fallback)
+- ✅ User authentication (JWT)
+- ✅ Account creation and login
+- ✅ Character data synced to cloud
 - ✅ No installation needed!
 
 ## Technology Stack
 
+### Frontend
 - **Three.js** - 3D graphics library
-- **JavaScript** - Game logic
+- **JavaScript (ES6 Modules)** - Game logic
 - **HTML/CSS** - UI
-- **LocalStorage** - Save system
+- **Font Awesome** - Icons
+- **Google Fonts** - Typography
+
+### Backend
+- **Node.js** - Runtime
+- **Express.js** - API framework (via Vercel serverless functions)
+- **MongoDB Atlas** - Database (free tier)
+- **JWT** - Authentication
+- **bcryptjs** - Password hashing
+
+### Deployment
+- **Vercel** - Hosting and serverless functions
 
 ## File Structure
 
 ```
-FantasyGame3D/
+Fantasy3D/
 ├── index.html          # Main HTML file
 ├── src/
 │   ├── app.js         # Main game logic
@@ -102,7 +117,22 @@ Works in all modern browsers:
 - Safari
 - Opera
 
-## Next Steps
+## Setup & Deployment
 
-See `SETUP.md` for detailed setup instructions.
+### Quick Start (Local Development)
+1. Install dependencies: `npm install`
+2. Set up MongoDB Atlas (see `MONGODB_SETUP.md`)
+3. Copy `env.example` to `.env.local` and fill in values
+4. Run: `npm start`
+5. Open browser to `http://localhost:3000`
+
+### Production Deployment
+See `DEPLOYMENT.md` for complete deployment instructions to Vercel.
+
+## Documentation
+
+- `SETUP.md` - Detailed setup instructions
+- `MONGODB_SETUP.md` - MongoDB Atlas setup guide
+- `DEPLOYMENT.md` - Vercel deployment guide
+- `IMPLEMENTATION_STATUS.md` - Current implementation status
 

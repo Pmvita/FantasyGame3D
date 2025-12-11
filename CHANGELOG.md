@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Fantasy Game 3D project will be documented in this file.
+All notable changes to the Fantasy3D project will be documented in this file.
 
 ## [Unreleased]
 

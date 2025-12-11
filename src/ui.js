@@ -2,6 +2,9 @@
 import { CharacterPreview } from './characterPreview.js';
 import { InventorySystem } from './inventory/inventory.js';
 import { SkillsSystem } from './skills/skills.js';
+import * as authAPI from './api/auth.js';
+import * as charactersAPI from './api/characters.js';
+import { getToken } from './api/client.js';
 
 export class UI {
     constructor(game) {
@@ -16,6 +19,39 @@ export class UI {
     }
 
     setupEventListeners() {
+        // Login screen buttons
+        document.getElementById('loginButton').addEventListener('click', () => {
+            this.handleLogin();
+        });
+
+        // Allow Enter key to submit login
+        document.getElementById('usernameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('passwordInput').focus();
+            }
+        });
+
+        document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.handleLogin();
+            }
+        });
+
+        document.getElementById('createAccountLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showCreateAccountScreen();
+        });
+
+        document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Password reset functionality coming soon!');
+        });
+
+        document.getElementById('needHelpLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Help documentation coming soon!');
+        });
+
         // Main menu buttons
         document.getElementById('startButton').addEventListener('click', () => {
             this.loadOrCreateCharacter();
@@ -171,15 +207,328 @@ export class UI {
         }
     }
 
-    showMainMenu() {
-        this.hideAllMenus();
-        document.getElementById('mainMenu').style.display = 'block';
+    async handleLogin() {
+        const username = document.getElementById('usernameInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+        const remember = document.getElementById('rememberCheckbox').checked;
+        const loginButton = document.getElementById('loginButton');
+
+        if (!username || !password) {
+            this.showError('Please enter both username and password.');
+            return;
+        }
+
+        // Disable button and show loading
+        loginButton.disabled = true;
+        loginButton.textContent = 'LOGGING IN...';
+
+        try {
+            // Call login API
+            const response = await authAPI.login(username, password);
+
+            // Store login info if remember is checked
+            if (remember) {
+                localStorage.setItem('fantasy3DUsername', username);
+            } else {
+                localStorage.removeItem('fantasy3DUsername');
+            }
+
+            // Check for LocalStorage characters to migrate
+            await this.checkForLocalStorageMigration();
+
+            // Hide login screen and show main menu
+            this.hideLoginScreen();
+            this.showMainMenu();
+        } catch (error) {
+            this.showError(error.message || 'Login failed. Please check your credentials.');
+        } finally {
+            // Re-enable button
+            loginButton.disabled = false;
+            loginButton.textContent = 'LOGIN';
+        }
     }
 
-    showCharacterSelection() {
+    showLoginScreen() {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        // Load saved username if exists
+        const savedUsername = localStorage.getItem('fantasy3DUsername');
+        if (savedUsername) {
+            document.getElementById('usernameInput').value = savedUsername;
+            document.getElementById('rememberCheckbox').checked = true;
+        }
+    }
+
+    hideLoginScreen() {
+        document.getElementById('loginScreen').classList.add('hidden');
+    }
+
+    showCreateAccountScreen() {
+        this.hideLoginScreen();
+        document.getElementById('createAccountScreen').classList.remove('hidden');
+        this.setupAccountCreationListeners();
+    }
+
+    hideCreateAccountScreen() {
+        document.getElementById('createAccountScreen').classList.add('hidden');
+    }
+
+    setupAccountCreationListeners() {
+        // Remove existing listeners to avoid duplicates
+        const registerButton = document.getElementById('registerButton');
+        const backToLoginLink = document.getElementById('backToLoginLink');
+        const registerPasswordInput = document.getElementById('registerPasswordInput');
+        const registerConfirmPasswordInput = document.getElementById('registerConfirmPasswordInput');
+
+        // Remove old listeners by cloning elements
+        const newRegisterButton = registerButton.cloneNode(true);
+        registerButton.parentNode.replaceChild(newRegisterButton, registerButton);
+        const newBackLink = backToLoginLink.cloneNode(true);
+        backToLoginLink.parentNode.replaceChild(newBackLink, backToLoginLink);
+
+        // Add new listeners
+        document.getElementById('registerButton').addEventListener('click', () => {
+            this.handleRegister();
+        });
+
+        document.getElementById('backToLoginLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.hideCreateAccountScreen();
+            this.showLoginScreen();
+        });
+
+        // Password strength indicator
+        if (registerPasswordInput) {
+            registerPasswordInput.addEventListener('input', () => {
+                this.updatePasswordStrength();
+            });
+        }
+
+        // Enter key handlers
+        document.getElementById('registerUsernameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('registerEmailInput').focus();
+            }
+        });
+
+        document.getElementById('registerEmailInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('registerPasswordInput').focus();
+            }
+        });
+
+        document.getElementById('registerPasswordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('registerConfirmPasswordInput').focus();
+            }
+        });
+
+        document.getElementById('registerConfirmPasswordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.handleRegister();
+            }
+        });
+    }
+
+    updatePasswordStrength() {
+        const password = document.getElementById('registerPasswordInput').value;
+        const strengthDiv = document.getElementById('passwordStrength');
+
+        if (!password) {
+            strengthDiv.textContent = '';
+            strengthDiv.className = 'password-strength';
+            return;
+        }
+
+        let strength = 'weak';
+        let message = 'Weak password';
+
+        if (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+            strength = 'strong';
+            message = 'Strong password';
+        } else if (password.length >= 6) {
+            strength = 'medium';
+            message = 'Medium password';
+        }
+
+        strengthDiv.textContent = message;
+        strengthDiv.className = `password-strength ${strength}`;
+    }
+
+    async handleRegister() {
+        const username = document.getElementById('registerUsernameInput').value.trim();
+        const email = document.getElementById('registerEmailInput').value.trim();
+        const password = document.getElementById('registerPasswordInput').value;
+        const confirmPassword = document.getElementById('registerConfirmPasswordInput').value;
+        const registerButton = document.getElementById('registerButton');
+        const registerButtonText = document.getElementById('registerButtonText');
+        const registerButtonSpinner = document.getElementById('registerButtonSpinner');
+        const errorMessage = document.getElementById('registerErrorMessage');
+        const successMessage = document.getElementById('registerSuccessMessage');
+
+        // Clear previous messages
+        errorMessage.textContent = '';
+        successMessage.textContent = '';
+
+        // Client-side validation
+        if (!username || username.length < 3) {
+            errorMessage.textContent = 'Username must be at least 3 characters';
+            return;
+        }
+
+        if (username.length > 20) {
+            errorMessage.textContent = 'Username must be at most 20 characters';
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            errorMessage.textContent = 'Username can only contain letters, numbers, and underscores';
+            return;
+        }
+
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errorMessage.textContent = 'Invalid email format';
+            return;
+        }
+
+        if (!password || password.length < 6) {
+            errorMessage.textContent = 'Password must be at least 6 characters';
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            errorMessage.textContent = 'Passwords do not match';
+            return;
+        }
+
+        // Show loading state
+        registerButton.disabled = true;
+        registerButtonText.style.display = 'none';
+        registerButtonSpinner.style.display = 'inline-block';
+
+        try {
+            // Call register API
+            const response = await authAPI.register(username, email || null, password);
+
+            // Show success message
+            successMessage.textContent = 'Account created successfully! Logging in...';
+
+            // Auto-login after a brief delay
+            setTimeout(async () => {
+                try {
+                    // Login with the new credentials
+                    await authAPI.login(username, password);
+
+                    // Check for LocalStorage migration
+                    await this.checkForLocalStorageMigration();
+
+                    // Hide account creation screen and show main menu
+                    this.hideCreateAccountScreen();
+                    this.showMainMenu();
+                } catch (loginError) {
+                    errorMessage.textContent = 'Account created but login failed. Please try logging in manually.';
+                }
+            }, 1000);
+        } catch (error) {
+            errorMessage.textContent = error.message || 'Registration failed. Please try again.';
+        } finally {
+            // Reset button state
+            registerButton.disabled = false;
+            registerButtonText.style.display = 'inline';
+            registerButtonSpinner.style.display = 'none';
+        }
+    }
+
+    showError(message) {
+        // Try to show error in a message area, or use alert as fallback
+        const errorDiv = document.getElementById('loginErrorMessage');
+        if (errorDiv) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        } else {
+            alert(message);
+        }
+    }
+
+    async checkForLocalStorageMigration() {
+        // Check if user has LocalStorage characters to migrate
+        const localCharacters = localStorage.getItem('fantasy3DCharacters');
+        if (!localCharacters) {
+            return; // No local characters to migrate
+        }
+
+        try {
+            const parsed = JSON.parse(localCharacters);
+            if (!Array.isArray(parsed) || parsed.length === 0) {
+                return; // No valid characters
+            }
+
+            // Check if user already has characters in MongoDB
+            const cloudCharacters = await charactersAPI.getCharacters();
+            
+            if (cloudCharacters.length > 0) {
+                // User already has cloud characters, ask if they want to merge
+                const shouldMerge = confirm(
+                    `You have ${parsed.length} local character(s) and ${cloudCharacters.length} cloud character(s). ` +
+                    'Would you like to import your local characters to your account?'
+                );
+
+                if (!shouldMerge) {
+                    return;
+                }
+            } else {
+                // No cloud characters, ask to import
+                const shouldImport = confirm(
+                    `Would you like to import your ${parsed.length} local character(s) to your account?`
+                );
+
+                if (!shouldImport) {
+                    return;
+                }
+            }
+
+            // Migrate characters
+            let migratedCount = 0;
+            for (const char of parsed) {
+                try {
+                    await charactersAPI.createCharacter({
+                        name: char.name,
+                        race: char.race,
+                        appearance: char.appearance,
+                        stats: char.stats,
+                        equipment: char.equipment || { weapon: null, armor: null, helmet: null },
+                    });
+                    migratedCount++;
+                } catch (error) {
+                    console.error('Failed to migrate character:', char.name, error);
+                }
+            }
+
+            if (migratedCount > 0) {
+                alert(`Successfully imported ${migratedCount} character(s) to your account!`);
+                // Clear LocalStorage after successful migration
+                localStorage.removeItem('fantasy3DCharacters');
+            }
+        } catch (error) {
+            console.error('Migration error:', error);
+            // Don't block user if migration fails
+        }
+    }
+
+    showMainMenu() {
+        this.hideAllMenus();
+        this.hideLoginScreen();
+        const mainMenu = document.getElementById('mainMenu');
+        mainMenu.classList.remove('hidden');
+        mainMenu.style.display = 'flex';
+    }
+
+    async showCharacterSelection() {
         this.hideAllMenus();
         document.getElementById('characterSelection').style.display = 'flex';
-        this.loadCharacterList();
+        await this.loadCharacterList();
     }
 
     showCharacterCreation() {
@@ -291,7 +640,11 @@ export class UI {
     }
 
     hideAllMenus() {
-        document.getElementById('mainMenu').style.display = 'none';
+        const mainMenu = document.getElementById('mainMenu');
+        if (mainMenu) {
+            mainMenu.style.display = 'none';
+            mainMenu.classList.add('hidden');
+        }
         document.getElementById('characterSelection').style.display = 'none';
         document.getElementById('characterCreation').style.display = 'none';
         document.getElementById('hud').style.display = 'none';
@@ -355,11 +708,11 @@ export class UI {
      * Loads and displays the list of saved characters in the character selection screen.
      * Each character card includes a delete button for character management.
      */
-    loadCharacterList() {
+    async loadCharacterList() {
         const list = document.getElementById('characterList');
         list.innerHTML = '';
 
-        const characters = this.getAllCharacters();
+        const characters = await this.getAllCharacters();
         
         if (characters.length === 0) {
             list.innerHTML = `
@@ -384,6 +737,7 @@ export class UI {
             const card = document.createElement('div');
             card.className = 'character-card';
             card.dataset.characterIndex = index;
+            card.dataset.characterId = char.id || index; // Store API ID if available
             const raceIcon = {
                 human: '<i class="fas fa-user"></i>',
                 elf: '<i class="fas fa-leaf"></i>',
@@ -450,23 +804,48 @@ export class UI {
     }
 
     /**
-     * Retrieves all saved characters from localStorage.
-     * @returns {Array} - Array of character objects, or empty array if none exist
+     * Retrieves all saved characters from API.
+     * Falls back to LocalStorage if not authenticated.
+     * @returns {Promise<Array>} - Array of character objects, or empty array if none exist
      */
-    getAllCharacters() {
-        try {
-            const saved = localStorage.getItem('fantasyGameCharacters');
-            if (!saved) {
+    async getAllCharacters() {
+        // Check if user is authenticated
+        const token = getToken();
+        if (!token) {
+            // Fallback to LocalStorage for unauthenticated users
+            try {
+                const saved = localStorage.getItem('fantasy3DCharacters');
+                if (!saved) {
+                    return [];
+                }
+                return JSON.parse(saved);
+            } catch (error) {
+                console.error('Error loading characters from localStorage:', error);
                 return [];
             }
-            return JSON.parse(saved);
+        }
+
+        // Fetch from API
+        try {
+            const characters = await charactersAPI.getCharacters();
+            return characters || [];
         } catch (error) {
-            console.error('Error loading characters from localStorage:', error);
-            return [];
+            console.error('Error loading characters from API:', error);
+            // Fallback to LocalStorage on error
+            try {
+                const saved = localStorage.getItem('fantasy3DCharacters');
+                if (!saved) {
+                    return [];
+                }
+                return JSON.parse(saved);
+            } catch (localError) {
+                console.error('Error loading characters from localStorage:', localError);
+                return [];
+            }
         }
     }
 
-    saveCharacter() {
+    async saveCharacter() {
         // Get race-specific default stats
         const raceStats = this.getRaceDefaultStats(this.selectedRace);
         
@@ -493,18 +872,42 @@ export class UI {
             }
         };
 
-        const characters = this.getAllCharacters();
-        characters.push(characterData);
-        localStorage.setItem('fantasyGameCharacters', JSON.stringify(characters));
+        const saveButton = document.getElementById('saveCharacterButton');
+        const originalText = saveButton.textContent;
+        saveButton.disabled = true;
+        saveButton.textContent = 'SAVING...';
 
-        this.showMainMenu();
-        alert('Character saved!');
+        try {
+            // Check if user is authenticated
+            const token = getToken();
+            if (token) {
+                // Save to API
+                await charactersAPI.createCharacter(characterData);
+                this.showMainMenu();
+                alert('Character saved to your account!');
+            } else {
+                // Fallback to LocalStorage
+                const characters = await this.getAllCharacters();
+                characters.push(characterData);
+                localStorage.setItem('fantasy3DCharacters', JSON.stringify(characters));
+                this.showMainMenu();
+                alert('Character saved locally! Create an account to sync across devices.');
+            }
+        } catch (error) {
+            console.error('Error saving character:', error);
+            alert('Failed to save character: ' + (error.message || 'Unknown error'));
+        } finally {
+            saveButton.disabled = false;
+            saveButton.textContent = originalText;
+        }
     }
 
-    selectCharacter(index) {
-        const characters = this.getAllCharacters();
+    async selectCharacter(index) {
+        const characters = await this.getAllCharacters();
         if (characters[index]) {
-            this.game.startGame(characters[index]);
+            // Convert API character format to game format if needed
+            const character = characters[index];
+            this.game.startGame(character);
         }
     }
 
@@ -524,13 +927,13 @@ export class UI {
     }
 
     /**
-     * Deletes a character from localStorage and updates the UI.
+     * Deletes a character from API or localStorage and updates the UI.
      * @param {number} characterIndex - The index of the character to delete
-     * @returns {boolean} - Returns true if deletion was successful, false otherwise
+     * @returns {Promise<boolean>} - Returns true if deletion was successful, false otherwise
      */
-    deleteCharacter(characterIndex) {
+    async deleteCharacter(characterIndex) {
         try {
-            const characters = this.getAllCharacters();
+            const characters = await this.getAllCharacters();
             
             // Validate index
             if (characterIndex < 0 || characterIndex >= characters.length) {
@@ -539,23 +942,36 @@ export class UI {
                 return false;
             }
             
-            // Store character name for feedback
-            const deletedCharacterName = characters[characterIndex].name || 'Unnamed Character';
+            // Store character info for feedback
+            const characterToDelete = characters[characterIndex];
+            const deletedCharacterName = characterToDelete.name || 'Unnamed Character';
+            const characterId = characterToDelete.id;
             
-            // Remove character from array
-            characters.splice(characterIndex, 1);
-            
-            // Save updated list
-            try {
-                localStorage.setItem('fantasyGameCharacters', JSON.stringify(characters));
-            } catch (storageError) {
-                console.error('Failed to save characters to localStorage:', storageError);
-                alert('Error: Failed to save changes. Please check your browser storage settings.');
-                return false;
+            // Check if user is authenticated
+            const token = getToken();
+            if (token && characterId) {
+                // Delete from API
+                try {
+                    await charactersAPI.deleteCharacter(characterId);
+                } catch (apiError) {
+                    console.error('API deletion error:', apiError);
+                    alert('Failed to delete character from server: ' + (apiError.message || 'Unknown error'));
+                    return false;
+                }
+            } else {
+                // Fallback to LocalStorage
+                characters.splice(characterIndex, 1);
+                try {
+                    localStorage.setItem('fantasy3DCharacters', JSON.stringify(characters));
+                } catch (storageError) {
+                    console.error('Failed to save characters to localStorage:', storageError);
+                    alert('Error: Failed to save changes. Please check your browser storage settings.');
+                    return false;
+                }
             }
             
             // Reload character list to reflect changes
-            this.loadCharacterList();
+            await this.loadCharacterList();
             
             // Show feedback
             console.log(`Character "${deletedCharacterName}" deleted successfully`);
@@ -567,10 +983,10 @@ export class UI {
         }
     }
 
-    loadOrCreateCharacter() {
-        const characters = this.getAllCharacters();
+    async loadOrCreateCharacter() {
+        const characters = await this.getAllCharacters();
         if (characters.length > 0) {
-            this.selectCharacter(0); // Load first character
+            await this.selectCharacter(0); // Load first character
         } else {
             this.showCharacterCreation();
         }

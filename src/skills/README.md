@@ -1,6 +1,6 @@
 # Skills System
 
-This folder contains the skills system for the Fantasy Game 3D.
+This folder contains the skills system for Fantasy3D.
 
 ## Files
 

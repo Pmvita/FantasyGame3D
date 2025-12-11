@@ -40,7 +40,7 @@
    - `dwarf.glb` (preferred) or `dwarf.gltf`
    - `demon.glb` (preferred) or `demon.gltf`
 
-2. Place in: `FantasyGame3D/assets/characters/`
+2. Place in: `Fantasy3D/assets/characters/`
 
 **Note**: GLB is preferred because it's a single file. GLTF works too, but you may need to include texture files.
 

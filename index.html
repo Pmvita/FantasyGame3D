@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fantasy Character 3D Game</title>
+    <title>Fantasy3D</title>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Google Fonts - Shadows Into Light -->
@@ -44,6 +44,319 @@
             pointer-events: auto;
         }
 
+        /* Login Screen */
+        #loginScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        .login-container {
+            width: 500px;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .game-logo {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .game-logo-banner {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(74, 144, 226, 0.3) 100%);
+            border: 3px solid rgba(255, 215, 0, 0.6);
+            border-radius: 10px;
+            padding: 20px 40px;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .game-logo-text {
+            font-family: "Shadows Into Light", cursive;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.8),
+                0 0 20px rgba(255, 215, 0, 0.6),
+                2px 2px 4px rgba(0, 0, 0, 0.8),
+                -2px -2px 4px rgba(139, 92, 246, 0.5);
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-gem {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(74, 144, 226, 1) 50%, rgba(139, 92, 246, 1) 100%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 20px rgba(139, 92, 246, 0.8),
+                0 0 40px rgba(139, 92, 246, 0.6),
+                inset 0 0 10px rgba(255, 255, 255, 0.3);
+            position: relative;
+            animation: gemPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes gemPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 
+                    0 0 20px rgba(139, 92, 246, 0.8),
+                    0 0 40px rgba(139, 92, 246, 0.6),
+                    inset 0 0 10px rgba(255, 255, 255, 0.3);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 
+                    0 0 30px rgba(139, 92, 246, 1),
+                    0 0 60px rgba(139, 92, 246, 0.8),
+                    inset 0 0 15px rgba(255, 255, 255, 0.5);
+            }
+        }
+
+        .login-input-group {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(139, 92, 246, 0.5);
+            border-radius: 5px;
+            color: #e0e0e0;
+            font-size: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: rgba(139, 92, 246, 1);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .login-input::placeholder {
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .remember-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 25px;
+            cursor: pointer;
+        }
+
+        .remember-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: rgba(139, 92, 246, 0.8);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(74, 144, 226, 0.9) 100%);
+            border: 2px solid rgba(255, 215, 0, 0.6);
+            border-radius: 5px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            font-family: "Shadows Into Light", cursive;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        .login-button::before,
+        .login-button::after {
+            content: '▶';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 215, 0, 0.9);
+            font-size: 16px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
+        .login-button::before {
+            left: 20px;
+        }
+
+        .login-button::after {
+            right: 20px;
+            transform: translateY(-50%) scaleX(-1);
+        }
+
+        .login-button:hover {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(74, 144, 226, 1) 100%);
+            border-color: rgba(255, 215, 0, 1);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .login-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-link {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .footer-link:not(:last-child)::after {
+            content: '|';
+            margin-left: 20px;
+            color: #666;
+        }
+
+        .footer-link:hover {
+            color: #fff;
+        }
+
+        .footer-link.create-account {
+            color: #51cf66;
+            font-weight: 600;
+        }
+
+        .footer-link.create-account:hover {
+            color: #69db7c;
+        }
+
+        #loginScreen.hidden {
+            display: none;
+        }
+
+        /* Account Creation Screen */
+        #createAccountScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        .create-account-container {
+            width: 500px;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .create-account-container .game-logo {
+            margin-bottom: 10px;
+        }
+
+        .create-account-container .login-input-group {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .password-strength {
+            width: 100%;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #aaa;
+            text-align: center;
+        }
+
+        .password-strength.weak {
+            color: #ff6b6b;
+        }
+
+        .password-strength.medium {
+            color: #ffa94d;
+        }
+
+        .password-strength.strong {
+            color: #51cf66;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .success-message {
+            color: #51cf66;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #createAccountScreen.hidden {
+            display: none;
+        }
+
         /* Main Menu */
         #mainMenu {
             position: absolute;
@@ -60,6 +373,10 @@
             flex-direction: column;
             align-items: center;
             font-family: "Shadows Into Light", cursive;
+        }
+
+        #mainMenu.hidden {
+            display: none;
         }
 
         #mainMenu h1 {
@@ -1505,9 +1822,87 @@
         <canvas id="gameCanvas"></canvas>
         
         <div id="ui">
+            <!-- Login Screen -->
+            <div id="loginScreen">
+                <div class="login-container">
+                    <div class="game-logo">
+                        <div class="game-logo-banner">
+                            <div class="game-logo-text">
+                                <span>Fantasy</span>
+                                <div class="logo-gem"></div>
+                                <span>3D</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="login-input-group">
+                        <input type="text" id="usernameInput" class="login-input" placeholder="USERNAME" autocomplete="username">
+                    </div>
+                    
+                    <div class="login-input-group">
+                        <input type="password" id="passwordInput" class="login-input" placeholder="PASSWORD" autocomplete="current-password">
+                    </div>
+                    
+                    <label class="remember-checkbox">
+                        <input type="checkbox" id="rememberCheckbox">
+                        <span>Remember my account info</span>
+                    </label>
+                    
+                    <button class="login-button" id="loginButton">LOGIN</button>
+                </div>
+                
+                <div class="login-footer">
+                    <a href="#" class="footer-link" id="forgotPasswordLink">Forgot your Password?</a>
+                    <a href="#" class="footer-link" id="needHelpLink">Need Help?</a>
+                    <a href="#" class="footer-link create-account" id="createAccountLink">Create Account</a>
+                </div>
+            </div>
+
+            <!-- Account Creation Screen -->
+            <div id="createAccountScreen" class="hidden">
+                <div class="create-account-container">
+                    <div class="game-logo">
+                        <div class="game-logo-banner">
+                            <div class="game-logo-text">
+                                <span>Create</span>
+                                <div class="logo-gem"></div>
+                                <span>Account</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="login-input-group">
+                        <input type="text" id="registerUsernameInput" class="login-input" placeholder="USERNAME" autocomplete="username">
+                    </div>
+                    
+                    <div class="login-input-group">
+                        <input type="email" id="registerEmailInput" class="login-input" placeholder="EMAIL (OPTIONAL)" autocomplete="email">
+                    </div>
+                    
+                    <div class="login-input-group">
+                        <input type="password" id="registerPasswordInput" class="login-input" placeholder="PASSWORD" autocomplete="new-password">
+                        <div id="passwordStrength" class="password-strength"></div>
+                    </div>
+                    
+                    <div class="login-input-group">
+                        <input type="password" id="registerConfirmPasswordInput" class="login-input" placeholder="CONFIRM PASSWORD" autocomplete="new-password">
+                    </div>
+                    
+                    <div class="error-message" id="registerErrorMessage"></div>
+                    <div class="success-message" id="registerSuccessMessage"></div>
+                    
+                    <button class="login-button" id="registerButton">
+                        <span id="registerButtonText">CREATE ACCOUNT</span>
+                        <span id="registerButtonSpinner" class="loading-spinner" style="display: none;"></span>
+                    </button>
+                    
+                    <a href="#" class="footer-link" id="backToLoginLink" style="margin-top: 10px;">← Back to Login</a>
+                </div>
+            </div>
+
             <!-- Main Menu -->
-            <div id="mainMenu">
-                <h1>Fantasy Game</h1>
+            <div id="mainMenu" class="hidden">
+                <h1>Fantasy3D</h1>
                 <button class="menu-button" id="startButton">Start Game</button>
                 <button class="menu-button" id="characterSelectButton">Character Selection</button>
                 <button class="menu-button" id="createCharacterButton">Create Character</button>

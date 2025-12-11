@@ -6,7 +6,7 @@ import { Controls } from './controls.js';
 import { UI } from './ui.js';
 import { Minimap } from './minimap.js';
 
-class FantasyGame {
+class Fantasy3D {
     constructor() {
         this.scene = null;
         this.camera = null;
@@ -47,7 +47,7 @@ class FantasyGame {
 
         // Initialize UI
         this.ui = new UI(this);
-        this.ui.showMainMenu();
+        this.ui.showLoginScreen();
 
         // Initialize world (but don't show until game starts)
         this.world = new World(this.scene);
@@ -415,6 +415,6 @@ class FantasyGame {
 
 // Start game when page loads
 window.addEventListener('DOMContentLoaded', () => {
-    window.game = new FantasyGame();
+        window.game = new Fantasy3D();
 });
 
