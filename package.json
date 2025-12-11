@@ -1,6 +1,7 @@
 {
   "name": "fantasy3d",
   "version": "1.0.0",
+  "type": "module",
   "description": "Fantasy3D - A 3D fantasy game built with Three.js",
   "main": "index.html",
   "scripts": {

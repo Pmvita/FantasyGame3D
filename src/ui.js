@@ -813,17 +813,17 @@ export class UI {
         const token = getToken();
         if (!token) {
             // Fallback to LocalStorage for unauthenticated users
-            try {
+        try {
                 const saved = localStorage.getItem('fantasy3DCharacters');
-                if (!saved) {
-                    return [];
-                }
-                return JSON.parse(saved);
-            } catch (error) {
-                console.error('Error loading characters from localStorage:', error);
+            if (!saved) {
                 return [];
             }
+            return JSON.parse(saved);
+        } catch (error) {
+            console.error('Error loading characters from localStorage:', error);
+            return [];
         }
+    }
 
         // Fetch from API
         try {
@@ -883,7 +883,7 @@ export class UI {
             if (token) {
                 // Save to API
                 await charactersAPI.createCharacter(characterData);
-                this.showMainMenu();
+        this.showMainMenu();
                 alert('Character saved to your account!');
             } else {
                 // Fallback to LocalStorage
@@ -960,13 +960,13 @@ export class UI {
                 }
             } else {
                 // Fallback to LocalStorage
-                characters.splice(characterIndex, 1);
-                try {
+            characters.splice(characterIndex, 1);
+            try {
                     localStorage.setItem('fantasy3DCharacters', JSON.stringify(characters));
-                } catch (storageError) {
-                    console.error('Failed to save characters to localStorage:', storageError);
-                    alert('Error: Failed to save changes. Please check your browser storage settings.');
-                    return false;
+            } catch (storageError) {
+                console.error('Failed to save characters to localStorage:', storageError);
+                alert('Error: Failed to save changes. Please check your browser storage settings.');
+                return false;
                 }
             }
             

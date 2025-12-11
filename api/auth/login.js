@@ -1,12 +1,12 @@
 // User login endpoint
 // Following node-express.mdc and nodejs-mongodb-jwt rules
 
-import { getCollection } from '../utils/mongodb.js';
-import { generateToken } from '../utils/jwt.js';
-import { validateUsername, validatePassword } from '../utils/validation.js';
-import { ValidationError, AuthenticationError, DatabaseError } from '../utils/errors.js';
-import { asyncHandler, errorHandler } from '../middleware/errorHandler.js';
-import { corsMiddleware } from '../middleware/cors.js';
+import { getCollection } from '../../lib/utils/mongodb.js';
+import { generateToken } from '../../lib/utils/jwt.js';
+import { validateUsername, validatePassword } from '../../lib/utils/validation.js';
+import { ValidationError, AuthenticationError, DatabaseError } from '../../lib/utils/errors.js';
+import { asyncHandler, errorHandler } from '../../lib/middleware/errorHandler.js';
+import { corsMiddleware } from '../../lib/middleware/cors.js';
 import bcrypt from 'bcryptjs';
 
 async function loginHandler(req, res) {

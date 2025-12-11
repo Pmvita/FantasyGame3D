@@ -1,10 +1,10 @@
 // JWT token verification endpoint
 // Following node-express.mdc authentication best practices
 
-import { verifyToken, extractTokenFromHeader } from '../utils/jwt.js';
-import { AuthenticationError } from '../utils/errors.js';
-import { asyncHandler, errorHandler } from '../middleware/errorHandler.js';
-import { corsMiddleware } from '../middleware/cors.js';
+import { verifyToken, extractTokenFromHeader } from '../../lib/utils/jwt.js';
+import { AuthenticationError } from '../../lib/utils/errors.js';
+import { asyncHandler, errorHandler } from '../../lib/middleware/errorHandler.js';
+import { corsMiddleware } from '../../lib/middleware/cors.js';
 
 async function verifyHandler(req, res) {
   // Only allow GET method

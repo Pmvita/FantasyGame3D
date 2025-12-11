@@ -1,12 +1,12 @@
 // Update character endpoint
 // Following node-express.mdc and RESTful API best practices
 
-import { getCollection } from '../utils/mongodb.js';
+import { getCollection } from '../../lib/utils/mongodb.js';
 import { ObjectId } from 'mongodb';
-import { validateCharacterData } from '../utils/validation.js';
-import { ValidationError, NotFoundError, DatabaseError } from '../utils/errors.js';
-import { asyncHandler, errorHandler } from '../middleware/errorHandler.js';
-import { corsMiddleware } from '../middleware/cors.js';
+import { validateCharacterData } from '../../lib/utils/validation.js';
+import { ValidationError, NotFoundError, DatabaseError } from '../../lib/utils/errors.js';
+import { asyncHandler, errorHandler } from '../../lib/middleware/errorHandler.js';
+import { corsMiddleware } from '../../lib/middleware/cors.js';
 
 async function updateCharacterHandler(req, res) {
   try {
@@ -29,7 +29,7 @@ async function updateCharacterHandler(req, res) {
       });
     }
 
-    const { verifyToken, extractTokenFromHeader } = await import('../utils/jwt.js');
+    const { verifyToken, extractTokenFromHeader } = await import('../../lib/utils/jwt.js');
     const token = extractTokenFromHeader(authHeader);
     const decoded = verifyToken(token);
 
