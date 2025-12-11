@@ -4,7 +4,7 @@ import { InventorySystem } from './inventory/inventory.js';
 import { SkillsSystem } from './skills/skills.js';
 import * as authAPI from './api/auth.js';
 import * as charactersAPI from './api/characters.js';
-import { getToken } from './api/client.js';
+import { getToken, removeToken } from './api/client.js';
 
 export class UI {
     constructor(game) {
@@ -63,6 +63,11 @@ export class UI {
 
         document.getElementById('createCharacterButton').addEventListener('click', () => {
             this.showCharacterCreation();
+        });
+
+        // Logout button
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            this.handleLogout();
         });
 
         // Character selection
@@ -523,6 +528,51 @@ export class UI {
         const mainMenu = document.getElementById('mainMenu');
         mainMenu.classList.remove('hidden');
         mainMenu.style.display = 'flex';
+        
+        // Update username display
+        this.updateMainMenuUsername();
+    }
+
+    updateMainMenuUsername() {
+        const usernameElement = document.getElementById('mainMenuUsername');
+        if (usernameElement) {
+            // Try to get username from localStorage first
+            const savedUsername = localStorage.getItem('fantasy3DUsername');
+            if (savedUsername) {
+                usernameElement.textContent = savedUsername;
+            } else {
+                // Try to decode token to get username
+                try {
+                    const token = getToken();
+                    if (token) {
+                        const payload = JSON.parse(atob(token.split('.')[1]));
+                        if (payload.username) {
+                            usernameElement.textContent = payload.username;
+                        }
+                    }
+                } catch (e) {
+                    // If token decode fails, use default
+                    usernameElement.textContent = 'Adventurer';
+                }
+            }
+        }
+    }
+
+    handleLogout() {
+        // Clear authentication data
+        removeToken();
+        localStorage.removeItem('fantasy3DUsername');
+        
+        // Hide main menu and show login screen
+        this.hideAllMenus();
+        this.showLoginScreen();
+        
+        // Clear any error messages
+        const errorMessage = document.getElementById('errorMessage');
+        if (errorMessage) {
+            errorMessage.textContent = '';
+            errorMessage.style.display = 'none';
+        }
     }
 
     async showCharacterSelection() {
