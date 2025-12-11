@@ -57,10 +57,11 @@ async function loginHandler(req, res) {
       { $set: { lastLogin: new Date() } }
     );
 
-    // Generate JWT token
+    // Generate JWT token (include role if present)
     const token = generateToken({
       userId: user._id.toString(),
       username: user.username,
+      role: user.role || 'user', // Include role in token
     });
 
     // Return success response
@@ -72,6 +73,7 @@ async function loginHandler(req, res) {
         user: {
           id: user._id.toString(),
           username: user.username,
+          role: user.role || 'user', // Include role in response
         },
       },
     });

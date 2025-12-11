@@ -81,10 +81,11 @@ async function registerHandler(req, res) {
       throw new DatabaseError('Failed to create user');
     }
 
-    // Generate JWT token
+    // Generate JWT token (new users default to 'user' role)
     const token = generateToken({
       userId: result.insertedId.toString(),
       username: userDoc.username,
+      role: 'user', // New users default to 'user' role
     });
 
     // Return success response

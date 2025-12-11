@@ -61,8 +61,9 @@ async function apiRequest(endpoint, options = {}) {
   try {
     const response = await fetch(url, config);
 
-    // Parse JSON response
-    const data = await response.json();
+    // Check if response is JSON
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType && contentType.includes('application/json');
 
     // Handle non-2xx status codes
     if (!response.ok) {
@@ -75,15 +76,33 @@ async function apiRequest(endpoint, options = {}) {
         }
       }
 
-      throw new Error(data.message || `API error: ${response.status}`);
+      // Try to parse JSON error response
+      if (isJson) {
+        try {
+          const data = await response.json();
+          throw new Error(data.message || `API error: ${response.status}`);
+        } catch (parseError) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+      } else {
+        // Non-JSON error response (e.g., 404 HTML page)
+        throw new Error(`API endpoint not found (${response.status}). Make sure the server is running.`);
+      }
     }
 
+    // Parse JSON response
+    if (!isJson) {
+      throw new Error('Expected JSON response but received non-JSON content');
+    }
+
+    const data = await response.json();
     return data;
   } catch (error) {
     // Handle network errors
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('Network error. Please check your connection.');
+      throw new Error('Network error. Please check your connection and ensure the server is running.');
     }
+    // Re-throw other errors
     throw error;
   }
 }
