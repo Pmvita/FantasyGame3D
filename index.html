@@ -630,43 +630,93 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(20, 20, 35, 0.98) 100%);
-            padding: 40px;
-            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
+            padding: 0;
+            border: 3px solid rgba(255, 215, 0, 0.6);
+            border-radius: 15px;
             min-width: 600px;
             max-width: 1000px;
             width: 773px;
             height: 700px;
-            overflow-y: auto;
+            overflow: hidden;
             display: none;
             flex-direction: column;
-            gap: 20px;
             font-family: "Shadows Into Light", cursive;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 
-                        0 0 0 1px rgba(255, 255, 255, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 0 40px rgba(139, 92, 246, 0.6),
+                inset 0 0 30px rgba(255, 215, 0, 0.1),
+                0 0 80px rgba(74, 144, 226, 0.4);
             backdrop-filter: blur(10px);
             z-index: 150;
+            position: relative;
         }
 
-        #characterSelection.hidden {
-            display: none;
+        #characterSelection::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(74, 144, 226, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        #characterSelection h2 {
-            color: #fff;
-            margin-bottom: 30px;
-            font-size: 2.2em;
+        #characterSelection::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                rgba(139, 92, 246, 0.8) 0%, 
+                rgba(74, 144, 226, 0.8) 25%,
+                rgba(139, 92, 246, 0.8) 50%,
+                rgba(74, 144, 226, 0.8) 75%,
+                rgba(139, 92, 246, 0.8) 100%);
+            background-size: 400% 400%;
+            animation: borderGlow 3s ease infinite;
+            border-radius: 15px;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        #characterSelection.hidden,
+        #characterCreation.hidden {
+            display: none !important;
+        }
+
+        .character-selection-header {
+            padding: 30px 40px 20px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.2) 0%, transparent 100%);
+            position: relative;
+            z-index: 1;
+        }
+
+        .character-selection-title {
             text-align: center;
-            text-shadow: 0 2px 10px rgba(74, 144, 226, 0.3);
-            letter-spacing: 1px;
+            margin: 0 0 15px 0;
+            font-size: 42px;
+            font-weight: bold;
+            font-family: "Shadows Into Light", cursive;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 1) 0%, rgba(139, 92, 246, 1) 50%, rgba(74, 144, 226, 1) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            letter-spacing: 3px;
         }
 
         #characterSelectionHeader {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            gap: 20px;
         }
 
         #characterSelectionHeader h2 {
@@ -674,12 +724,40 @@
             flex: 1;
         }
 
+        .character-selection-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .character-selection-footer {
+            padding: 20px 40px;
+            border-top: 2px solid rgba(255, 215, 0, 0.3);
+            background: linear-gradient(180deg, transparent 0%, rgba(74, 144, 226, 0.2) 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
         .create-new-button {
             padding: 12px 24px;
-            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(74, 144, 226, 0.9) 100%);
             color: white;
-            border: none;
-            border-radius: 8px;
+            border: 2px solid rgba(255, 215, 0, 0.6);
+            border-radius: 5px;
+            font-family: "Shadows Into Light", cursive;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+            font-size: 14px;
             font-size: 1em;
             font-weight: 600;
             cursor: pointer;
@@ -688,9 +766,14 @@
         }
 
         .create-new-button:hover {
-            background: linear-gradient(135deg, #5aa0f2 0%, #458acd 100%);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(74, 144, 226, 1) 100%);
+            border-color: rgba(255, 215, 0, 1);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.7);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .create-new-button:active {
+            transform: translateY(0);
         }
 
         #characterList {
@@ -702,15 +785,15 @@
         }
 
         .character-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.6) 0%, rgba(20, 20, 35, 0.6) 100%);
             padding: 20px;
-            border-radius: 15px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
             position: relative;
             overflow: visible;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(139, 92, 246, 0.2);
             height: 222px;
         }
 
@@ -721,17 +804,18 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #4a90e2, #8b5cf6, #4a90e2);
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.8), rgba(74, 144, 226, 0.8), rgba(139, 92, 246, 0.8));
             background-size: 200% 100%;
             opacity: 0;
             transition: opacity 0.3s;
+            border-radius: 10px 10px 0 0;
         }
 
         .character-card:hover {
-            background: linear-gradient(135deg, rgba(74, 144, 226, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
-            border-color: rgba(74, 144, 226, 0.5);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(74, 144, 226, 0.15) 100%);
+            border-color: rgba(255, 215, 0, 0.8);
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.4);
         }
 
         .character-card:hover::before {
@@ -887,48 +971,51 @@
 
         #backFromSelectionButton {
             width: 100%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        #backFromSelectionButton:hover {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
-            border-color: rgba(255, 255, 255, 0.3);
         }
 
         /* Custom Scrollbar */
-        #characterSelection::-webkit-scrollbar {
+        .character-selection-content::-webkit-scrollbar,
+        #characterCreationContent::-webkit-scrollbar {
             width: 10px;
         }
 
-        #characterSelection::-webkit-scrollbar-track {
+        .character-selection-content::-webkit-scrollbar-track,
+        #characterCreationContent::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
         }
 
-        #characterSelection::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #4a90e2, #8b5cf6);
+        .character-selection-content::-webkit-scrollbar-thumb,
+        #characterCreationContent::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(74, 144, 226, 0.8));
             border-radius: 10px;
         }
 
-        #characterSelection::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #5aa0f2, #9b6cf6);
+        .character-selection-content::-webkit-scrollbar-thumb:hover,
+        #characterCreationContent::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(74, 144, 226, 1));
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
             #characterSelection {
                 min-width: 90vw;
-                padding: 25px;
+                width: 90vw;
+            }
+
+            .character-selection-header,
+            .character-selection-content,
+            .character-selection-footer {
+                padding: 20px;
+            }
+
+            .character-selection-title {
+                font-size: 32px;
             }
 
             #characterSelectionHeader {
                 flex-direction: column;
                 gap: 15px;
-            }
-
-            #characterSelectionHeader h2 {
-                font-size: 1.8em;
             }
 
             .create-new-button {
@@ -973,36 +1060,89 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(20, 20, 35, 0.98) 100%);
-            padding: 40px;
-            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
+            padding: 0;
+            border: 3px solid rgba(255, 215, 0, 0.6);
+            border-radius: 15px;
             width: 95vw;
             max-width: 1600px;
             min-width: 1000px;
             max-height: 90vh;
-            overflow-y: auto;
+            overflow: hidden;
             display: none;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 
-                        0 0 0 1px rgba(255, 255, 255, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            flex-direction: column;
+            box-shadow: 
+                0 0 40px rgba(139, 92, 246, 0.6),
+                inset 0 0 30px rgba(255, 215, 0, 0.1),
+                0 0 80px rgba(74, 144, 226, 0.4);
             backdrop-filter: blur(10px);
             z-index: 150;
+            position: relative;
         }
 
-        #characterCreation h2 {
-            color: #fff;
-            margin-bottom: 30px;
-            font-size: 2.2em;
+        #characterCreation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(74, 144, 226, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #characterCreation::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                rgba(139, 92, 246, 0.8) 0%, 
+                rgba(74, 144, 226, 0.8) 25%,
+                rgba(139, 92, 246, 0.8) 50%,
+                rgba(74, 144, 226, 0.8) 75%,
+                rgba(139, 92, 246, 0.8) 100%);
+            background-size: 400% 400%;
+            animation: borderGlow 3s ease infinite;
+            border-radius: 15px;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .character-creation-header {
+            padding: 30px 40px 20px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.2) 0%, transparent 100%);
+            position: relative;
+            z-index: 1;
+        }
+
+        .character-creation-title {
             text-align: center;
-            text-shadow: 0 2px 10px rgba(74, 144, 226, 0.3);
-            letter-spacing: 1px;
+            margin: 0;
+            font-size: 42px;
+            font-weight: bold;
+            font-family: "Shadows Into Light", cursive;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 1) 0%, rgba(139, 92, 246, 1) 50%, rgba(74, 144, 226, 1) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            letter-spacing: 3px;
         }
 
-        #characterCreationContent {
-            display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 30px;
-            align-items: stretch;
+
+        .character-creation-footer {
+            padding: 20px 40px;
+            border-top: 2px solid rgba(255, 215, 0, 0.3);
+            background: linear-gradient(180deg, transparent 0%, rgba(74, 144, 226, 0.2) 100%);
+            position: relative;
+            z-index: 1;
         }
 
         #characterCreationContent > div:first-child {
@@ -1276,56 +1416,79 @@
         .creation-actions button {
             flex: 1;
             padding: 15px 25px;
-            border-radius: 10px;
+            border-radius: 5px;
             font-size: 1.1em;
-            font-weight: 600;
+            font-weight: bold;
+            font-family: "Shadows Into Light", cursive;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid;
+            position: relative;
+            overflow: hidden;
             cursor: pointer;
             transition: all 0.3s;
             border: none;
         }
 
         #saveCharacterButton {
-            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(74, 144, 226, 0.9) 100%);
             color: white;
-            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+            border-color: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        #saveCharacterButton::before,
+        #saveCharacterButton::after {
+            content: '▶';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 215, 0, 0.9);
+            font-size: 14px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
+        #saveCharacterButton::before {
+            left: 15px;
+        }
+
+        #saveCharacterButton::after {
+            right: 15px;
+            transform: translateY(-50%) scaleX(-1);
         }
 
         #saveCharacterButton:hover {
-            background: linear-gradient(135deg, #5aa0f2 0%, #458acd 100%);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(74, 144, 226, 1) 100%);
+            border-color: rgba(255, 215, 0, 1);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        #saveCharacterButton:active {
+            transform: translateY(0);
         }
 
         #cancelCreationButton {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.8) 0%, rgba(185, 28, 28, 0.8) 100%);
             color: white;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
         }
 
         #cancelCreationButton:hover {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
-            border-color: rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(220, 38, 38, 1) 0%, rgba(185, 28, 28, 1) 100%);
+            border-color: rgba(255, 215, 0, 1);
+            box-shadow: 0 0 25px rgba(220, 38, 38, 0.7);
             transform: translateY(-2px);
         }
 
+        #cancelCreationButton:active {
+            transform: translateY(0);
+        }
+
         /* Custom Scrollbar for Character Creation */
-        #characterCreation::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        #characterCreation::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-        }
-
-        #characterCreation::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #4a90e2, #8b5cf6);
-            border-radius: 10px;
-        }
-
-        #characterCreation::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #5aa0f2, #9b6cf6);
-        }
 
         /* Responsive Design for Character Creation */
         @media (max-width: 1400px) {
@@ -1361,7 +1524,17 @@
         @media (max-width: 768px) {
             #characterCreation {
                 width: 95vw;
-                padding: 25px;
+                min-width: 95vw;
+            }
+
+            .character-creation-header,
+            .character-creation-footer,
+            #characterCreationContent {
+                padding: 20px;
+            }
+
+            .character-creation-title {
+                font-size: 32px;
             }
 
             .race-selection {
@@ -2142,17 +2315,45 @@
 
             <!-- Character Selection -->
             <div id="characterSelection" class="hidden">
-                <div id="characterSelectionHeader">
-                    <h2>Select Character</h2>
-                    <button class="create-new-button" id="createNewFromSelectionButton">+ Create New</button>
+                <!-- Decorative corners -->
+                <div class="menu-corner-decoration top-left"></div>
+                <div class="menu-corner-decoration top-right"></div>
+                <div class="menu-corner-decoration bottom-left"></div>
+                <div class="menu-corner-decoration bottom-right"></div>
+                
+                <!-- Header -->
+                <div class="character-selection-header">
+                    <h2 class="character-selection-title">Character Selection</h2>
+                    <div id="characterSelectionHeader">
+                        <button class="create-new-button" id="createNewFromSelectionButton">+ Create New</button>
+                    </div>
                 </div>
-                <div id="characterList"></div>
-                <button class="menu-button" id="backFromSelectionButton">← Back to Menu</button>
+                
+                <!-- Content -->
+                <div class="character-selection-content">
+                    <div id="characterList"></div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="character-selection-footer">
+                    <button class="menu-button" id="backFromSelectionButton">← Back to Menu</button>
+                </div>
             </div>
 
             <!-- Character Creation -->
-            <div id="characterCreation">
-                <h2>Create Character</h2>
+            <div id="characterCreation" class="hidden">
+                <!-- Decorative corners -->
+                <div class="menu-corner-decoration top-left"></div>
+                <div class="menu-corner-decoration top-right"></div>
+                <div class="menu-corner-decoration bottom-left"></div>
+                <div class="menu-corner-decoration bottom-right"></div>
+                
+                <!-- Header -->
+                <div class="character-creation-header">
+                    <h2 class="character-creation-title">Create Character</h2>
+                </div>
+                
+                <!-- Content -->
                 <div id="characterCreationContent">
                     <div>
                         <!-- Race Selection -->
@@ -2227,16 +2428,20 @@
                                 <input type="range" id="speedStat" min="0" max="100" value="10">
                             </div>
                         </div>
-                        <div class="creation-actions">
-                            <button id="saveCharacterButton"><i class="fas fa-save"></i> Save Character</button>
-                            <button id="cancelCreationButton"><i class="fas fa-times"></i> Cancel</button>
-                        </div>
                     </div>
 
                     <!-- 3D Preview -->
                     <div id="characterPreviewContainer">
                         <h3><i class="fas fa-cube"></i> Character Preview</h3>
                         <canvas id="characterPreviewCanvas"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="character-creation-footer">
+                    <div class="creation-actions">
+                        <button id="saveCharacterButton"><i class="fas fa-save"></i> Save Character</button>
+                        <button id="cancelCreationButton"><i class="fas fa-times"></i> Cancel</button>
                     </div>
                 </div>
             </div>

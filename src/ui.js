@@ -577,13 +577,17 @@ export class UI {
 
     async showCharacterSelection() {
         this.hideAllMenus();
-        document.getElementById('characterSelection').style.display = 'flex';
+        const characterSelection = document.getElementById('characterSelection');
+        characterSelection.classList.remove('hidden');
+        characterSelection.style.display = 'flex';
         await this.loadCharacterList();
     }
 
     showCharacterCreation() {
         this.hideAllMenus();
-        document.getElementById('characterCreation').style.display = 'block';
+        const characterCreation = document.getElementById('characterCreation');
+        characterCreation.classList.remove('hidden');
+        characterCreation.style.display = 'flex';
         
         // Initialize preview if not already created
         if (!this.characterPreview) {
@@ -695,8 +699,16 @@ export class UI {
             mainMenu.style.display = 'none';
             mainMenu.classList.add('hidden');
         }
-        document.getElementById('characterSelection').style.display = 'none';
-        document.getElementById('characterCreation').style.display = 'none';
+        const characterSelection = document.getElementById('characterSelection');
+        if (characterSelection) {
+            characterSelection.style.display = 'none';
+            characterSelection.classList.add('hidden');
+        }
+        const characterCreation = document.getElementById('characterCreation');
+        if (characterCreation) {
+            characterCreation.style.display = 'none';
+            characterCreation.classList.add('hidden');
+        }
         document.getElementById('hud').style.display = 'none';
         document.getElementById('settingsButton').style.display = 'none';
         document.getElementById('settingsMenu').style.display = 'none';
