@@ -89,6 +89,7 @@ async function updateCharacterHandler(req, res) {
       const updateDoc = {
         name: characterData.name.trim(),
         race: characterData.race,
+        gender: characterData.gender || existingCharacter.gender || 'male',
         appearance: characterData.appearance || existingCharacter.appearance,
         stats: characterData.stats,
         equipment: characterData.equipment || existingCharacter.equipment,
@@ -121,6 +122,7 @@ async function updateCharacterHandler(req, res) {
               id: updatedCharacter._id.toString(),
               name: updatedCharacter.name,
               race: updatedCharacter.race,
+              gender: updatedCharacter.gender || 'male',
               appearance: updatedCharacter.appearance,
               stats: updatedCharacter.stats,
               equipment: updatedCharacter.equipment,

@@ -67,6 +67,7 @@ async function createCharacterHandler(req, res) {
         userId: new ObjectId(userId),
         name: characterData.name.trim(),
         race: characterData.race,
+        gender: characterData.gender || 'male',
         appearance: characterData.appearance || {},
         stats: characterData.stats,
         equipment: characterData.equipment || {
@@ -94,6 +95,7 @@ async function createCharacterHandler(req, res) {
             id: result.insertedId.toString(),
             name: characterDoc.name,
             race: characterDoc.race,
+            gender: characterDoc.gender,
             appearance: characterDoc.appearance,
             stats: characterDoc.stats,
             equipment: characterDoc.equipment,

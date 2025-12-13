@@ -11,6 +11,7 @@ export class UI {
         this.game = game;
         this.characterPreview = null;
         this.selectedRace = 'human';
+        this.selectedGender = 'male'; // 'male' or 'female'
         this.inventorySystem = null;
         this.skillsSystem = null;
         this.skillCooldowns = {}; // Track cooldowns for each skill slot
@@ -107,6 +108,48 @@ export class UI {
                 
                 await this.updatePreview();
             });
+        });
+
+        // Gender selection
+        document.querySelectorAll('.gender-button').forEach(button => {
+            button.addEventListener('click', async () => {
+                // Remove selected class from all
+                document.querySelectorAll('.gender-button').forEach(b => b.classList.remove('selected'));
+                // Add to clicked
+                button.classList.add('selected');
+                this.selectedGender = button.dataset.gender;
+                
+                console.log(`Gender selected: ${this.selectedGender}`);
+                await this.updatePreview();
+            });
+        });
+
+        // Customization slider controls
+        this.setupSliderControls('hairStyle', 'hairStylePrev', 'hairStyleNext', 'hairStyleValue');
+        this.setupSliderControls('faceType', 'faceTypePrev', 'faceTypeNext', 'faceTypeValue');
+        this.setupSliderControls('facialFeatures', 'facialFeaturesPrev', 'facialFeaturesNext', 'facialFeaturesValue');
+
+        // Customization sliders
+        ['hairStyle', 'faceType', 'facialFeatures', 'skinTone', 'bodyShape'].forEach(id => {
+            const slider = document.getElementById(id);
+            if (slider) {
+                slider.addEventListener('input', () => {
+                    const valueDisplay = document.getElementById(id + 'Value');
+                    if (valueDisplay) {
+                        if (id === 'skinTone' || id === 'bodyShape') {
+                            valueDisplay.textContent = parseFloat(slider.value).toFixed(1);
+                        } else {
+                            valueDisplay.textContent = parseInt(slider.value) + 1;
+                        }
+                    }
+                    this.updatePreview();
+                });
+            }
+        });
+
+        // Hair color change
+        document.getElementById('hairColor').addEventListener('input', () => {
+            this.updatePreview();
         });
 
         // Character creation
@@ -501,7 +544,8 @@ export class UI {
                     await charactersAPI.createCharacter({
                         name: char.name,
                         race: char.race,
-                        appearance: char.appearance,
+                        gender: char.gender || 'male', // Default to 'male' for backward compatibility
+                        appearance: char.appearance || {},
                         stats: char.stats,
                         equipment: char.equipment || { weapon: null, armor: null, helmet: null },
                     });
@@ -599,22 +643,65 @@ export class UI {
         document.querySelectorAll('.race-button').forEach(b => b.classList.remove('selected'));
         document.querySelector('[data-race="human"]').classList.add('selected');
         
+        // Set default gender selection
+        this.selectedGender = 'male';
+        document.querySelectorAll('.gender-button').forEach(b => b.classList.remove('selected'));
+        document.getElementById('genderMale').classList.add('selected');
+        
         // Reset form to defaults
         document.getElementById('characterName').value = '';
         document.getElementById('hairColor').value = '#8B4513';
+        document.getElementById('hairStyle').value = 0;
+        document.getElementById('hairStyleValue').textContent = '1';
+        document.getElementById('faceType').value = 0;
+        document.getElementById('faceTypeValue').textContent = '1';
+        document.getElementById('facialFeatures').value = 0;
+        document.getElementById('facialFeaturesValue').textContent = '1';
         document.getElementById('skinTone').value = 0.5;
         document.getElementById('skinToneValue').textContent = '0.5';
-        document.getElementById('healthStat').value = 50;
-        document.getElementById('healthValue').textContent = '50';
-        document.getElementById('strengthStat').value = 10;
-        document.getElementById('strengthValue').textContent = '10';
-        document.getElementById('magicStat').value = 10;
-        document.getElementById('magicValue').textContent = '10';
-        document.getElementById('speedStat').value = 10;
-        document.getElementById('speedValue').textContent = '10';
+        document.getElementById('bodyShape').value = 0.5;
+        document.getElementById('bodyShapeValue').textContent = '0.5';
+        
+        // Apply race-specific default stats
+        const raceStats = this.getRaceDefaultStats(this.selectedRace);
+        document.getElementById('healthStat').value = raceStats.health;
+        document.getElementById('healthValue').textContent = raceStats.health;
+        document.getElementById('strengthStat').value = raceStats.strength;
+        document.getElementById('strengthValue').textContent = raceStats.strength;
+        document.getElementById('magicStat').value = raceStats.magic;
+        document.getElementById('magicValue').textContent = raceStats.magic;
+        document.getElementById('speedStat').value = raceStats.speed;
+        document.getElementById('speedValue').textContent = raceStats.speed;
         
         // Update preview with initial values
         this.updatePreview();
+    }
+
+    setupSliderControls(sliderId, prevId, nextId, valueId) {
+        const slider = document.getElementById(sliderId);
+        const prevBtn = document.getElementById(prevId);
+        const nextBtn = document.getElementById(nextId);
+        const valueDisplay = document.getElementById(valueId);
+        
+        if (!slider || !prevBtn || !nextBtn || !valueDisplay) return;
+
+        prevBtn.addEventListener('click', () => {
+            const current = parseInt(slider.value);
+            if (current > parseInt(slider.min)) {
+                slider.value = current - 1;
+                valueDisplay.textContent = (current - 1 + 1).toString();
+                slider.dispatchEvent(new Event('input'));
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            const current = parseInt(slider.value);
+            if (current < parseInt(slider.max)) {
+                slider.value = current + 1;
+                valueDisplay.textContent = (current + 1 + 1).toString();
+                slider.dispatchEvent(new Event('input'));
+            }
+        });
     }
 
     async updatePreview() {
@@ -622,8 +709,19 @@ export class UI {
         
         const hairColor = document.getElementById('hairColor').value;
         const skinTone = parseFloat(document.getElementById('skinTone').value);
+        const faceType = parseInt(document.getElementById('faceType').value);
+        const hairStyle = parseInt(document.getElementById('hairStyle').value);
+        const facialFeatures = parseInt(document.getElementById('facialFeatures').value);
         
-        await this.characterPreview.updateCharacter(this.selectedRace, hairColor, skinTone);
+        await this.characterPreview.updateCharacter(
+            this.selectedRace, 
+            this.selectedGender, 
+            hairColor, 
+            skinTone, 
+            faceType, 
+            hairStyle, 
+            facialFeatures
+        );
     }
 
     showHUD() {
@@ -808,6 +906,8 @@ export class UI {
             }[char.race] || '<i class="fas fa-user"></i>';
             
             const raceName = char.race ? char.race.charAt(0).toUpperCase() + char.race.slice(1) : 'Human';
+            const genderIcon = char.gender === 'female' ? '<i class="fas fa-venus"></i>' : '<i class="fas fa-mars"></i>';
+            const genderName = char.gender === 'female' ? 'Female' : 'Male';
             
             card.innerHTML = `
                 <button class="character-delete-button" data-character-index="${index}" aria-label="Delete character">
@@ -817,7 +917,7 @@ export class UI {
                     <div class="character-card-icon">${raceIcon}</div>
                     <div class="character-card-title">
                         <h3>${char.name || 'Unnamed Character'}</h3>
-                        <div class="character-card-race">${raceName}</div>
+                        <div class="character-card-race">${raceName} ${genderIcon} ${genderName}</div>
                     </div>
                 </div>
                 <div class="character-stats">
@@ -914,10 +1014,14 @@ export class UI {
         const characterData = {
             name: document.getElementById('characterName').value || 'Unnamed Character',
             race: this.selectedRace,
+            gender: this.selectedGender,
             appearance: {
                 hairColor: document.getElementById('hairColor').value,
                 skinTone: parseFloat(document.getElementById('skinTone').value),
-                bodyShape: 0.5
+                bodyShape: parseFloat(document.getElementById('bodyShape').value) || 0.5,
+                faceType: parseInt(document.getElementById('faceType').value) || 0,
+                hairStyle: parseInt(document.getElementById('hairStyle').value) || 0,
+                facialFeatures: parseInt(document.getElementById('facialFeatures').value) || 0
             },
             stats: {
                 health: parseInt(document.getElementById('healthStat').value) || raceStats.health,
