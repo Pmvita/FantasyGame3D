@@ -9,7 +9,7 @@ import { get, post, put, del } from './client.js';
  */
 export async function getCharacters() {
   try {
-    const response = await get('/api/characters');
+    const response = await get('/api/characters/get');
 
     if (response.error) {
       throw new Error(response.message || 'Failed to fetch characters');
@@ -79,6 +79,29 @@ export async function deleteCharacter(characterId) {
     return response.data;
   } catch (error) {
     console.error('Error deleting character:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a character by name (finds the character first, then deletes it)
+ * @param {string} characterName - Character name
+ * @returns {Promise<Object>} Deletion confirmation
+ */
+export async function deleteCharacterByName(characterName) {
+  try {
+    // First, get all characters to find the one with matching name
+    const characters = await getCharacters();
+    const character = characters.find(char => char.name === characterName);
+    
+    if (!character) {
+      throw new Error(`Character with name "${characterName}" not found`);
+    }
+
+    // Delete using the found character's ID
+    return await deleteCharacter(character.id || character._id);
+  } catch (error) {
+    console.error('Error deleting character by name:', error);
     throw error;
   }
 }

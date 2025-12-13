@@ -67,13 +67,13 @@ async function apiRequest(endpoint, options = {}) {
 
     // Handle non-2xx status codes
     if (!response.ok) {
-      // If token is invalid, clear it
+      // If token is invalid (401 Unauthorized), clear it and set logged out flag
       if (response.status === 401) {
         removeToken();
-        // Redirect to login if we're not already there
-        if (!window.location.pathname.includes('login')) {
-          window.location.reload();
-        }
+        localStorage.setItem('fantasy3DLoggedOut', 'true');
+        localStorage.removeItem('fantasy3DUsername');
+        // Don't reload - let the UI handle showing login screen
+        // The checkAutoLogin will detect the missing token and show login
       }
 
       // Try to parse JSON error response

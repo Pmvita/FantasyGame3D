@@ -10,8 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap" rel="stylesheet">
-    <!-- Giphy SDK -->
-    <script src="https://unpkg.com/@giphy/js-fetch-api@4.0.0/dist/index.js"></script>
+    <!-- Giphy API Integration - Using direct API calls -->
     <style>
         :root {
             /* Responsive scaling variables */
@@ -155,60 +154,7 @@
             z-index: 1;
         }
 
-        /* Giphy animation containers for ambient effects */
-        .giphy-ambient {
-            position: absolute;
-            pointer-events: none;
-            z-index: 2;
-            opacity: 0.3;
-            filter: blur(1px);
-        }
-
-        .giphy-ambient.top-left {
-            top: 10%;
-            left: 5%;
-            width: 150px;
-            height: 150px;
-        }
-
-        .giphy-ambient.top-right {
-            top: 15%;
-            right: 5%;
-            width: 120px;
-            height: 120px;
-        }
-
-        .giphy-ambient.bottom-left {
-            bottom: 10%;
-            left: 8%;
-            width: 100px;
-            height: 100px;
-        }
-
-        .giphy-ambient.bottom-right {
-            bottom: 15%;
-            right: 8%;
-            width: 130px;
-            height: 130px;
-        }
-
-        /* Giphy loading animation (for button states) */
-        .giphy-loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            z-index: 10;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-
-        .giphy-loading.active {
-            opacity: 1;
-        }
+        /* Giphy utilities reserved for future chat integration */
 
         /* WoW-style login container - clean and focused */
         .login-container {
@@ -880,17 +826,397 @@
         }
 
         /* Character Selection - WoW-style clean layout */
+        /* Character Selection - WoW-style */
         #characterSelection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(10, 10, 20, 0.98) 0%, rgba(5, 5, 15, 0.98) 100%);
+            display: none;
+            flex-direction: column;
+            z-index: 150;
+            overflow: hidden;
+        }
+        
+        /* WoW-style selection top controls */
+        .wow-selection-top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.6);
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .wow-selection-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .wow-create-character-btn {
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 215, 0, 0.6);
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .wow-create-character-btn:hover {
+            background: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        /* Main 3-column layout for selection */
+        .wow-selection-main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 280px;
+            gap: 20px;
+            flex: 1;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        /* Left Panel: Character List */
+        .wow-character-list-panel {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .wow-character-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        /* Character card in WoW style */
+        .wow-character-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+        
+        .wow-character-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .wow-character-card.selected {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .wow-character-card-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .wow-character-card.selected .wow-character-card-icon {
+            color: #FFD700;
+            border-color: #FFD700;
+        }
+        
+        .wow-character-card-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .wow-character-card-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .wow-character-card.selected .wow-character-card-name {
+            color: #FFD700;
+        }
+        
+        .wow-character-card-details {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .wow-character-card-level {
+            font-weight: 600;
+            color: rgba(255, 215, 0, 0.8);
+        }
+        
+        .wow-character-card-delete {
             position: absolute;
-            top: 50%;
+            top: 5px;
+            right: 5px;
+            width: 25px;
+            height: 25px;
+            border: none;
+            background: rgba(204, 0, 0, 0.6);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .wow-character-card:hover .wow-character-card-delete {
+            opacity: 1;
+        }
+        
+        .wow-character-card-delete:hover {
+            background: rgba(204, 0, 0, 0.9);
+        }
+        
+        /* Center Panel: Character Preview */
+        .wow-selection-preview-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(ellipse at center, 
+                        rgba(0, 0, 0, 0.3) 0%, 
+                        rgba(0, 0, 0, 0.6) 70%, 
+                        rgba(0, 0, 0, 0.8) 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            min-height: 600px;
+        }
+        
+        .wow-selection-preview-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
+            gap: 20px;
+        }
+        
+        .wow-placeholder-icon {
+            font-size: 80px;
+            opacity: 0.3;
+        }
+        
+        .wow-placeholder-text {
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .wow-character-info-panel {
+            position: absolute;
+            bottom: 30px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(20, 20, 30, 0.95);
-            padding: 0;
-            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.15);
-            border-radius: clamp(8px, 1vw, 12px);
-            width: clamp(800px, 90vw, 1200px);
-            max-width: 95vw;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 8px;
+            padding: 20px;
+            min-width: 300px;
+            z-index: 5;
+        }
+        
+        .wow-character-info-panel.hidden {
+            display: none;
+        }
+        
+        .wow-character-info-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .wow-character-info-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .wow-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        
+        .wow-info-label {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .wow-info-value {
+            color: #FFD700;
+            font-weight: 600;
+        }
+        
+        .wow-character-info-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .wow-stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .wow-stat-item i {
+            color: #FFD700;
+        }
+        
+        /* Right Panel: Server Info */
+        .wow-server-info-panel {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .wow-server-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .wow-server-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+        }
+        
+        .wow-server-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+        
+        .wow-server-value {
+            color: #FFD700;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .wow-slots-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .wow-slots-used {
+            color: #FFD700;
+        }
+        
+        .wow-slots-separator {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .wow-slots-total {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        /* Selection Footer */
+        .wow-selection-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.6);
+            border-top: 2px solid rgba(255, 215, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .wow-footer-button-danger {
+            border-color: rgba(204, 0, 0, 0.6);
+            background: rgba(204, 0, 0, 0.2);
+            color: #FF6B6B;
+        }
+        
+        .wow-footer-button-danger:hover {
+            background: rgba(204, 0, 0, 0.3);
+            box-shadow: 0 0 15px rgba(204, 0, 0, 0.5);
+        }
+        
+        /* Empty state for character list */
+        .wow-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .wow-empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .wow-empty-state h3 {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+        
+        .wow-empty-state p {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
             height: clamp(550px, 85vh, 750px);
             max-height: 90vh;
             overflow: hidden;
@@ -1468,28 +1794,616 @@
         .character-card:nth-child(5) { animation-delay: 0.25s; }
         .character-card:nth-child(6) { animation-delay: 0.3s; }
 
-        /* Character Creation - WoW-style clean and minimal */
+        /* Character Creation - WoW-style */
         #characterCreation {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(20, 20, 30, 0.95);
-            padding: 0;
-            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.15);
-            border-radius: clamp(8px, 1vw, 12px);
-            width: clamp(320px, 95vw, 1600px);
-            max-width: 95vw;
-            min-width: min(320px, 95vw);
-            height: clamp(500px, 90vh, 900px);
-            max-height: 90vh;
-            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(10, 10, 20, 0.98) 0%, rgba(5, 5, 15, 0.98) 100%);
             display: none;
             flex-direction: column;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
             z-index: 150;
+            overflow: hidden;
+        }
+        
+        /* WoW-style top controls */
+        .wow-creation-top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.6);
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .wow-gender-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .wow-control-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .wow-gender-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .wow-gender-icon {
+            width: 50px;
+            height: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+            color: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .wow-gender-icon:hover {
+            border-color: rgba(255, 215, 0, 0.6);
+            background: rgba(255, 215, 0, 0.1);
+            color: #FFD700;
+        }
+        
+        .wow-gender-icon.selected {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        .wow-character-type {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .wow-type-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .wow-type-button {
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .wow-type-button:hover {
+            border-color: rgba(255, 215, 0, 0.6);
+            background: rgba(255, 215, 0, 0.1);
+            color: #FFD700;
+        }
+        
+        .wow-type-button.selected {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        /* Main 3-column layout */
+        .wow-creation-main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            gap: 20px;
+            flex: 1;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        /* Left Panel: Race Selection */
+        .wow-race-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .wow-faction-section {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid;
+        }
+        
+        .wow-faction-section.alliance-faction {
+            background: linear-gradient(135deg, rgba(0, 112, 221, 0.3) 0%, rgba(0, 112, 221, 0.1) 100%);
+            border-color: rgba(0, 112, 221, 0.6);
+        }
+        
+        .wow-faction-section.horde-faction {
+            background: linear-gradient(135deg, rgba(204, 0, 0, 0.3) 0%, rgba(204, 0, 0, 0.1) 100%);
+            border-color: rgba(204, 0, 0, 0.6);
+        }
+        
+        .wow-faction-header {
+            padding: 12px 15px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            border-bottom: 2px solid;
+        }
+        
+        .wow-faction-section.alliance-faction .wow-faction-header {
+            background: rgba(0, 112, 221, 0.4);
+            color: #70B8FF;
+            border-bottom-color: rgba(0, 112, 221, 0.6);
+        }
+        
+        .wow-faction-section.horde-faction .wow-faction-header {
+            background: rgba(204, 0, 0, 0.4);
+            color: #FF6B6B;
+            border-bottom-color: rgba(204, 0, 0, 0.6);
+        }
+        
+        .wow-race-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+        }
+        
+        .wow-race-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .wow-race-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .wow-race-item.selected {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #FFD700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+        
+        .wow-race-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .wow-race-item.selected .wow-race-icon {
+            color: #FFD700;
+        }
+        
+        .wow-race-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .wow-race-item.selected .wow-race-name {
+            color: #FFD700;
+        }
+        
+        /* Center Panel: Character Preview */
+        .wow-character-preview-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             position: relative;
+            background: radial-gradient(ellipse at center, 
+                        rgba(0, 0, 0, 0.3) 0%, 
+                        rgba(0, 0, 0, 0.6) 70%, 
+                        rgba(0, 0, 0, 0.8) 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            min-height: 600px;
+        }
+        
+        .wow-character-preview-panel #characterPreviewCanvas {
+            width: 100%;
+            height: 100%;
+            min-height: 600px;
+            background: linear-gradient(to bottom, 
+                        rgba(26, 58, 82, 0.9) 0%, 
+                        rgba(45, 90, 61, 0.9) 50%, 
+                        rgba(26, 58, 26, 0.9) 100%);
+            position: relative;
+        }
+        
+        /* WoW-style vignette overlay for character */
+        .wow-character-preview-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center 40%, 
+                        transparent 20%, 
+                        rgba(0, 0, 0, 0.3) 50%, 
+                        rgba(0, 0, 0, 0.7) 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .wow-character-name-input {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            z-index: 5;
+        }
+        
+        .wow-character-name-input input {
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 250px;
+        }
+        
+        .wow-character-name-input input:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        .wow-random-name-btn {
+            width: 45px;
+            height: 45px;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            background: rgba(0, 0, 0, 0.8);
+            color: #FFD700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .wow-random-name-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        /* Right Panel: Class Selection */
+        .wow-class-panel {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .wow-panel-header {
+            padding: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            margin-bottom: 10px;
+        }
+        
+        .wow-class-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .wow-class-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .wow-class-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .wow-class-item.selected {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #FFD700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+        
+        .wow-class-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .wow-class-item.selected .wow-class-icon {
+            color: #FFD700;
+        }
+        
+        .wow-class-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .wow-class-item.selected .wow-class-name {
+            color: #FFD700;
+        }
+        
+        /* Customization Panel */
+        .wow-customization-panel {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            max-height: 60vh;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 20;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        }
+        
+        .wow-customization-panel.hidden {
+            display: none;
+        }
+        
+        .wow-customization-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .wow-custom-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .wow-custom-section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .wow-custom-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .wow-custom-item label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+        }
+        
+        .wow-slider-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .wow-slider-btn {
+            width: 35px;
+            height: 35px;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            background: rgba(0, 0, 0, 0.5);
+            color: #FFD700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .wow-slider-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #FFD700;
+        }
+        
+        .wow-range-slider {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .wow-range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #FFD700;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .wow-range-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #FFD700;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .wow-color-picker {
+            width: 100%;
+            height: 40px;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .wow-customization-footer {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .wow-custom-save-btn,
+        .wow-custom-cancel-btn {
+            padding: 12px 24px;
+            border: 2px solid;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .wow-custom-save-btn {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #FFD700;
+            color: #FFD700;
+        }
+        
+        .wow-custom-save-btn:hover {
+            background: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        .wow-custom-cancel-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .wow-custom-cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Responsive design for smaller screens */
+        @media (max-width: 1200px) {
+            .wow-creation-main-content {
+                grid-template-columns: 220px 1fr 220px;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .wow-creation-main-content {
+                grid-template-columns: 180px 1fr 180px;
+                gap: 15px;
+            }
+            
+            .wow-race-name,
+            .wow-class-name {
+                font-size: 14px;
+            }
+        }
+        
+        /* Bottom Footer Buttons */
+        .wow-creation-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.6);
+            border-top: 2px solid rgba(255, 215, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .wow-footer-button {
+            padding: 14px 28px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .wow-footer-button:hover {
+            border-color: rgba(255, 215, 0, 0.6);
+            background: rgba(255, 215, 0, 0.1);
+            color: #FFD700;
+        }
+        
+        .wow-footer-button-primary {
+            border-color: rgba(255, 215, 0, 0.6);
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+        }
+        
+        .wow-footer-button-primary:hover {
+            background: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
         }
 
         #characterCreation::before {
@@ -2896,11 +3810,6 @@
         <div id="ui">
             <!-- Login Screen -->
             <div id="loginScreen">
-                <!-- Giphy ambient animations -->
-                <div class="giphy-ambient top-left" id="giphyAmbient1"></div>
-                <div class="giphy-ambient top-right" id="giphyAmbient2"></div>
-                <div class="giphy-ambient bottom-left" id="giphyAmbient3"></div>
-                <div class="giphy-ambient bottom-right" id="giphyAmbient4"></div>
                 
                 <div class="login-container">
                     <div class="game-logo">
@@ -3010,233 +3919,368 @@
                 </div>
             </div>
 
-            <!-- Character Selection - WoW-style layout -->
+            <!-- Character Selection - WoW-style -->
             <div id="characterSelection" class="hidden">
-                <!-- Header -->
-                <div class="character-selection-header">
-                    <h2 class="character-selection-title">Character Selection</h2>
-                    <button class="create-new-button" id="createNewFromSelectionButton">+ Create New Character</button>
+                <!-- Top Controls -->
+                <div class="wow-selection-top-controls">
+                    <div class="wow-selection-title">CHARACTER SELECTION</div>
+                    <button class="wow-create-character-btn" id="createNewFromSelectionButton">
+                        <i class="fas fa-plus"></i> Create New Character
+                    </button>
                 </div>
                 
-                <!-- Main Content Area (Preview Left, List Right) -->
-                <div style="display: flex; flex: 1; min-height: 0; overflow: hidden;">
-                    <!-- Character Preview Area (WoW-style left panel) -->
-                    <div class="character-selection-preview">
-                        <div class="character-selection-preview-placeholder" id="characterPreviewPlaceholder">
-                            <i class="fas fa-user-circle"></i>
-                            <p>Select a character to preview</p>
+                <!-- Main Content: 3-Column Layout (similar to character creation) -->
+                <div class="wow-selection-main-content">
+                    <!-- Left Panel: Character List -->
+                    <div class="wow-character-list-panel">
+                        <div class="wow-panel-header">YOUR CHARACTERS</div>
+                        <div id="characterList" class="wow-character-list-container">
+                            <!-- Characters will be dynamically inserted here -->
                         </div>
-                        <!-- Character preview canvas will be inserted here when character is selected -->
-                        <canvas id="characterSelectionPreviewCanvas" style="display: none; max-width: 100%; max-height: 100%; border-radius: clamp(8px, 1vw, 12px); position: relative; z-index: 1;"></canvas>
                     </div>
                     
-                    <!-- Character List (WoW-style right panel) -->
-                    <div class="character-selection-content">
-                        <div id="characterList"></div>
+                    <!-- Center Panel: Character Preview (Large, Centered) -->
+                    <div class="wow-selection-preview-panel">
+                        <div class="wow-selection-preview-placeholder" id="characterPreviewPlaceholder">
+                            <div class="wow-placeholder-icon"><i class="fas fa-user-circle"></i></div>
+                            <div class="wow-placeholder-text">Select a character to preview</div>
+                        </div>
+                        <!-- Character preview canvas -->
+                        <canvas id="characterSelectionPreviewCanvas" style="display: none; width: 100%; height: 100%; min-height: 600px; border-radius: 12px; position: relative; z-index: 1;"></canvas>
+                        
+                        <!-- Character Info Display (shown when character is selected) -->
+                        <div id="wowCharacterInfo" class="wow-character-info-panel hidden">
+                            <div class="wow-character-info-name" id="wowCharacterInfoName"></div>
+                            <div class="wow-character-info-details">
+                                <div class="wow-info-row">
+                                    <span class="wow-info-label">Race:</span>
+                                    <span class="wow-info-value" id="wowCharacterInfoRace"></span>
+                                </div>
+                                <div class="wow-info-row">
+                                    <span class="wow-info-label">Class:</span>
+                                    <span class="wow-info-value" id="wowCharacterInfoClass"></span>
+                                </div>
+                                <div class="wow-info-row">
+                                    <span class="wow-info-label">Level:</span>
+                                    <span class="wow-info-value" id="wowCharacterInfoLevel">1</span>
+                                </div>
+                                <div class="wow-info-stats">
+                                    <div class="wow-stat-item">
+                                        <i class="fas fa-heart"></i>
+                                        <span id="wowCharacterInfoHealth">100/100</span>
+                                    </div>
+                                    <div class="wow-stat-item">
+                                        <i class="fas fa-sword"></i>
+                                        <span id="wowCharacterInfoStrength">10</span>
+                                    </div>
+                                    <div class="wow-stat-item">
+                                        <i class="fas fa-wand-magic-sparkles"></i>
+                                        <span id="wowCharacterInfoMagic">10</span>
+                                    </div>
+                                    <div class="wow-stat-item">
+                                        <i class="fas fa-bolt"></i>
+                                        <span id="wowCharacterInfoSpeed">10</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Footer -->
-                <div class="character-selection-footer">
-                    <button class="menu-button" id="backFromSelectionButton">← Back to Menu</button>
-                    <button class="menu-button primary" id="enterWorldButton" style="display: none;">Enter World</button>
-                </div>
-            </div>
-
-            <!-- Character Creation - WoW-style minimalist -->
-            <div id="characterCreation" class="hidden">
-                <!-- Header -->
-                <div class="character-creation-header">
-                    <h2 class="character-creation-title">Create Character</h2>
-                </div>
-                
-                <!-- Content -->
-                <div id="characterCreationContent">
-                    <div>
-                        <!-- Race Selection -->
-                        <div class="creation-section">
-                            <h3><i class="fas fa-users"></i> Select Race</h3>
-                            <div class="race-selection">
-                                <div class="race-button" data-race="human">
-                                    <h3><i class="fas fa-user"></i> Human</h3>
-                                    <p>Balanced stats, versatile</p>
-                                </div>
-                                <div class="race-button" data-race="elf">
-                                    <h3><i class="fas fa-leaf"></i> Elf</h3>
-                                    <p>High magic, agile</p>
-                                </div>
-                                <div class="race-button" data-race="dwarf">
-                                    <h3><i class="fas fa-hammer"></i> Dwarf</h3>
-                                    <p>High strength, sturdy</p>
-                                </div>
-                                <div class="race-button" data-race="demon">
-                                    <h3><i class="fas fa-fire"></i> Demon</h3>
-                                    <p>High magic & strength</p>
-                                </div>
+                    
+                    <!-- Right Panel: Server/Realm Info (WoW-style) -->
+                    <div class="wow-server-info-panel">
+                        <div class="wow-panel-header">SERVER</div>
+                        <div class="wow-server-info">
+                            <div class="wow-server-item">
+                                <div class="wow-server-label">Realm:</div>
+                                <div class="wow-server-value">Fantasy Realm</div>
                             </div>
-                        </div>
-
-                        <!-- Gender Selection -->
-                        <div class="creation-section">
-                            <h3><i class="fas fa-venus-mars"></i> Select Gender</h3>
-                            <div class="gender-selection">
-                                <button class="gender-button selected" data-gender="male" id="genderMale">
-                                    <i class="fas fa-mars"></i> Male
-                                </button>
-                                <button class="gender-button" data-gender="female" id="genderFemale">
-                                    <i class="fas fa-venus"></i> Female
-                                </button>
+                            <div class="wow-server-item">
+                                <div class="wow-server-label">Type:</div>
+                                <div class="wow-server-value">PvE</div>
                             </div>
-                        </div>
-
-                        <div class="creation-section">
-                            <h3><i class="fas fa-pen"></i> Character Name</h3>
-                            <div style="display: flex; gap: clamp(8px, 1vw, 12px); align-items: flex-end;">
-                                <div style="flex: 1;">
-                                    <label>Enter your character's name:</label>
-                                    <input type="text" id="characterName" placeholder="Enter name" maxlength="20">
-                                </div>
-                                <button type="button" id="randomizeNameButton" class="randomize-button" title="Randomize Name">
-                                    <i class="fas fa-dice"></i> Random
-                                </button>
+                            <div class="wow-server-item">
+                                <div class="wow-server-label">Population:</div>
+                                <div class="wow-server-value">Medium</div>
                             </div>
                         </div>
                         
-                        <!-- Category 1: Face & Hair (WoW-style organization) -->
-                        <div class="creation-section">
-                            <h3><i class="fas fa-user-circle"></i> Face & Hair</h3>
-                            
-                            <label><i class="fas fa-user-circle"></i> Hair Style:</label>
-                            <div class="stat-slider-container">
-                                <div class="stat-slider-header">
-                                    <label>Style <span id="hairStyleValue">1</span></label>
-                                    <div class="slider-controls">
-                                        <button class="slider-btn" id="hairStylePrev"><i class="fas fa-chevron-left"></i></button>
-                                        <button class="slider-btn" id="hairStyleNext"><i class="fas fa-chevron-right"></i></button>
-                                    </div>
-                                </div>
-                                <input type="range" id="hairStyle" min="0" max="9" step="1" value="0">
-                            </div>
-
-                            <label style="margin-top: 15px;"><i class="fas fa-paint-brush"></i> Hair Color:</label>
-                            <input type="color" id="hairColor" value="#8B4513">
-                            
-                            <label style="margin-top: 15px;"><i class="fas fa-eye"></i> Eye Color:</label>
-                            <input type="color" id="eyeColor" value="#4A90E2" title="Select eye color">
-                            
-                            <label style="margin-top: 15px;"><i class="fas fa-smile"></i> Face Type:</label>
-                            <div class="stat-slider-container">
-                                <div class="stat-slider-header">
-                                    <label>Face <span id="faceTypeValue">1</span></label>
-                                    <div class="slider-controls">
-                                        <button class="slider-btn" id="faceTypePrev"><i class="fas fa-chevron-left"></i></button>
-                                        <button class="slider-btn" id="faceTypeNext"><i class="fas fa-chevron-right"></i></button>
-                                    </div>
-                                </div>
-                                <input type="range" id="faceType" min="0" max="9" step="1" value="0">
-                            </div>
-                            
-                            <label style="margin-top: 15px;"><i class="fas fa-mask"></i> Facial Features:</label>
-                            <div class="stat-slider-container">
-                                <div class="stat-slider-header">
-                                    <label>Features <span id="facialFeaturesValue">1</span></label>
-                                    <div class="slider-controls">
-                                        <button class="slider-btn" id="facialFeaturesPrev"><i class="fas fa-chevron-left"></i></button>
-                                        <button class="slider-btn" id="facialFeaturesNext"><i class="fas fa-chevron-right"></i></button>
-                                    </div>
-                                </div>
-                                <input type="range" id="facialFeatures" min="0" max="9" step="1" value="0">
-                            </div>
-                            
-                            <!-- Race-Specific Features (WoW-style) -->
-                            <label style="margin-top: 15px;" id="raceFeaturesLabel" class="race-specific-label" style="display: none;">
-                                <i class="fas fa-star"></i> <span id="raceFeaturesLabelText">Race Features</span>:
-                            </label>
-                            <div class="stat-slider-container race-specific-container" id="raceFeaturesContainer" style="display: none;">
-                                <div class="stat-slider-header">
-                                    <label><span id="raceFeaturesType">Tattoos</span> <span id="raceFeaturesValue">0</span></label>
-                                    <div class="slider-controls">
-                                        <button class="slider-btn" id="raceFeaturesPrev"><i class="fas fa-chevron-left"></i></button>
-                                        <button class="slider-btn" id="raceFeaturesNext"><i class="fas fa-chevron-right"></i></button>
-                                    </div>
-                                </div>
-                                <input type="range" id="raceFeatures" min="0" max="9" step="1" value="0">
-                            </div>
-                        </div>
-
-                        <!-- Category 2: Body & Appearance -->
-                        <div class="creation-section">
-                            <h3><i class="fas fa-user"></i> Body & Appearance</h3>
-                            
-                            <label><i class="fas fa-hand-sparkles"></i> Skin Tone:</label>
-                            <div class="stat-slider-container">
-                                <div class="stat-slider-header">
-                                    <label>Adjust skin tone</label>
-                                    <span class="stat-value-display" id="skinToneValue">0.5</span>
-                                </div>
-                                <input type="range" id="skinTone" min="0" max="1" step="0.1" value="0.5">
-                            </div>
-                            
-                            <label style="margin-top: 15px;"><i class="fas fa-weight"></i> Body Shape:</label>
-                            <div class="stat-slider-container">
-                                <div class="stat-slider-header">
-                                    <label>Body build</label>
-                                    <span class="stat-value-display" id="bodyShapeValue">0.5</span>
-                                </div>
-                                <input type="range" id="bodyShape" min="0" max="1" step="0.1" value="0.5">
-                            </div>
-                        </div>
-                        <div class="creation-section">
-                            <h3><i class="fas fa-swords"></i> Character Stats</h3>
-                            <div class="stat-slider-container">
-                                <div class="stat-slider-header">
-                                    <label><i class="fas fa-heart"></i> Health</label>
-                                    <span class="stat-value-display" id="healthValue">50</span>
-                                </div>
-                                <input type="range" id="healthStat" min="0" max="100" value="50">
-                            </div>
-                            <div class="stat-slider-container">
-                                <div class="stat-slider-header">
-                                    <label><i class="fas fa-sword"></i> Strength</label>
-                                    <span class="stat-value-display" id="strengthValue">10</span>
-                                </div>
-                                <input type="range" id="strengthStat" min="0" max="100" value="10">
-                            </div>
-                            <div class="stat-slider-container">
-                                <div class="stat-slider-header">
-                                    <label><i class="fas fa-wand-magic-sparkles"></i> Magic</label>
-                                    <span class="stat-value-display" id="magicValue">10</span>
-                                </div>
-                                <input type="range" id="magicStat" min="0" max="100" value="10">
-                            </div>
-                            <div class="stat-slider-container">
-                                <div class="stat-slider-header">
-                                    <label><i class="fas fa-bolt"></i> Speed</label>
-                                    <span class="stat-value-display" id="speedValue">10</span>
-                                </div>
-                                <input type="range" id="speedStat" min="0" max="100" value="10">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 3D Preview (WoW-style character-centric design) -->
-                    <div id="characterPreviewContainer">
-                        <h3><i class="fas fa-cube"></i> Character Preview</h3>
-                        <canvas id="characterPreviewCanvas"></canvas>
-                        <!-- New player tip banner -->
-                        <div class="character-creation-tip" id="newPlayerTip">
-                            <i class="fas fa-lightbulb"></i>
-                            <strong>Tip:</strong> Don't worry! You can change your appearance later in the game.
+                        <div class="wow-panel-header" style="margin-top: 30px;">CHARACTER SLOTS</div>
+                        <div class="wow-slots-info">
+                            <div class="wow-slots-used" id="wowSlotsUsed">0</div>
+                            <div class="wow-slots-separator">/</div>
+                            <div class="wow-slots-total">12</div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Footer -->
-                <div class="character-creation-footer">
-                    <div class="creation-actions">
-                        <button id="saveCharacterButton"><i class="fas fa-save"></i> Save Character</button>
-                        <button id="cancelCreationButton"><i class="fas fa-times"></i> Cancel</button>
+                <!-- Bottom Buttons: Back, Enter World, Delete -->
+                <div class="wow-selection-footer">
+                    <button class="wow-footer-button" id="backFromSelectionButton">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="wow-footer-button wow-footer-button-primary" id="enterWorldButton" style="display: none;">
+                        <i class="fas fa-play"></i> Enter World
+                    </button>
+                    <button class="wow-footer-button wow-footer-button-danger" id="deleteCharacterButton" style="display: none;">
+                        <i class="fas fa-trash"></i> Delete Character
+                    </button>
+                </div>
+            </div>
+
+            <!-- Character Creation - WoW-style -->
+            <div id="characterCreation" class="hidden">
+                <!-- Top Controls -->
+                <div class="wow-creation-top-controls">
+                    <!-- Gender Selector (Top Left) -->
+                    <div class="wow-gender-selector">
+                        <div class="wow-control-label">GENDER</div>
+                        <div class="wow-gender-buttons">
+                            <button class="wow-gender-icon selected" data-gender="male" id="genderMale" title="Male">
+                                <i class="fas fa-mars"></i>
+                            </button>
+                            <button class="wow-gender-icon" data-gender="female" id="genderFemale" title="Female">
+                                <i class="fas fa-venus"></i>
+                            </button>
+                        </div>
                     </div>
+                    
+                    <!-- Character Type (Top Center) -->
+                    <div class="wow-character-type">
+                        <div class="wow-control-label">CHARACTER TYPE</div>
+                        <div class="wow-type-buttons">
+                            <button class="wow-type-button selected" data-type="new" id="charTypeNew">
+                                New Level 1
+                            </button>
+                            <button class="wow-type-button" data-type="trial" id="charTypeTrial">
+                                Class Trial Level 110
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main Content: 3-Column Layout -->
+                <div class="wow-creation-main-content">
+                    <!-- Left Panel: Race Selection (Alliance/Horde) -->
+                    <div class="wow-race-panel">
+                        <div class="wow-faction-section alliance-faction">
+                            <div class="wow-faction-header">ALLIANCE</div>
+                            <div class="wow-race-list">
+                                <div class="wow-race-item selected" data-race="human" data-faction="alliance">
+                                    <div class="wow-race-icon"><i class="fas fa-user"></i></div>
+                                    <div class="wow-race-name">Human</div>
+                                </div>
+                                <div class="wow-race-item" data-race="elf" data-faction="alliance">
+                                    <div class="wow-race-icon"><i class="fas fa-leaf"></i></div>
+                                    <div class="wow-race-name">Elf</div>
+                                </div>
+                                <div class="wow-race-item" data-race="dwarf" data-faction="alliance">
+                                    <div class="wow-race-icon"><i class="fas fa-hammer"></i></div>
+                                    <div class="wow-race-name">Dwarf</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="wow-faction-section horde-faction">
+                            <div class="wow-faction-header">HORDE</div>
+                            <div class="wow-race-list">
+                                <div class="wow-race-item" data-race="demon" data-faction="horde">
+                                    <div class="wow-race-icon"><i class="fas fa-fire"></i></div>
+                                    <div class="wow-race-name">Demon</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Center Panel: Character Model (Large, Centered) -->
+                    <div class="wow-character-preview-panel">
+                        <canvas id="characterPreviewCanvas"></canvas>
+                        <div class="wow-character-name-input">
+                            <input type="text" id="characterName" placeholder="Enter character name" maxlength="20">
+                            <button type="button" id="randomizeNameButton" class="wow-random-name-btn" title="Randomize Name">
+                                <i class="fas fa-dice"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Panel: Class Selection -->
+                    <div class="wow-class-panel">
+                        <div class="wow-panel-header">CLASS</div>
+                        <div class="wow-class-list">
+                            <div class="wow-class-item" data-class="warrior">
+                                <div class="wow-class-icon"><i class="fas fa-sword"></i></div>
+                                <div class="wow-class-name">Warrior</div>
+                            </div>
+                            <div class="wow-class-item selected" data-class="paladin">
+                                <div class="wow-class-icon"><i class="fas fa-shield-alt"></i></div>
+                                <div class="wow-class-name">Paladin</div>
+                            </div>
+                            <div class="wow-class-item" data-class="hunter">
+                                <div class="wow-class-icon"><i class="fas fa-bow-arrow"></i></div>
+                                <div class="wow-class-name">Hunter</div>
+                            </div>
+                            <div class="wow-class-item" data-class="rogue">
+                                <div class="wow-class-icon"><i class="fas fa-user-secret"></i></div>
+                                <div class="wow-class-name">Rogue</div>
+                            </div>
+                            <div class="wow-class-item" data-class="priest">
+                                <div class="wow-class-icon"><i class="fas fa-pray"></i></div>
+                                <div class="wow-class-name">Priest</div>
+                            </div>
+                            <div class="wow-class-item" data-class="shaman">
+                                <div class="wow-class-icon"><i class="fas fa-bolt"></i></div>
+                                <div class="wow-class-name">Shaman</div>
+                            </div>
+                            <div class="wow-class-item" data-class="mage">
+                                <div class="wow-class-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+                                <div class="wow-class-name">Mage</div>
+                            </div>
+                            <div class="wow-class-item" data-class="warlock">
+                                <div class="wow-class-icon"><i class="fas fa-skull"></i></div>
+                                <div class="wow-class-name">Warlock</div>
+                            </div>
+                            <div class="wow-class-item" data-class="monk">
+                                <div class="wow-class-icon"><i class="fas fa-fist-raised"></i></div>
+                                <div class="wow-class-name">Monk</div>
+                            </div>
+                            <div class="wow-class-item" data-class="druid">
+                                <div class="wow-class-icon"><i class="fas fa-tree"></i></div>
+                                <div class="wow-class-name">Druid</div>
+                            </div>
+                            <div class="wow-class-item" data-class="demon-hunter">
+                                <div class="wow-class-icon"><i class="fas fa-eye"></i></div>
+                                <div class="wow-class-name">Demon Hunter</div>
+                            </div>
+                            <div class="wow-class-item" data-class="death-knight">
+                                <div class="wow-class-icon"><i class="fas fa-skull-crossbones"></i></div>
+                                <div class="wow-class-name">Death Knight</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Customization Panel (Hidden by default, shown when Customize is clicked) -->
+                <div id="wowCustomizationPanel" class="wow-customization-panel hidden">
+                    <div class="wow-customization-content">
+                        <!-- Face & Hair -->
+                        <div class="wow-custom-section">
+                            <h3 class="wow-custom-section-title">Face & Hair</h3>
+                            
+                            <div class="wow-custom-item">
+                                <label>Hair Style: <span id="hairStyleValue">1</span></label>
+                                <div class="wow-slider-controls">
+                                    <button class="wow-slider-btn" id="hairStylePrev"><i class="fas fa-chevron-left"></i></button>
+                                    <input type="range" id="hairStyle" min="0" max="9" step="1" value="0" class="wow-range-slider">
+                                    <button class="wow-slider-btn" id="hairStyleNext"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Hair Color:</label>
+                                <input type="color" id="hairColor" value="#8B4513" class="wow-color-picker">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Eye Color:</label>
+                                <input type="color" id="eyeColor" value="#4A90E2" class="wow-color-picker">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Face Type: <span id="faceTypeValue">1</span></label>
+                                <div class="wow-slider-controls">
+                                    <button class="wow-slider-btn" id="faceTypePrev"><i class="fas fa-chevron-left"></i></button>
+                                    <input type="range" id="faceType" min="0" max="9" step="1" value="0" class="wow-range-slider">
+                                    <button class="wow-slider-btn" id="faceTypeNext"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Facial Features: <span id="facialFeaturesValue">1</span></label>
+                                <div class="wow-slider-controls">
+                                    <button class="wow-slider-btn" id="facialFeaturesPrev"><i class="fas fa-chevron-left"></i></button>
+                                    <input type="range" id="facialFeatures" min="0" max="9" step="1" value="0" class="wow-range-slider">
+                                    <button class="wow-slider-btn" id="facialFeaturesNext"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="wow-custom-item race-specific" id="raceFeaturesItem" style="display: none;">
+                                <label id="raceFeaturesLabel"><span id="raceFeaturesLabelText">Race Features</span>: <span id="raceFeaturesValue">0</span></label>
+                                <div class="wow-slider-controls">
+                                    <button class="wow-slider-btn" id="raceFeaturesPrev"><i class="fas fa-chevron-left"></i></button>
+                                    <input type="range" id="raceFeatures" min="0" max="9" step="1" value="0" class="wow-range-slider">
+                                    <button class="wow-slider-btn" id="raceFeaturesNext"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Body & Appearance -->
+                        <div class="wow-custom-section">
+                            <h3 class="wow-custom-section-title">Body & Appearance</h3>
+                            
+                            <div class="wow-custom-item">
+                                <label>Skin Tone: <span id="skinToneValue">0.5</span></label>
+                                <input type="range" id="skinTone" min="0" max="1" step="0.1" value="0.5" class="wow-range-slider">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Body Shape: <span id="bodyShapeValue">0.5</span></label>
+                                <input type="range" id="bodyShape" min="0" max="1" step="0.1" value="0.5" class="wow-range-slider">
+                            </div>
+                        </div>
+                        
+                        <!-- Character Stats -->
+                        <div class="wow-custom-section">
+                            <h3 class="wow-custom-section-title">Character Stats</h3>
+                            
+                            <div class="wow-custom-item">
+                                <label>Health: <span id="healthValue">50</span></label>
+                                <input type="range" id="healthStat" min="0" max="100" value="50" class="wow-range-slider">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Strength: <span id="strengthValue">10</span></label>
+                                <input type="range" id="strengthStat" min="0" max="100" value="10" class="wow-range-slider">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Magic: <span id="magicValue">10</span></label>
+                                <input type="range" id="magicStat" min="0" max="100" value="10" class="wow-range-slider">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Speed: <span id="speedValue">10</span></label>
+                                <input type="range" id="speedStat" min="0" max="100" value="10" class="wow-range-slider">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Customization Panel Footer -->
+                    <div class="wow-customization-footer">
+                        <button class="wow-custom-save-btn" id="wowCustomSaveButton">
+                            <i class="fas fa-save"></i> Save Character
+                        </button>
+                        <button class="wow-custom-cancel-btn" onclick="document.getElementById('wowCustomizationPanel').classList.add('hidden')">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Bottom Buttons: Back, Customize, More Info -->
+                <div class="wow-creation-footer">
+                    <button class="wow-footer-button" id="wowBackButton">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="wow-footer-button wow-footer-button-primary" id="wowCustomizeButton">
+                        <i class="fas fa-chevron-left"></i> Customize <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="wow-footer-button" id="wowMoreInfoButton">
+                        More Info <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+                
+                <!-- Hidden Save/Cancel buttons (for compatibility) -->
+                <div style="display: none;">
+                    <button id="saveCharacterButton"></button>
+                    <button id="cancelCreationButton"></button>
                 </div>
             </div>
 
@@ -3403,120 +4447,29 @@
 
     <script type="module" src="src/app.js"></script>
     
-    <!-- Giphy SDK Integration for Login Animations -->
-    <script type="module">
-        // Giphy API Configuration
-        const GIPHY_API_KEY = 'VH9h1zuDsslzFhYglMgqY8v4G0HgtD7K';
+    <!-- Giphy API - Reserved for future chat integration -->
+    <script>
+        // Giphy API Configuration - Reserved for in-game chat GIF support
+        window.GIPHY_API_KEY = 'VH9h1zuDsslzFhYglMgqY8v4G0HgtD7K';
+        window.GIPHY_API_URL = 'https://api.giphy.com/v1/gifs';
         
-        // Initialize Giphy Fetch API
-        const { GiphyFetch } = window.GiphyFetch;
-        const gf = new GiphyFetch(GIPHY_API_KEY);
-        
-        // Fantasy-themed search terms for ambient animations
-        const ambientSearchTerms = [
-            'magic particles',
-            'floating orbs',
-            'sparkles',
-            'magic aura',
-            'fantasy glow'
-        ];
-        
-        // Load ambient Giphy animations for login screen
-        async function loadAmbientAnimations() {
-            const containers = [
-                document.getElementById('giphyAmbient1'),
-                document.getElementById('giphyAmbient2'),
-                document.getElementById('giphyAmbient3'),
-                document.getElementById('giphyAmbient4')
-            ];
-            
-            // Only load if login screen is visible
-            const loginScreen = document.getElementById('loginScreen');
-            if (!loginScreen || loginScreen.classList.contains('hidden')) {
-                return;
-            }
-            
-            try {
-                for (let i = 0; i < containers.length; i++) {
-                    const container = containers[i];
-                    if (!container) continue;
-                    
-                    // Random search term for variety
-                    const searchTerm = ambientSearchTerms[Math.floor(Math.random() * ambientSearchTerms.length)];
-                    
-                    // Fetch a random GIF
-                    const { data } = await gf.random({ 
-                        tag: searchTerm,
-                        rating: 'g',
-                        type: 'gifs'
-                    });
-                    
-                    if (data && data.images && data.images.fixed_height_small) {
-                        const img = document.createElement('img');
-                        img.src = data.images.fixed_height_small.url;
-                        img.style.width = '100%';
-                        img.style.height = '100%';
-                        img.style.objectFit = 'contain';
-                        img.style.opacity = '0.3';
-                        img.style.filter = 'blur(1px)';
-                        container.appendChild(img);
-                    }
-                }
-            } catch (error) {
-                console.warn('Giphy ambient animations failed to load:', error);
-                // Silently fail - animations are optional
-            }
-        }
-        
-        // Load Giphy animation for button loading state
-        async function loadButtonLoadingAnimation(buttonElement) {
-            if (!buttonElement) return null;
-            
-            try {
-                const { data } = await gf.random({ 
-                    tag: 'loading magic',
-                    rating: 'g',
-                    type: 'gifs'
-                });
-                
-                if (data && data.images && data.images.fixed_height_small) {
-                    return data.images.fixed_height_small.url;
-                }
-            } catch (error) {
-                console.warn('Giphy loading animation failed:', error);
-            }
-            return null;
-        }
-        
-        // Initialize when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                // Wait a bit for login screen to render
-                setTimeout(loadAmbientAnimations, 500);
-            });
-        } else {
-            setTimeout(loadAmbientAnimations, 500);
-        }
-        
-        // Watch for login screen visibility changes
-        const loginScreen = document.getElementById('loginScreen');
-        if (loginScreen) {
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                        if (!loginScreen.classList.contains('hidden')) {
-                            loadAmbientAnimations();
-                        }
-                    }
-                });
-            });
-            observer.observe(loginScreen, { attributes: true });
-        }
-        
-        // Export for use in other scripts
+        // Giphy utilities for chat (to be implemented)
         window.giphyUtils = {
-            loadButtonLoadingAnimation,
-            gf
+            // Will be used for chat GIF search and display
+            searchGifs: async function(query) {
+                try {
+                    const response = await fetch(
+                        `${window.GIPHY_API_URL}/search?api_key=${window.GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=10&rating=g`
+                    );
+                    if (response.ok) {
+                        const result = await response.json();
+                        return result.data || [];
+                    }
+                } catch (error) {
+                    console.error('Giphy search failed:', error);
+                }
+                return [];
+            }
         };
     </script>
     

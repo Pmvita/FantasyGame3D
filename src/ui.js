@@ -113,11 +113,11 @@ export class UI {
             });
         }
 
-        // Race selection
-        document.querySelectorAll('.race-button').forEach(button => {
+        // Race selection (WoW-style)
+        document.querySelectorAll('.wow-race-item').forEach(button => {
             button.addEventListener('click', async () => {
                 // Remove selected class from all
-                document.querySelectorAll('.race-button').forEach(b => b.classList.remove('selected'));
+                document.querySelectorAll('.wow-race-item').forEach(b => b.classList.remove('selected'));
                 // Add to clicked
                 button.classList.add('selected');
                 this.selectedRace = button.dataset.race;
@@ -129,24 +129,41 @@ export class UI {
                 
                 // Apply race-specific default stats
                 const raceStats = this.getRaceDefaultStats(this.selectedRace);
-                document.getElementById('healthStat').value = raceStats.health;
-                document.getElementById('healthValue').textContent = raceStats.health;
-                document.getElementById('strengthStat').value = raceStats.strength;
-                document.getElementById('strengthValue').textContent = raceStats.strength;
-                document.getElementById('magicStat').value = raceStats.magic;
-                document.getElementById('magicValue').textContent = raceStats.magic;
-                document.getElementById('speedStat').value = raceStats.speed;
-                document.getElementById('speedValue').textContent = raceStats.speed;
+                const healthStat = document.getElementById('healthStat');
+                const strengthStat = document.getElementById('strengthStat');
+                const magicStat = document.getElementById('magicStat');
+                const speedStat = document.getElementById('speedStat');
+                
+                if (healthStat) {
+                    healthStat.value = raceStats.health;
+                    const healthValue = document.getElementById('healthValue');
+                    if (healthValue) healthValue.textContent = raceStats.health;
+                }
+                if (strengthStat) {
+                    strengthStat.value = raceStats.strength;
+                    const strengthValue = document.getElementById('strengthValue');
+                    if (strengthValue) strengthValue.textContent = raceStats.strength;
+                }
+                if (magicStat) {
+                    magicStat.value = raceStats.magic;
+                    const magicValue = document.getElementById('magicValue');
+                    if (magicValue) magicValue.textContent = raceStats.magic;
+                }
+                if (speedStat) {
+                    speedStat.value = raceStats.speed;
+                    const speedValue = document.getElementById('speedValue');
+                    if (speedValue) speedValue.textContent = raceStats.speed;
+                }
                 
                 await this.updatePreview();
             });
         });
 
-        // Gender selection
-        document.querySelectorAll('.gender-button').forEach(button => {
+        // Gender selection (WoW-style)
+        document.querySelectorAll('.wow-gender-icon').forEach(button => {
             button.addEventListener('click', async () => {
                 // Remove selected class from all
-                document.querySelectorAll('.gender-button').forEach(b => b.classList.remove('selected'));
+                document.querySelectorAll('.wow-gender-icon').forEach(b => b.classList.remove('selected'));
                 // Add to clicked
                 button.classList.add('selected');
                 this.selectedGender = button.dataset.gender;
@@ -155,6 +172,57 @@ export class UI {
                 await this.updatePreview();
             });
         });
+        
+        // Class selection (WoW-style)
+        this.selectedClass = 'paladin'; // Default class
+        document.querySelectorAll('.wow-class-item').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove selected class from all
+                document.querySelectorAll('.wow-class-item').forEach(b => b.classList.remove('selected'));
+                // Add to clicked
+                button.classList.add('selected');
+                this.selectedClass = button.dataset.class;
+                console.log(`Class selected: ${this.selectedClass}`);
+            });
+        });
+        
+        // Character type selection
+        this.characterType = 'new'; // Default: New Level 1
+        document.querySelectorAll('.wow-type-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.wow-type-button').forEach(b => b.classList.remove('selected'));
+                button.classList.add('selected');
+                this.characterType = button.dataset.type;
+                console.log(`Character type selected: ${this.characterType}`);
+            });
+        });
+        
+        // Customize button - toggle customization panel
+        const customizeBtn = document.getElementById('wowCustomizeButton');
+        if (customizeBtn) {
+            customizeBtn.addEventListener('click', () => {
+                const panel = document.getElementById('wowCustomizationPanel');
+                if (panel) {
+                    panel.classList.toggle('hidden');
+                }
+            });
+        }
+        
+        // Back button
+        const backBtn = document.getElementById('wowBackButton');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.showMainMenu();
+            });
+        }
+        
+        // More Info button
+        const moreInfoBtn = document.getElementById('wowMoreInfoButton');
+        if (moreInfoBtn) {
+            moreInfoBtn.addEventListener('click', () => {
+                alert('Character Creation Info:\n\n• Choose your Race (Alliance or Horde)\n• Select your Class\n• Customize your appearance\n• Set your character stats\n\nYou can change your appearance later in the game!');
+            });
+        }
 
         // Customization slider controls
         this.setupSliderControls('hairStyle', 'hairStylePrev', 'hairStyleNext', 'hairStyleValue');
@@ -190,9 +258,12 @@ export class UI {
         });
 
         // Randomize name button (WoW feature)
-        document.getElementById('randomizeNameButton').addEventListener('click', () => {
-            this.randomizeCharacterName();
-        });
+        const randomizeBtn = document.getElementById('randomizeNameButton');
+        if (randomizeBtn) {
+            randomizeBtn.addEventListener('click', () => {
+                this.randomizeCharacterName();
+            });
+        }
 
         // Race-specific features slider
         this.setupSliderControls('raceFeatures', 'raceFeaturesPrev', 'raceFeaturesNext', 'raceFeaturesValue');
@@ -201,14 +272,38 @@ export class UI {
             await this.updatePreview();
         });
 
-        // Character creation
-        document.getElementById('saveCharacterButton').addEventListener('click', () => {
-            this.saveCharacter();
-        });
+        // Character creation - Save button (triggered from customization panel or footer)
+        const saveBtn = document.getElementById('saveCharacterButton');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => {
+                this.saveCharacter();
+            });
+        }
+        
+        // Also allow saving via Enter key in name input
+        const nameInput = document.getElementById('characterName');
+        if (nameInput) {
+            nameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.saveCharacter();
+                }
+            });
+        }
 
-        document.getElementById('cancelCreationButton').addEventListener('click', () => {
-            this.showMainMenu();
-        });
+        const cancelBtn = document.getElementById('cancelCreationButton');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                this.showMainMenu();
+            });
+        }
+        
+        // Save button in customization panel
+        const customSaveBtn = document.getElementById('wowCustomSaveButton');
+        if (customSaveBtn) {
+            customSaveBtn.addEventListener('click', () => {
+                this.saveCharacter();
+            });
+        }
 
         // Update sliders and preview
         document.getElementById('characterName').addEventListener('input', () => {
@@ -323,12 +418,35 @@ export class UI {
             // Call login API
             const response = await authAPI.login(username, password);
 
-            // Store login info if remember is checked
+            // Store username for display (always, regardless of remember checkbox)
+            localStorage.setItem('fantasy3DUsername', username);
+            
+            // Store remember preference
             if (remember) {
-                localStorage.setItem('fantasy3DUsername', username);
+                localStorage.setItem('fantasy3DRemember', 'true');
             } else {
-                localStorage.removeItem('fantasy3DUsername');
+                localStorage.removeItem('fantasy3DRemember');
             }
+
+            // Clear logged out flag since user just logged in
+            localStorage.removeItem('fantasy3DLoggedOut');
+            
+            // Ensure token is stored (should already be done by authAPI.login)
+            const { getToken, setToken } = await import('./api/client.js');
+            if (response.token) {
+                setToken(response.token);
+                console.log('✅ Token stored in localStorage');
+            }
+            
+            // Verify token was actually stored
+            const storedToken = getToken();
+            if (!storedToken) {
+                console.error('❌ Token was not stored! This is a critical error.');
+                throw new Error('Failed to store authentication token. Please try again.');
+            }
+            
+            console.log('✅ Login successful! Token stored:', storedToken.substring(0, 20) + '...');
+            console.log('✅ User will stay logged in on page refresh');
 
             // Check for LocalStorage characters to migrate
             await this.checkForLocalStorageMigration();
@@ -340,6 +458,7 @@ export class UI {
                 this.showMainMenu();
             }, 1500);
         } catch (error) {
+            console.error('Login error:', error);
             this.showError(error.message || 'Login failed. Please check your credentials.');
         } finally {
             // Re-enable button
@@ -352,9 +471,84 @@ export class UI {
         document.getElementById('loginScreen').classList.remove('hidden');
         // Load saved username if exists
         const savedUsername = localStorage.getItem('fantasy3DUsername');
+        const remember = localStorage.getItem('fantasy3DRemember') === 'true';
+        
         if (savedUsername) {
             document.getElementById('usernameInput').value = savedUsername;
-            document.getElementById('rememberCheckbox').checked = true;
+            document.getElementById('rememberCheckbox').checked = remember;
+        } else {
+            // Clear checkbox if no saved username
+            document.getElementById('rememberCheckbox').checked = false;
+        }
+    }
+
+    /**
+     * Check if user is already logged in and auto-login if valid
+     */
+    async checkAutoLogin() {
+        console.log('🔍 Checking for auto-login...');
+        
+        // Check if user explicitly logged out (don't auto-login)
+        const loggedOut = localStorage.getItem('fantasy3DLoggedOut');
+        if (loggedOut === 'true') {
+            console.log('❌ User explicitly logged out, skipping auto-login');
+            return false;
+        }
+
+        const token = getToken();
+        if (!token) {
+            console.log('❌ No token found in localStorage, showing login screen');
+            return false;
+        }
+        
+        console.log('✅ Token found:', token.substring(0, 20) + '...');
+
+        try {
+            // Verify token is still valid
+            console.log('🔐 Verifying token...');
+            const { verifyToken } = await import('./api/auth.js');
+            const userData = await verifyToken();
+            
+            // The verify endpoint returns { userId, username, role } directly, not nested in user
+            const username = userData?.username || userData?.user?.username;
+            
+            if (userData && username) {
+                // Token is valid, auto-login successful
+                console.log('✅ Auto-login successful for user:', username);
+                
+                // Store username for display
+                localStorage.setItem('fantasy3DUsername', username);
+                
+                // Clear logged out flag since we successfully auto-logged in
+                localStorage.removeItem('fantasy3DLoggedOut');
+                
+                // Check for LocalStorage characters to migrate
+                await this.checkForLocalStorageMigration();
+                
+                // Hide login screen (no transition for auto-login)
+                this.hideLoginScreen(false);
+                
+                // Show main menu
+                this.showMainMenu();
+                
+                return true;
+            } else {
+                console.error('❌ Auto-login failed: Invalid user data returned from verifyToken');
+                // Clear invalid token
+                const { removeToken } = await import('./api/client.js');
+                removeToken();
+                localStorage.removeItem('fantasy3DUsername');
+                return false;
+            }
+        } catch (error) {
+            // Token is invalid or expired, clear it
+            console.error('❌ Auto-login failed:', error.message);
+            console.error('Error details:', error);
+            const { removeToken } = await import('./api/client.js');
+            removeToken();
+            localStorage.removeItem('fantasy3DUsername');
+            // Don't set logged out flag - just clear the invalid token
+            return false;
         }
     }
 
@@ -611,7 +805,21 @@ export class UI {
             setTimeout(async () => {
                 try {
                     // Login with the new credentials
-                    await authAPI.login(username, password);
+                    const loginResponse = await authAPI.login(username, password);
+                    
+                    // Store username for display
+                    localStorage.setItem('fantasy3DUsername', username);
+                    
+                    // Clear logged out flag since user just registered and logged in
+                    localStorage.removeItem('fantasy3DLoggedOut');
+                    
+                    // Ensure token is stored
+                    if (loginResponse.token) {
+                        const { setToken } = await import('./api/client.js');
+                        setToken(loginResponse.token);
+                    }
+                    
+                    console.log('✅ Registration and login successful. User will stay logged in on refresh.');
 
                     // Check for LocalStorage migration
                     await this.checkForLocalStorageMigration();
@@ -759,12 +967,22 @@ export class UI {
         }
     }
 
-    handleLogout() {
-        // Clear authentication data
+    async handleLogout() {
+        console.log('User logging out...');
+        
+        // Set logged out flag to prevent auto-login
+        localStorage.setItem('fantasy3DLoggedOut', 'true');
+        
+        // Clear token
+        const { removeToken } = await import('./api/client.js');
         removeToken();
+        
+        // Clear username
         localStorage.removeItem('fantasy3DUsername');
         
-        // Hide main menu and show login screen
+        console.log('✅ Logged out. User will need to log in again on next visit.');
+        
+        // Hide all menus and show login screen
         this.hideAllMenus();
         this.showLoginScreen();
         
@@ -782,20 +1000,26 @@ export class UI {
         characterSelection.classList.remove('hidden');
         characterSelection.style.display = 'flex';
         
-        // Reset preview placeholder
+        // Get all elements we need
         const placeholder = document.getElementById('characterPreviewPlaceholder');
         const canvas = document.getElementById('characterSelectionPreviewCanvas');
-        if (placeholder) placeholder.style.display = 'block';
+        const infoPanel = document.getElementById('wowCharacterInfo');
+        const enterWorldBtn = document.getElementById('enterWorldButton');
+        const deleteBtn = document.getElementById('deleteCharacterButton');
+        
+        // Reset preview placeholder
+        if (placeholder) placeholder.style.display = 'flex';
         if (canvas) canvas.style.display = 'none';
         
-        // Hide "Enter World" button initially
-        const enterWorldBtn = document.getElementById('enterWorldButton');
-        if (enterWorldBtn) enterWorldBtn.style.display = 'none';
-        
-        // Clear any selected character cards
-        document.querySelectorAll('.character-card').forEach(card => {
+        // Clear any selected character cards (WoW-style)
+        document.querySelectorAll('.wow-character-card').forEach(card => {
             card.classList.remove('selected');
         });
+        
+        // Hide character info panel and buttons
+        if (infoPanel) infoPanel.classList.add('hidden');
+        if (enterWorldBtn) enterWorldBtn.style.display = 'none';
+        if (deleteBtn) deleteBtn.style.display = 'none';
         
         this.selectedCharacterIndex = null;
         await this.loadCharacterList();
@@ -812,15 +1036,33 @@ export class UI {
             this.characterPreview = new CharacterPreview('characterPreviewCanvas');
         }
         
-        // Set default race selection
+        // Set default race selection (WoW-style)
         this.selectedRace = 'human';
-        document.querySelectorAll('.race-button').forEach(b => b.classList.remove('selected'));
-        document.querySelector('[data-race="human"]').classList.add('selected');
+        document.querySelectorAll('.wow-race-item').forEach(b => b.classList.remove('selected'));
+        const humanRace = document.querySelector('.wow-race-item[data-race="human"]');
+        if (humanRace) humanRace.classList.add('selected');
         
-        // Set default gender selection
+        // Set default gender selection (WoW-style)
         this.selectedGender = 'male';
-        document.querySelectorAll('.gender-button').forEach(b => b.classList.remove('selected'));
-        document.getElementById('genderMale').classList.add('selected');
+        document.querySelectorAll('.wow-gender-icon').forEach(b => b.classList.remove('selected'));
+        const maleGender = document.getElementById('genderMale');
+        if (maleGender) maleGender.classList.add('selected');
+        
+        // Set default class selection
+        this.selectedClass = 'paladin';
+        document.querySelectorAll('.wow-class-item').forEach(b => b.classList.remove('selected'));
+        const paladinClass = document.querySelector('.wow-class-item[data-class="paladin"]');
+        if (paladinClass) paladinClass.classList.add('selected');
+        
+        // Set default character type
+        this.characterType = 'new';
+        document.querySelectorAll('.wow-type-button').forEach(b => b.classList.remove('selected'));
+        const newType = document.getElementById('charTypeNew');
+        if (newType) newType.classList.add('selected');
+        
+        // Hide customization panel by default
+        const customPanel = document.getElementById('wowCustomizationPanel');
+        if (customPanel) customPanel.classList.add('hidden');
         
         // Update race-specific features UI
         this.updateRaceSpecificFeatures();
@@ -1193,17 +1435,30 @@ export class UI {
      */
     async loadCharacterList() {
         const list = document.getElementById('characterList');
+        if (!list) {
+            console.error('Character list container not found');
+            return;
+        }
+        
         list.innerHTML = '';
 
         const characters = await this.getAllCharacters();
         
+        // Update character slots display
+        const slotsUsed = document.getElementById('wowSlotsUsed');
+        if (slotsUsed) {
+            slotsUsed.textContent = characters.length;
+        }
+        
         if (characters.length === 0) {
             list.innerHTML = `
-                <div class="empty-state" style="grid-column: 1 / -1;">
-                    <div class="empty-state-icon"><i class="fas fa-swords"></i></div>
+                <div class="wow-empty-state">
+                    <div class="wow-empty-state-icon"><i class="fas fa-user-circle"></i></div>
                     <h3>No Characters Yet</h3>
                     <p>Create your first character to begin your adventure!</p>
-                    <button class="create-new-button" id="createFirstCharacterButton">Create Your First Character</button>
+                    <button class="wow-create-character-btn" id="createFirstCharacterButton" style="margin-top: 20px;">
+                        <i class="fas fa-plus"></i> Create Your First Character
+                    </button>
                 </div>
             `;
             // Add event listener for the create button
@@ -1216,11 +1471,15 @@ export class UI {
             return;
         }
 
+        // Store characters for later use
+        this.characters = characters;
+
         characters.forEach((char, index) => {
             const card = document.createElement('div');
-            card.className = 'character-card';
+            card.className = 'wow-character-card';
             card.dataset.characterIndex = index;
-            card.dataset.characterId = char.id || index; // Store API ID if available
+            card.dataset.characterId = char.id || char._id || index; // Store API ID if available
+            
             const raceIcon = {
                 human: '<i class="fas fa-user"></i>',
                 elf: '<i class="fas fa-leaf"></i>',
@@ -1230,39 +1489,21 @@ export class UI {
             
             const raceName = char.race ? char.race.charAt(0).toUpperCase() + char.race.slice(1) : 'Human';
             const genderIcon = char.gender === 'female' ? '<i class="fas fa-venus"></i>' : '<i class="fas fa-mars"></i>';
-            const genderName = char.gender === 'female' ? 'Female' : 'Male';
+            const level = char.stats?.level || char.level || 1;
+            const className = char.class || 'Paladin';
             
             card.innerHTML = `
-                <button class="character-delete-button" data-character-index="${index}" aria-label="Delete character">
+                <button class="wow-character-card-delete" data-character-index="${index}" aria-label="Delete character">
                     <i class="fas fa-times"></i>
                 </button>
-                <div class="character-card-header">
-                    <div class="character-card-icon">${raceIcon}</div>
-                    <div class="character-card-title">
-                        <h3>${char.name || 'Unnamed Character'}</h3>
-                        <div class="character-card-race">${raceName} ${genderIcon} ${genderName}</div>
-                    </div>
-                </div>
-                <div class="character-stats">
-                    <div class="stat-item health-stat">
-                        <span class="stat-icon"><i class="fas fa-heart"></i></span>
-                        <span class="stat-label">Health</span>
-                        <span class="stat-value">${char.stats.health}/${char.stats.maxHealth}</span>
-                    </div>
-                    <div class="stat-item strength-stat">
-                        <span class="stat-icon"><i class="fas fa-sword"></i></span>
-                        <span class="stat-label">Strength</span>
-                        <span class="stat-value">${char.stats.strength}</span>
-                    </div>
-                    <div class="stat-item magic-stat">
-                        <span class="stat-icon"><i class="fas fa-wand-magic-sparkles"></i></span>
-                        <span class="stat-label">Magic</span>
-                        <span class="stat-value">${char.stats.magic}</span>
-                    </div>
-                    <div class="stat-item speed-stat">
-                        <span class="stat-icon"><i class="fas fa-bolt"></i></span>
-                        <span class="stat-label">Speed</span>
-                        <span class="stat-value">${char.stats.speed}</span>
+                <div class="wow-character-card-icon">${raceIcon}</div>
+                <div class="wow-character-card-info">
+                    <div class="wow-character-card-name">${char.name || 'Unnamed Character'}</div>
+                    <div class="wow-character-card-details">
+                        <span class="wow-character-card-level">Level ${level}</span>
+                        <span>${raceName}</span>
+                        <span>${genderIcon}</span>
+                        <span>${className}</span>
                     </div>
                 </div>
             `;
@@ -1270,13 +1511,13 @@ export class UI {
             // Add click handler for card selection (but not when clicking delete button)
             card.addEventListener('click', (e) => {
                 // Don't select if clicking the delete button
-                if (!e.target.closest('.character-delete-button')) {
+                if (!e.target.closest('.wow-character-card-delete')) {
                     this.selectCharacter(index);
                 }
             });
             
             // Add click handler for delete button
-            const deleteButton = card.querySelector('.character-delete-button');
+            const deleteButton = card.querySelector('.wow-character-card-delete');
             if (deleteButton) {
                 deleteButton.addEventListener('click', (e) => {
                     e.stopPropagation(); // Prevent card selection
@@ -1298,35 +1539,62 @@ export class UI {
         const token = getToken();
         if (!token) {
             // Fallback to LocalStorage for unauthenticated users
-        try {
-                const saved = localStorage.getItem('fantasy3DCharacters');
-            if (!saved) {
-                return [];
-            }
-            return JSON.parse(saved);
-        } catch (error) {
-            console.error('Error loading characters from localStorage:', error);
-            return [];
-        }
-    }
-
-        // Fetch from API
-        try {
-            const characters = await charactersAPI.getCharacters();
-            return characters || [];
-        } catch (error) {
-            console.error('Error loading characters from API:', error);
-            // Fallback to LocalStorage on error
             try {
                 const saved = localStorage.getItem('fantasy3DCharacters');
                 if (!saved) {
+                    console.log('No token and no local characters found');
                     return [];
                 }
-                return JSON.parse(saved);
-            } catch (localError) {
-                console.error('Error loading characters from localStorage:', localError);
+                const localChars = JSON.parse(saved);
+                console.log('Loaded characters from localStorage (no token):', localChars.length, 'characters');
+                return localChars;
+            } catch (error) {
+                console.error('Error loading characters from localStorage:', error);
                 return [];
             }
+        }
+
+        // Fetch from API (user is authenticated)
+        try {
+            console.log('Fetching characters from API for logged-in user...');
+            const characters = await charactersAPI.getCharacters();
+            console.log('✅ Loaded characters from API:', characters.length, 'characters');
+            
+            if (characters && characters.length > 0) {
+                // Log character details for debugging
+                characters.forEach((char, idx) => {
+                    console.log(`  Character ${idx + 1}: ${char.name} (${char.race}, ${char.gender})`);
+                });
+            } else {
+                console.log('No characters found in database for this user');
+            }
+            
+            return characters || [];
+        } catch (error) {
+            console.error('❌ Error loading characters from API:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack
+            });
+            
+            // Only fallback to LocalStorage if it's a network/server error, not auth error
+            if (error.message && !error.message.includes('401') && !error.message.includes('Unauthorized')) {
+                try {
+                    const saved = localStorage.getItem('fantasy3DCharacters');
+                    if (!saved) {
+                        return [];
+                    }
+                    const localChars = JSON.parse(saved);
+                    console.log('⚠️ Fallback: Loaded characters from localStorage:', localChars.length, 'characters');
+                    return localChars;
+                } catch (localError) {
+                    console.error('Error loading characters from localStorage:', localError);
+                    return [];
+                }
+            }
+            
+            // For auth errors, return empty array (user needs to log in)
+            return [];
         }
     }
 
@@ -1334,26 +1602,43 @@ export class UI {
         // Get race-specific default stats
         const raceStats = this.getRaceDefaultStats(this.selectedRace);
         
+        // Get all form values safely
+        const nameInput = document.getElementById('characterName');
+        const hairColorInput = document.getElementById('hairColor');
+        const eyeColorInput = document.getElementById('eyeColor');
+        const skinToneInput = document.getElementById('skinTone');
+        const bodyShapeInput = document.getElementById('bodyShape');
+        const faceTypeInput = document.getElementById('faceType');
+        const hairStyleInput = document.getElementById('hairStyle');
+        const facialFeaturesInput = document.getElementById('facialFeatures');
+        const raceFeaturesInput = document.getElementById('raceFeatures');
+        const healthStatInput = document.getElementById('healthStat');
+        const strengthStatInput = document.getElementById('strengthStat');
+        const magicStatInput = document.getElementById('magicStat');
+        const speedStatInput = document.getElementById('speedStat');
+        
         const characterData = {
-            name: document.getElementById('characterName').value || 'Unnamed Character',
+            name: (nameInput && nameInput.value) || 'Unnamed Character',
             race: this.selectedRace,
             gender: this.selectedGender,
+            class: this.selectedClass || 'paladin',
+            characterType: this.characterType || 'new',
             appearance: {
-                hairColor: document.getElementById('hairColor').value,
-                eyeColor: document.getElementById('eyeColor').value,
-                skinTone: parseFloat(document.getElementById('skinTone').value),
-                bodyShape: parseFloat(document.getElementById('bodyShape').value) || 0.5,
-                faceType: parseInt(document.getElementById('faceType').value) || 0,
-                hairStyle: parseInt(document.getElementById('hairStyle').value) || 0,
-                facialFeatures: parseInt(document.getElementById('facialFeatures').value) || 0,
-                raceFeatures: parseInt(document.getElementById('raceFeatures').value) || 0
+                hairColor: (hairColorInput && hairColorInput.value) || '#8B4513',
+                eyeColor: (eyeColorInput && eyeColorInput.value) || '#4A90E2',
+                skinTone: (skinToneInput && parseFloat(skinToneInput.value)) || 0.5,
+                bodyShape: (bodyShapeInput && parseFloat(bodyShapeInput.value)) || 0.5,
+                faceType: (faceTypeInput && parseInt(faceTypeInput.value)) || 0,
+                hairStyle: (hairStyleInput && parseInt(hairStyleInput.value)) || 0,
+                facialFeatures: (facialFeaturesInput && parseInt(facialFeaturesInput.value)) || 0,
+                raceFeatures: (raceFeaturesInput && parseInt(raceFeaturesInput.value)) || 0
             },
             stats: {
-                health: parseInt(document.getElementById('healthStat').value) || raceStats.health,
-                maxHealth: parseInt(document.getElementById('healthStat').value) || raceStats.health,
-                strength: parseInt(document.getElementById('strengthStat').value) || raceStats.strength,
-                magic: parseInt(document.getElementById('magicStat').value) || raceStats.magic,
-                speed: parseInt(document.getElementById('speedStat').value) || raceStats.speed,
+                health: (healthStatInput && parseInt(healthStatInput.value)) || raceStats.health,
+                maxHealth: (healthStatInput && parseInt(healthStatInput.value)) || raceStats.health,
+                strength: (strengthStatInput && parseInt(strengthStatInput.value)) || raceStats.strength,
+                magic: (magicStatInput && parseInt(magicStatInput.value)) || raceStats.magic,
+                speed: (speedStatInput && parseInt(speedStatInput.value)) || raceStats.speed,
                 defense: raceStats.defense
             },
             equipment: {
@@ -1364,9 +1649,11 @@ export class UI {
         };
 
         const saveButton = document.getElementById('saveCharacterButton');
-        const originalText = saveButton.textContent;
-        saveButton.disabled = true;
-        saveButton.textContent = 'SAVING...';
+        const originalText = saveButton ? saveButton.textContent : 'Save';
+        if (saveButton) {
+            saveButton.disabled = true;
+            saveButton.textContent = 'SAVING...';
+        }
 
         try {
             // Check if user is authenticated
@@ -1374,6 +1661,8 @@ export class UI {
             if (token) {
                 // Save to API
                 await charactersAPI.createCharacter(characterData);
+                // Refresh character list to show the new character
+                await this.loadCharacterList();
                 this.showMainMenu();
                 alert('Character saved to your account!');
             } else {
@@ -1381,6 +1670,8 @@ export class UI {
                 const characters = await this.getAllCharacters();
                 characters.push(characterData);
                 localStorage.setItem('fantasy3DCharacters', JSON.stringify(characters));
+                // Refresh character list to show the new character
+                await this.loadCharacterList();
                 this.showMainMenu();
                 alert('Character saved locally! Create an account to sync across devices.');
             }
@@ -1391,20 +1682,29 @@ export class UI {
             console.error('Error saving character:', error);
             alert('Failed to save character: ' + (error.message || 'Unknown error'));
         } finally {
-            saveButton.disabled = false;
-            saveButton.textContent = originalText;
+            if (saveButton) {
+                saveButton.disabled = false;
+                saveButton.textContent = originalText;
+            }
         }
     }
 
     async selectCharacter(index) {
-        const characters = await this.getAllCharacters();
-        if (!characters[index]) return;
+        // Use stored characters if available, otherwise fetch
+        const characters = this.characters || await this.getAllCharacters();
+        if (!characters || !characters[index]) {
+            console.error('Invalid character index:', index, 'Total characters:', characters?.length || 0);
+            return;
+        }
         
         const character = characters[index];
         this.selectedCharacterIndex = index;
+        this.selectedCharacter = character; // Store selected character
+        
+        console.log('Selected character:', character.name, 'at index:', index);
         
         // Update visual selection state (WoW-style)
-        document.querySelectorAll('.character-card').forEach((card, i) => {
+        document.querySelectorAll('.wow-character-card').forEach((card, i) => {
             if (i === index) {
                 card.classList.add('selected');
             } else {
@@ -1415,11 +1715,20 @@ export class UI {
         // Show character preview in selection screen (WoW-style)
         await this.showCharacterSelectionPreview(character);
         
-        // Show "Enter World" button
+        // Show "Enter World" and "Delete" buttons
         const enterWorldBtn = document.getElementById('enterWorldButton');
+        const deleteBtn = document.getElementById('deleteCharacterButton');
         if (enterWorldBtn) {
-            enterWorldBtn.style.display = 'block';
+            enterWorldBtn.style.display = 'flex';
             enterWorldBtn.onclick = () => this.startGameWithCharacter(index);
+        }
+        if (deleteBtn) {
+            deleteBtn.style.display = 'flex';
+            deleteBtn.onclick = () => {
+                if (this.selectedCharacterIndex !== null) {
+                    this.showDeleteConfirmation(this.selectedCharacterIndex, character.name || 'Unnamed Character');
+                }
+            };
         }
     }
     
@@ -1430,12 +1739,16 @@ export class UI {
     async showCharacterSelectionPreview(character) {
         const placeholder = document.getElementById('characterPreviewPlaceholder');
         const canvas = document.getElementById('characterSelectionPreviewCanvas');
+        const infoPanel = document.getElementById('wowCharacterInfo');
         
         if (!placeholder || !canvas) return;
         
-        // Hide placeholder, show canvas
+        // Hide placeholder, show canvas and info panel
         placeholder.style.display = 'none';
         canvas.style.display = 'block';
+        if (infoPanel) {
+            infoPanel.classList.remove('hidden');
+        }
         
         // Initialize or reuse CharacterPreview instance for selection screen
         if (!this.characterSelectionPreview) {
@@ -1455,6 +1768,33 @@ export class UI {
             appearance.eyeColor || '#4A90E2',
             appearance.raceFeatures || 0
         );
+        
+        // Update character info panel (WoW-style)
+        if (infoPanel) {
+            const nameEl = document.getElementById('wowCharacterInfoName');
+            const raceEl = document.getElementById('wowCharacterInfoRace');
+            const classEl = document.getElementById('wowCharacterInfoClass');
+            const levelEl = document.getElementById('wowCharacterInfoLevel');
+            const healthEl = document.getElementById('wowCharacterInfoHealth');
+            const strengthEl = document.getElementById('wowCharacterInfoStrength');
+            const magicEl = document.getElementById('wowCharacterInfoMagic');
+            const speedEl = document.getElementById('wowCharacterInfoSpeed');
+            
+            if (nameEl) nameEl.textContent = character.name || 'Unnamed Character';
+            if (raceEl) {
+                const race = (character.race || 'Human');
+                raceEl.textContent = race.charAt(0).toUpperCase() + race.slice(1);
+            }
+            if (classEl) {
+                const className = (character.class || 'Paladin');
+                classEl.textContent = className.charAt(0).toUpperCase() + className.slice(1);
+            }
+            if (levelEl) levelEl.textContent = character.stats?.level || character.level || 1;
+            if (healthEl) healthEl.textContent = `${character.stats?.health || 100}/${character.stats?.maxHealth || 100}`;
+            if (strengthEl) strengthEl.textContent = character.stats?.strength || 10;
+            if (magicEl) magicEl.textContent = character.stats?.magic || 10;
+            if (speedEl) speedEl.textContent = character.stats?.speed || 10;
+        }
     }
     
     /**
@@ -1503,7 +1843,7 @@ export class UI {
             // Store character info for feedback
             const characterToDelete = characters[characterIndex];
             const deletedCharacterName = characterToDelete.name || 'Unnamed Character';
-            const characterId = characterToDelete.id;
+            const characterId = characterToDelete.id || characterToDelete._id; // Support both id and _id
             
             // Check if user is authenticated
             const token = getToken();
@@ -1526,6 +1866,28 @@ export class UI {
                 alert('Error: Failed to save changes. Please check your browser storage settings.');
                 return false;
                 }
+            }
+            
+            // Clear selected character if it was deleted
+            if (this.selectedCharacterIndex === characterIndex) {
+                this.selectedCharacterIndex = null;
+                this.selectedCharacter = null;
+                
+                // Reset preview
+                const placeholder = document.getElementById('characterPreviewPlaceholder');
+                const canvas = document.getElementById('characterSelectionPreviewCanvas');
+                const infoPanel = document.getElementById('wowCharacterInfo');
+                const enterWorldBtn = document.getElementById('enterWorldButton');
+                const deleteBtn = document.getElementById('deleteCharacterButton');
+                
+                if (placeholder) placeholder.style.display = 'flex';
+                if (canvas) canvas.style.display = 'none';
+                if (infoPanel) infoPanel.classList.add('hidden');
+                if (enterWorldBtn) enterWorldBtn.style.display = 'none';
+                if (deleteBtn) deleteBtn.style.display = 'none';
+            } else if (this.selectedCharacterIndex > characterIndex) {
+                // Adjust selected index if a character before it was deleted
+                this.selectedCharacterIndex--;
             }
             
             // Reload character list to reflect changes

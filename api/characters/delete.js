@@ -61,7 +61,7 @@ async function deleteCharacterHandler(req, res) {
       });
 
       if (result.deletedCount === 0) {
-        throw new NotFoundError('Character');
+        throw new NotFoundError('Character not found or does not belong to user');
       }
 
       return res.status(200).json({
@@ -71,11 +71,8 @@ async function deleteCharacterHandler(req, res) {
           deletedId: characterId,
         },
       });
-    } catch (error) {
-      // Error handler middleware will catch this
-      throw error;
-    }
   } catch (error) {
+    // Error handler middleware will catch this
     throw error;
   }
 }
