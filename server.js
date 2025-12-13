@@ -72,6 +72,12 @@ app.delete('/api/characters/delete', async (req, res) => {
   await handler(req, res);
 });
 
+// Logging endpoints
+app.post('/api/log/character-selected', async (req, res) => {
+  const { default: handler } = await import('./api/log/character-selected.js');
+  await handler(req, res);
+});
+
 // Serve index.html for all other routes (SPA routing)
 app.get('*', (req, res) => {
   res.sendFile(join(__dirname, 'index.html'));

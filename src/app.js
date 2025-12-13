@@ -55,7 +55,22 @@ class Fantasy3D {
 
         // Initialize UI
         this.ui = new UI(this);
-        this.ui.showLoginScreen();
+        
+        // Check for auto-login (if user was previously logged in)
+        // This will automatically show main menu if logged in, or login screen if not
+        this.ui.checkAutoLogin().then((autoLoggedIn) => {
+            if (!autoLoggedIn) {
+                // Show login screen if auto-login failed or user logged out
+                console.log('Showing login screen (auto-login failed or user logged out)');
+                this.ui.showLoginScreen();
+            } else {
+                console.log('Auto-login successful, main menu should be visible');
+            }
+        }).catch((error) => {
+            console.error('Error during auto-login check:', error);
+            // On error, show login screen
+            this.ui.showLoginScreen();
+        });
 
         // Initialize world (but don't show until game starts)
         this.world = new World(this.scene);
@@ -68,6 +83,37 @@ class Fantasy3D {
     }
 
     async startGame(characterData) {
+        // Log character selection to server (via console)
+        const raceName = (characterData.race || 'human').charAt(0).toUpperCase() + (characterData.race || 'human').slice(1);
+        const genderName = (characterData.gender || 'male').charAt(0).toUpperCase() + (characterData.gender || 'male').slice(1);
+        const level = characterData.level || characterData.stats?.level || 1;
+        
+        console.log('\n⚔️  === CHARACTER SELECTED - GAME STARTING ===');
+        console.log(`👤 Character Name: ${characterData.name || 'Unnamed'}`);
+        console.log(`🏹 Race: ${raceName}`);
+        console.log(`⚧️  Gender: ${genderName}`);
+        console.log(`📊 Level: ${level}`);
+        console.log(`❤️  Health: ${characterData.stats?.health || 100}/${characterData.stats?.maxHealth || 100}`);
+        console.log(`⚔️  Strength: ${characterData.stats?.strength || 10}`);
+        console.log(`✨ Magic: ${characterData.stats?.magic || 10}`);
+        console.log(`💨 Speed: ${characterData.stats?.speed || 10}`);
+        console.log('==========================================\n');
+        
+        // Also send to server for logging (if server endpoint exists)
+        try {
+            await fetch('/api/log/character-selected', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    characterName: characterData.name,
+                    race: raceName,
+                    gender: genderName,
+                    level: level,
+                    stats: characterData.stats
+                })
+            }).catch(() => {}); // Silently fail if endpoint doesn't exist
+        } catch (e) {}
+        
         // Hide menus
         this.ui.hideAllMenus();
         this.ui.showHUD();

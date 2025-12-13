@@ -64,6 +64,14 @@ async function loginHandler(req, res) {
       role: user.role || 'user', // Include role in token
     });
 
+    // Log player login to server console
+    console.log('\n🎮 === PLAYER LOGIN ===');
+    console.log(`👤 Username: ${user.username}`);
+    console.log(`🆔 User ID: ${user._id.toString()}`);
+    console.log(`👑 Role: ${user.role || 'user'}`);
+    console.log(`📅 Last Login: ${user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'First login'}`);
+    console.log('=====================\n');
+
     // Return success response
     return res.status(200).json({
       error: false,

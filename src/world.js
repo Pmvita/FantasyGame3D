@@ -73,33 +73,33 @@ export class World {
             this.rockModel = rockData.scene;
             console.log('Rock model loaded');
 
-            // Load LowTreePond model (optional - fallback geometry will be used if missing)
+            // Load fantasy-login-bg model (optional - fallback geometry will be used if missing)
             try {
-                const pondData = await this.loader.loadAsync('src/World/Enviroment/LowTreePond.glb');
-                this.lowTreePondModel = pondData.scene;
+                const fantasyBgData = await this.loader.loadAsync('assets/backgrounds/fantasy-login-bg.glb');
+                this.lowTreePondModel = fantasyBgData.scene; // Keep same variable name for compatibility
                 
                 // Debug: Inspect the model structure
                 const box = new THREE.Box3().setFromObject(this.lowTreePondModel);
                 const size = box.getSize(new THREE.Vector3());
                 const center = box.getCenter(new THREE.Vector3());
-                console.log('LowTreePond model loaded');
-                console.log('LowTreePond - Size:', size, 'Center:', center);
-                console.log('LowTreePond - Bounding box min:', box.min, 'max:', box.max);
+                console.log('fantasy-login-bg model loaded');
+                console.log('fantasy-login-bg - Size:', size, 'Center:', center);
+                console.log('fantasy-login-bg - Bounding box min:', box.min, 'max:', box.max);
                 
                 // Log model children to see what it contains
                 this.lowTreePondModel.traverse((child) => {
                     if (child.isMesh) {
-                        console.log('LowTreePond mesh:', child.name || 'unnamed', 'position:', child.position);
+                        console.log('fantasy-login-bg mesh:', child.name || 'unnamed', 'position:', child.position);
                     }
                 });
-            } catch (pondError) {
+            } catch (fantasyBgError) {
                 // File doesn't exist (404) or other error - fallback geometry will be used
-                // This is expected if LowTreePond.glb doesn't exist yet
-                if (pondError.message && (pondError.message.includes('<!DOCTYPE') || pondError.message.includes('not valid JSON'))) {
+                // This is expected if fantasy-login-bg.glb doesn't exist yet
+                if (fantasyBgError.message && (fantasyBgError.message.includes('<!DOCTYPE') || fantasyBgError.message.includes('not valid JSON'))) {
                     // Suppress expected 404 errors - file doesn't exist, fallback will be used
-                    console.log('LowTreePond.glb not found - using fallback geometry (this is expected if the file doesn\'t exist)');
+                    console.log('fantasy-login-bg.glb not found - using fallback geometry (this is expected if the file doesn\'t exist)');
                 } else {
-                    console.log('LowTreePond model unavailable - using fallback geometry');
+                    console.log('fantasy-login-bg model unavailable - using fallback geometry');
                 }
             }
 

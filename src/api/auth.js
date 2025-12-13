@@ -76,6 +76,22 @@ export async function verifyToken() {
       throw new Error(response.message || 'Token verification failed');
     }
 
+    // The API returns { userId, username, role } directly in data
+    // Wrap it in a user object for consistency with other auth responses
+    if (response.data) {
+      return {
+        user: {
+          userId: response.data.userId,
+          username: response.data.username,
+          role: response.data.role || 'user',
+        },
+        // Also include direct access for backward compatibility
+        userId: response.data.userId,
+        username: response.data.username,
+        role: response.data.role || 'user',
+      };
+    }
+
     return response.data;
   } catch (error) {
     removeToken();

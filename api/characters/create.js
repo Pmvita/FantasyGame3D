@@ -68,6 +68,8 @@ async function createCharacterHandler(req, res) {
         name: characterData.name.trim(),
         race: characterData.race,
         gender: characterData.gender || 'male',
+        class: characterData.class || 'paladin', // Include class field
+        characterType: characterData.characterType || 'new', // Include character type
         appearance: characterData.appearance || {},
         stats: characterData.stats,
         equipment: characterData.equipment || {
@@ -96,6 +98,8 @@ async function createCharacterHandler(req, res) {
             name: characterDoc.name,
             race: characterDoc.race,
             gender: characterDoc.gender,
+            class: characterDoc.class,
+            characterType: characterDoc.characterType,
             appearance: characterDoc.appearance,
             stats: characterDoc.stats,
             equipment: characterDoc.equipment,
