@@ -17,6 +17,21 @@ export class UI {
         this.skillCooldowns = {}; // Track cooldowns for each skill slot
         this.setupEventListeners();
         this.initializeInventory();
+        this.onboardingStep = 0;
+        this.onboardingSteps = [
+            {
+                title: 'Welcome to Fantasy3D!',
+                text: 'Embark on an epic adventure in a magical 3D world. Let\'s get you started!'
+            },
+            {
+                title: 'Create Your Character',
+                text: 'Choose your race, customize your appearance, and set your stats. Don\'t worry - you can always change things later!'
+            },
+            {
+                title: 'Ready to Play!',
+                text: 'Use WASD or arrow keys to move, click to interact, and explore the world. Have fun!'
+            }
+        ];
     }
 
     setupEventListeners() {
@@ -65,6 +80,20 @@ export class UI {
         document.getElementById('createCharacterButton').addEventListener('click', () => {
             this.showCharacterCreation();
         });
+
+        // Onboarding flow (WoW-style tutorial)
+        const skipOnboardingBtn = document.getElementById('skipOnboardingButton');
+        const nextOnboardingBtn = document.getElementById('nextOnboardingButton');
+        if (skipOnboardingBtn) {
+            skipOnboardingBtn.addEventListener('click', () => {
+                this.skipOnboarding();
+            });
+        }
+        if (nextOnboardingBtn) {
+            nextOnboardingBtn.addEventListener('click', () => {
+                this.nextOnboardingStep();
+            });
+        }
 
         // Logout button
         document.getElementById('logoutButton').addEventListener('click', () => {
@@ -575,6 +604,16 @@ export class UI {
         
         // Update username display
         this.updateMainMenuUsername();
+        
+        // Check if we should show onboarding (only for new users)
+        const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+        const hasCharacters = localStorage.getItem('fantasy3DCharacters') || getToken();
+        if (!hasSeenOnboarding && !hasCharacters) {
+            // Small delay to let menu render first
+            setTimeout(() => {
+                this.showOnboarding();
+            }, 500);
+        }
     }
 
     updateMainMenuUsername() {
@@ -673,8 +712,89 @@ export class UI {
         document.getElementById('speedStat').value = raceStats.speed;
         document.getElementById('speedValue').textContent = raceStats.speed;
         
+        // Check if this is a new player and show tip (WoW-style)
+        this.checkAndShowNewPlayerTip();
+        
         // Update preview with initial values
         this.updatePreview();
+    }
+
+    // Check if user is new and show helpful tip (WoW character creation pattern)
+    checkAndShowNewPlayerTip() {
+        const hasCreatedCharacter = localStorage.getItem('hasCreatedCharacter');
+        const tipElement = document.getElementById('newPlayerTip');
+        
+        if (!hasCreatedCharacter && tipElement) {
+            // Show tip for new players
+            tipElement.style.display = 'block';
+        } else if (tipElement) {
+            // Hide for returning players
+            tipElement.style.display = 'none';
+        }
+    }
+
+    // Onboarding flow (WoW-style tutorial system)
+    showOnboarding() {
+        const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+        if (hasSeenOnboarding) {
+            return; // Skip if already seen
+        }
+
+        const overlay = document.getElementById('onboardingOverlay');
+        if (overlay) {
+            this.onboardingStep = 0;
+            this.updateOnboardingDisplay();
+            overlay.style.display = 'flex';
+        }
+    }
+
+    updateOnboardingDisplay() {
+        const title = document.getElementById('onboardingTitle');
+        const text = document.getElementById('onboardingText');
+        const nextBtn = document.getElementById('nextOnboardingButton');
+        const progressDots = document.querySelectorAll('.onboarding-dot');
+
+        if (!title || !text || !nextBtn) return;
+
+        const step = this.onboardingSteps[this.onboardingStep];
+        if (step) {
+            title.textContent = step.title;
+            text.textContent = step.text;
+        }
+
+        // Update button text
+        if (this.onboardingStep === this.onboardingSteps.length - 1) {
+            nextBtn.textContent = 'Start Playing';
+        } else {
+            nextBtn.textContent = 'Next';
+        }
+
+        // Update progress dots
+        progressDots.forEach((dot, index) => {
+            if (index === this.onboardingStep) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    nextOnboardingStep() {
+        this.onboardingStep++;
+        if (this.onboardingStep >= this.onboardingSteps.length) {
+            // Completed onboarding
+            this.skipOnboarding();
+        } else {
+            this.updateOnboardingDisplay();
+        }
+    }
+
+    skipOnboarding() {
+        const overlay = document.getElementById('onboardingOverlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+            localStorage.setItem('hasSeenOnboarding', 'true');
+        }
     }
 
     setupSliderControls(sliderId, prevId, nextId, valueId) {
@@ -1049,7 +1169,7 @@ export class UI {
             if (token) {
                 // Save to API
                 await charactersAPI.createCharacter(characterData);
-        this.showMainMenu();
+                this.showMainMenu();
                 alert('Character saved to your account!');
             } else {
                 // Fallback to LocalStorage
@@ -1059,6 +1179,9 @@ export class UI {
                 this.showMainMenu();
                 alert('Character saved locally! Create an account to sync across devices.');
             }
+            
+            // Mark that user has created a character (for hiding new player tips)
+            localStorage.setItem('hasCreatedCharacter', 'true');
         } catch (error) {
             console.error('Error saving character:', error);
             alert('Failed to save character: ' + (error.message || 'Unknown error'));
