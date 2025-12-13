@@ -287,7 +287,7 @@ export class CharacterPreview {
         }
     }
 
-    async updateCharacter(race, gender, hairColor, skinTone, faceType = 0, hairStyle = 0, facialFeatures = 0) {
+    async updateCharacter(race, gender, hairColor, skinTone, faceType = 0, hairStyle = 0, facialFeatures = 0, eyeColor = '#4A90E2', raceFeatures = 0) {
         // Remove old character
         if (this.characterGroup) {
             this.scene.remove(this.characterGroup);
@@ -382,13 +382,13 @@ export class CharacterPreview {
             this.characterGroup.add(model);
         } else {
             // Fallback to simple geometry if model not found
-            this.createFallbackCharacter(race, gender, hairColor, skinTone, faceType, hairStyle, facialFeatures);
+            this.createFallbackCharacter(race, gender, hairColor, skinTone, faceType, hairStyle, facialFeatures, eyeColor, raceFeatures);
         }
 
         this.scene.add(this.characterGroup);
     }
 
-    createFallbackCharacter(race, gender, hairColor, skinTone, faceType = 0, hairStyle = 0, facialFeatures = 0) {
+    createFallbackCharacter(race, gender, hairColor, skinTone, faceType = 0, hairStyle = 0, facialFeatures = 0, eyeColor = '#4A90E2', raceFeatures = 0) {
         // Enhanced fallback character with race and gender-specific features
         const raceProps = this.getRaceProperties(race, gender);
         const isFemale = gender === 'female';
@@ -458,8 +458,11 @@ export class CharacterPreview {
             this.characterGroup.add(hair);
         });
 
-        // Race-specific features
-        this.addRaceSpecificFeatures(race, gender, raceProps, headSize, skinColor, facialFeatures);
+        // Add eyes with eye color
+        this.addEyes(head, headSize, eyeColor);
+        
+        // Race-specific features (now includes raceFeatures parameter)
+        this.addRaceSpecificFeatures(race, gender, raceProps, headSize, skinColor, facialFeatures, raceFeatures);
 
         // Add arms
         const armGeometry = new THREE.BoxGeometry(
@@ -561,7 +564,30 @@ export class CharacterPreview {
         return geometries;
     }
 
-    addRaceSpecificFeatures(race, gender, raceProps, headSize, skinColor, facialFeatures) {
+    /**
+     * Adds eyes with eye color to the character head
+     */
+    addEyes(head, headSize, eyeColor) {
+        const eyeSize = headSize * 0.08;
+        const eyeGeometry = new THREE.SphereGeometry(eyeSize, 8, 8);
+        const eyeMaterial = new THREE.MeshStandardMaterial({
+            color: eyeColor,
+            emissive: eyeColor,
+            emissiveIntensity: 0.3
+        });
+
+        // Left eye
+        const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial.clone());
+        leftEye.position.set(-headSize * 0.2, 0, headSize * 0.45);
+        head.add(leftEye);
+
+        // Right eye
+        const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial.clone());
+        rightEye.position.set(headSize * 0.2, 0, headSize * 0.45);
+        head.add(rightEye);
+    }
+
+    addRaceSpecificFeatures(race, gender, raceProps, headSize, skinColor, facialFeatures, raceFeatures = 0) {
         const isFemale = gender === 'female';
         
         switch (race) {
@@ -584,6 +610,11 @@ export class CharacterPreview {
                 rightEar.position.set(headSize / 2 + 0.08, raceProps.bodyHeight + headSize * 0.6, 0);
                 rightEar.rotation.z = Math.PI / 5;
                 this.characterGroup.add(rightEar);
+
+                // Elf markings (raceFeatures 0-9 variations)
+                if (raceFeatures > 0) {
+                    this.addElfMarkings(headSize, raceProps, skinColor, raceFeatures);
+                }
                 break;
 
             case 'dwarf':
@@ -620,9 +651,11 @@ export class CharacterPreview {
                 break;
 
             case 'demon':
-                // Horns
-                const hornSize = isFemale ? 0.5 : 0.6;
-                const hornGeometry = new THREE.ConeGeometry(0.08, hornSize, 8);
+                // Horns (horn style varies by raceFeatures 0-9)
+                const baseHornSize = isFemale ? 0.5 : 0.6;
+                const hornVariation = raceFeatures * 0.05; // Slight size/style variation
+                const hornSize = baseHornSize + hornVariation;
+                const hornGeometry = new THREE.ConeGeometry(0.08 + hornVariation * 0.5, hornSize, 8);
                 const hornMaterial = new THREE.MeshStandardMaterial({
                     color: 0x1a1a1a,
                     metalness: 0.3,
@@ -631,12 +664,12 @@ export class CharacterPreview {
                 
                 const leftHorn = new THREE.Mesh(hornGeometry, hornMaterial);
                 leftHorn.position.set(-headSize * 0.25, raceProps.bodyHeight + headSize + 0.25, 0);
-                leftHorn.rotation.z = -Math.PI / 8;
+                leftHorn.rotation.z = -Math.PI / 8 - (raceFeatures * 0.02);
                 this.characterGroup.add(leftHorn);
 
                 const rightHorn = new THREE.Mesh(hornGeometry, hornMaterial);
                 rightHorn.position.set(headSize * 0.25, raceProps.bodyHeight + headSize + 0.25, 0);
-                rightHorn.rotation.z = Math.PI / 8;
+                rightHorn.rotation.z = Math.PI / 8 + (raceFeatures * 0.02);
                 this.characterGroup.add(rightHorn);
 
                 // Reddish skin tint
@@ -652,6 +685,11 @@ export class CharacterPreview {
 
             case 'human':
             default:
+                // Human tattoos (raceFeatures 0-9 variations)
+                if (raceFeatures > 0) {
+                    this.addHumanTattoos(headSize, raceProps, raceFeatures);
+                }
+                
                 // Human characters can have facial features based on facialFeatures value
                 if (facialFeatures > 0 && !isFemale) {
                     // Add facial hair variations
@@ -670,6 +708,52 @@ export class CharacterPreview {
                 }
                 break;
         }
+    }
+
+    /**
+     * Adds elf facial/body markings (WoW-style race features)
+     */
+    addElfMarkings(headSize, raceProps, skinColor, raceFeatures) {
+        const markingColor = new THREE.Color(0x8b5cf6); // Purple markings
+        const markingIntensity = 0.3 + (raceFeatures * 0.05);
+        
+        // Add small geometric patterns on face/body
+        const markingGeometry = new THREE.PlaneGeometry(headSize * 0.3, headSize * 0.2);
+        const markingMaterial = new THREE.MeshStandardMaterial({
+            color: markingColor,
+            transparent: true,
+            opacity: markingIntensity,
+            side: THREE.DoubleSide
+        });
+        
+        // Face markings
+        const faceMarking = new THREE.Mesh(markingGeometry, markingMaterial);
+        faceMarking.position.set(0, raceProps.bodyHeight + headSize * 0.7, headSize * 0.45);
+        faceMarking.rotation.y = Math.PI;
+        this.characterGroup.add(faceMarking);
+    }
+
+    /**
+     * Adds human tattoos (WoW-style race features)
+     */
+    addHumanTattoos(headSize, raceProps, raceFeatures) {
+        const tattooColor = new THREE.Color(0x4a4a4a); // Dark tattoo color
+        const tattooIntensity = 0.4 + (raceFeatures * 0.03);
+        
+        // Add tattoo patterns on body
+        const tattooGeometry = new THREE.PlaneGeometry(raceProps.bodyWidth * 0.8, raceProps.bodyHeight * 0.6);
+        const tattooMaterial = new THREE.MeshStandardMaterial({
+            color: tattooColor,
+            transparent: true,
+            opacity: tattooIntensity,
+            side: THREE.DoubleSide
+        });
+        
+        // Body tattoos
+        const bodyTattoo = new THREE.Mesh(tattooGeometry, tattooMaterial);
+        bodyTattoo.position.set(0, raceProps.bodyHeight * 0.4, raceProps.bodyDepth / 2 + 0.05);
+        bodyTattoo.rotation.y = Math.PI;
+        this.characterGroup.add(bodyTattoo);
     }
 
     getRaceProperties(race, gender = 'male') {

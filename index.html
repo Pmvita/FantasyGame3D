@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap" rel="stylesheet">
+    <!-- Giphy SDK -->
+    <script src="https://unpkg.com/@giphy/js-fetch-api@4.0.0/dist/index.js"></script>
     <style>
         :root {
             /* Responsive scaling variables */
@@ -85,87 +87,135 @@
             pointer-events: auto;
         }
 
-        /* Login Screen */
+        /* Login Screen - WoW-style minimalist */
         #loginScreen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(26, 26, 46, 1) 0%, rgba(20, 20, 35, 1) 100%);
+            /* Fallback gradient if background image not loaded */
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(20, 20, 35, 0.98) 100%);
+            /* Fantasy background image - add your image to assets/backgrounds/ */
+            background-image: 
+                linear-gradient(135deg, rgba(26, 26, 46, 0.6) 0%, rgba(20, 20, 35, 0.6) 100%),
+                url('assets/backgrounds/fantasy-login-bg.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-blend-mode: normal;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 200;
         }
+        
+        /* Subtle background pattern/texture overlay */
+        #loginScreen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(74, 144, 226, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
 
+        /* Giphy animation containers for ambient effects */
+        .giphy-ambient {
+            position: absolute;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .giphy-ambient.top-left {
+            top: 10%;
+            left: 5%;
+            width: 150px;
+            height: 150px;
+        }
+
+        .giphy-ambient.top-right {
+            top: 15%;
+            right: 5%;
+            width: 120px;
+            height: 120px;
+        }
+
+        .giphy-ambient.bottom-left {
+            bottom: 10%;
+            left: 8%;
+            width: 100px;
+            height: 100px;
+        }
+
+        .giphy-ambient.bottom-right {
+            bottom: 15%;
+            right: 8%;
+            width: 130px;
+            height: 130px;
+        }
+
+        /* Giphy loading animation (for button states) */
+        .giphy-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .giphy-loading.active {
+            opacity: 1;
+        }
+
+        /* WoW-style login container - clean and focused */
         .login-container {
-            width: clamp(320px, 90vw, 500px);
-            padding: clamp(30px, 6vh, 60px) clamp(20px, 4vw, 40px);
+            width: clamp(320px, 90vw, 450px);
+            padding: clamp(40px, 7vh, 60px) clamp(30px, 5vw, 50px);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: clamp(20px, 3vh, 30px);
+            gap: clamp(25px, 4vh, 35px);
+            background: rgba(0, 0, 0, 0.4);
+            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.1);
+            border-radius: clamp(8px, 1vw, 12px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 1;
         }
 
+        /* WoW-style clean logo - minimalist */
         .game-logo {
             position: relative;
-            margin-bottom: clamp(10px, 2vh, 20px);
-        }
-
-        .game-logo-banner {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(74, 144, 226, 0.3) 100%);
-            border: clamp(2px, 0.3vw, 3px) solid rgba(255, 215, 0, 0.6);
-            border-radius: var(--border-radius);
-            padding: clamp(15px, 2vh, 20px) clamp(25px, 4vw, 40px);
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2);
+            margin-bottom: clamp(30px, 5vh, 50px);
+            text-align: center;
         }
 
         .game-logo-text {
             font-family: "Shadows Into Light", cursive;
             font-size: var(--font-xxxl);
             font-weight: bold;
-            color: white;
+            color: rgba(255, 255, 255, 0.95);
             text-shadow: 
-                0 0 10px rgba(255, 215, 0, 0.8),
-                0 0 20px rgba(255, 215, 0, 0.6),
-                2px 2px 4px rgba(0, 0, 0, 0.8),
-                -2px -2px 4px rgba(139, 92, 246, 0.5);
-            letter-spacing: clamp(1px, 0.2vw, 2px);
-            display: flex;
-            align-items: center;
-            gap: clamp(10px, 1.5vw, 15px);
-        }
-
-        .logo-gem {
-            width: clamp(30px, 4vw, 40px);
-            height: clamp(30px, 4vw, 40px);
-            background: linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(74, 144, 226, 1) 50%, rgba(139, 92, 246, 1) 100%);
-            border-radius: 50%;
-            box-shadow: 
-                0 0 20px rgba(139, 92, 246, 0.8),
-                0 0 40px rgba(139, 92, 246, 0.6),
-                inset 0 0 10px rgba(255, 255, 255, 0.3);
-            position: relative;
-            animation: gemPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes gemPulse {
-            0%, 100% {
-                transform: scale(1);
-                box-shadow: 
-                    0 0 20px rgba(139, 92, 246, 0.8),
-                    0 0 40px rgba(139, 92, 246, 0.6),
-                    inset 0 0 10px rgba(255, 255, 255, 0.3);
-            }
-            50% {
-                transform: scale(1.1);
-                box-shadow: 
-                    0 0 30px rgba(139, 92, 246, 1),
-                    0 0 60px rgba(139, 92, 246, 0.8),
-                    inset 0 0 15px rgba(255, 255, 255, 0.5);
-            }
+                0 2px 4px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(139, 92, 246, 0.4);
+            letter-spacing: clamp(2px, 0.3vw, 3px);
+            display: inline-block;
+            margin-bottom: clamp(10px, 1.5vh, 15px);
         }
 
         .login-input-group {
@@ -216,23 +266,22 @@
             accent-color: rgba(139, 92, 246, 0.8);
         }
 
+        /* WoW-style login button - clean and professional */
         .login-button {
             width: 100%;
-            padding: clamp(15px, 2vh, 18px);
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(74, 144, 226, 0.9) 100%);
-            border: clamp(2px, 0.25vw, 2px) solid rgba(255, 215, 0, 0.6);
-            border-radius: clamp(5px, 0.6vw, 5px);
+            padding: clamp(14px, 2vh, 16px);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.85) 0%, rgba(74, 144, 226, 0.85) 100%);
+            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.2);
+            border-radius: clamp(4px, 0.5vw, 6px);
             color: white;
-            font-size: var(--font-lg);
-            font-weight: bold;
-            font-family: "Shadows Into Light", cursive;
-            text-transform: uppercase;
-            letter-spacing: clamp(1px, 0.2vw, 2px);
+            font-size: var(--font-md);
+            font-weight: 600;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-transform: none;
+            letter-spacing: 0.5px;
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             height: var(--button-height);
             min-height: 44px; /* Accessibility touch target */
         }
@@ -258,10 +307,10 @@
         }
 
         .login-button:hover {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(74, 144, 226, 1) 100%);
-            border-color: rgba(255, 215, 0, 1);
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(74, 144, 226, 0.95) 100%);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transform: translateY(-1px);
         }
 
         .login-button:active {
@@ -672,28 +721,25 @@
             border-bottom-right-radius: 10px;
         }
 
-        /* Character Selection */
+        /* Character Selection - WoW-style clean layout */
         #characterSelection {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
+            background: rgba(20, 20, 30, 0.95);
             padding: 0;
-            border: clamp(2px, 0.3vw, 3px) solid rgba(255, 215, 0, 0.6);
-            border-radius: var(--border-radius);
-            width: clamp(320px, 90vw, 1000px);
+            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.15);
+            border-radius: clamp(8px, 1vw, 12px);
+            width: clamp(800px, 90vw, 1200px);
             max-width: 95vw;
-            height: clamp(500px, 85vh, 700px);
+            height: clamp(550px, 85vh, 750px);
             max-height: 90vh;
             overflow: hidden;
             display: none;
-            flex-direction: column;
-            font-family: "Shadows Into Light", cursive;
-            box-shadow: 
-                0 0 40px rgba(139, 92, 246, 0.6),
-                inset 0 0 30px rgba(255, 215, 0, 0.1),
-                0 0 80px rgba(74, 144, 226, 0.4);
+            flex-direction: row; /* WoW-style: preview on left, list on right */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
             z-index: 150;
             position: relative;
@@ -773,19 +819,61 @@
             flex: 1;
         }
 
+        /* WoW-style: Character preview on left, list on right */
+        .character-selection-preview {
+            width: clamp(350px, 40vw, 450px);
+            min-width: 300px;
+            background: rgba(10, 10, 20, 0.8);
+            border-right: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(30px, 4vh, 50px);
+            position: relative;
+        }
+
+        .character-selection-preview::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.5) 100%);
+            pointer-events: none;
+        }
+
+        .character-selection-preview-placeholder {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: clamp(16px, 2vw, 20px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .character-selection-preview-placeholder i {
+            font-size: clamp(48px, 6vw, 64px);
+            margin-bottom: clamp(15px, 2vh, 20px);
+            display: block;
+            opacity: 0.4;
+        }
+
         .character-selection-content {
             flex: 1;
             overflow-y: auto;
-            padding: clamp(20px, 3vh, 30px) clamp(25px, 4vw, 40px);
+            padding: clamp(25px, 3vh, 35px) clamp(25px, 4vw, 40px);
             position: relative;
             z-index: 1;
-            min-height: 0; /* Allow flexbox to shrink */
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .character-selection-footer {
-            padding: clamp(15px, 2vh, 20px) clamp(25px, 4vw, 40px);
-            border-top: clamp(2px, 0.25vw, 2px) solid rgba(255, 215, 0, 0.3);
-            background: linear-gradient(180deg, transparent 0%, rgba(74, 144, 226, 0.2) 100%);
+            padding: clamp(15px, 2vh, 20px) clamp(25px, 4vw, 35px);
+            border-top: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 15, 25, 0.5);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -795,82 +883,71 @@
             flex-shrink: 0;
         }
 
+        /* WoW-style create new button */
         .create-new-button {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(74, 144, 226, 0.9) 100%);
+            padding: clamp(10px, 1.5vh, 12px) clamp(20px, 3vw, 24px);
+            background: rgba(139, 92, 246, 0.7);
             color: white;
-            border: 2px solid rgba(255, 215, 0, 0.6);
-            border-radius: 5px;
-            font-family: "Shadows Into Light", cursive;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
-            font-size: 14px;
-            font-size: 1em;
+            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.2);
+            border-radius: clamp(4px, 0.5vw, 6px);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             font-weight: 600;
+            font-size: clamp(14px, 1.5vw, 16px);
+            text-transform: none;
+            letter-spacing: 0.5px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .create-new-button:hover {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(74, 144, 226, 1) 100%);
-            border-color: rgba(255, 215, 0, 1);
-            box-shadow: 0 0 25px rgba(139, 92, 246, 0.7);
-            transform: translateY(-2px);
+            background: rgba(139, 92, 246, 0.85);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transform: translateY(-1px);
         }
 
         .create-new-button:active {
             transform: translateY(0);
         }
 
+        /* WoW-style character list - vertical list */
         #characterList {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(clamp(250px, 30vw, 280px), 1fr));
-            gap: clamp(15px, 2vw, 20px);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(12px, 1.5vw, 16px);
             overflow-y: auto;
             flex: 1;
         }
 
+        /* WoW-style character card - clean and minimal */
         .character-card {
-            background: linear-gradient(135deg, rgba(26, 26, 46, 0.6) 0%, rgba(20, 20, 35, 0.6) 100%);
-            padding: clamp(15px, 2vw, 20px);
-            border-radius: clamp(8px, 1vw, 10px);
+            background: rgba(20, 20, 30, 0.6);
+            padding: clamp(18px, 2.5vw, 24px);
+            border-radius: clamp(6px, 0.8vw, 8px);
             cursor: pointer;
-            transition: all 0.3s ease;
-            border: clamp(2px, 0.25vw, 2px) solid rgba(255, 215, 0, 0.3);
+            transition: all 0.2s ease;
+            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.15);
             position: relative;
-            overflow: visible;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(139, 92, 246, 0.2);
-            min-height: clamp(180px, 25vh, 222px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            min-height: clamp(120px, 15vh, 150px);
         }
 
         .character-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, rgba(139, 92, 246, 0.8), rgba(74, 144, 226, 0.8), rgba(139, 92, 246, 0.8));
-            background-size: 200% 100%;
-            opacity: 0;
-            transition: opacity 0.3s;
-            border-radius: 10px 10px 0 0;
+            display: none; /* Remove decorative top bar */
         }
 
         .character-card:hover {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(74, 144, 226, 0.15) 100%);
-            border-color: rgba(255, 215, 0, 0.8);
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.4);
+            background: rgba(30, 30, 45, 0.8);
+            border-color: rgba(139, 92, 246, 0.5);
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
-        .character-card:hover::before {
-            opacity: 1;
+        .character-card.selected {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: rgba(139, 92, 246, 0.7);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
         }
 
         .character-delete-button {
@@ -916,18 +993,20 @@
             outline-offset: 2px;
         }
 
+        /* WoW-style character card header - clean layout */
         .character-card-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: clamp(12px, 1.5vw, 16px);
+            margin-bottom: clamp(12px, 1.5vh, 15px);
+            padding-bottom: clamp(12px, 1.5vh, 15px);
+            border-bottom: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.1);
         }
 
         .character-card-icon {
-            font-size: 2.5em;
+            font-size: clamp(2em, 2.5vw, 2.5em);
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+            opacity: 0.9;
         }
 
         .character-card-title {
@@ -1022,8 +1101,21 @@
             font-size: 1.1em;
         }
 
+        /* WoW-style footer buttons layout */
         #backFromSelectionButton {
-            width: 100%;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        #enterWorldButton {
+            flex: 1;
+            max-width: 200px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.85) 0%, rgba(74, 144, 226, 0.85) 100%);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        #enterWorldButton:hover {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(74, 144, 226, 0.95) 100%);
         }
 
         /* Custom Scrollbar */
@@ -1218,16 +1310,16 @@
         .character-card:nth-child(5) { animation-delay: 0.25s; }
         .character-card:nth-child(6) { animation-delay: 0.3s; }
 
-        /* Character Creation */
+        /* Character Creation - WoW-style clean and minimal */
         #characterCreation {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
+            background: rgba(20, 20, 30, 0.95);
             padding: 0;
-            border: clamp(2px, 0.3vw, 3px) solid rgba(255, 215, 0, 0.6);
-            border-radius: var(--border-radius);
+            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.15);
+            border-radius: clamp(8px, 1vw, 12px);
             width: clamp(320px, 95vw, 1600px);
             max-width: 95vw;
             min-width: min(320px, 95vw);
@@ -1236,10 +1328,7 @@
             overflow: hidden;
             display: none;
             flex-direction: column;
-            box-shadow: 
-                0 0 40px rgba(139, 92, 246, 0.6),
-                inset 0 0 30px rgba(255, 215, 0, 0.1),
-                0 0 80px rgba(74, 144, 226, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
             z-index: 150;
             position: relative;
@@ -1259,54 +1348,31 @@
             z-index: 0;
         }
 
-        #characterCreation::after {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, 
-                rgba(139, 92, 246, 0.8) 0%, 
-                rgba(74, 144, 226, 0.8) 25%,
-                rgba(139, 92, 246, 0.8) 50%,
-                rgba(74, 144, 226, 0.8) 75%,
-                rgba(139, 92, 246, 0.8) 100%);
-            background-size: 400% 400%;
-            animation: borderGlow 3s ease infinite;
-            border-radius: 15px;
-            z-index: -1;
-            opacity: 0.5;
-        }
-
+        /* WoW-style character creation - clean and minimal */
         .character-creation-header {
-            padding: clamp(20px, 3vh, 30px) clamp(25px, 4vw, 40px) clamp(15px, 2vh, 20px);
-            border-bottom: clamp(2px, 0.25vw, 2px) solid rgba(255, 215, 0, 0.3);
-            background: linear-gradient(180deg, rgba(139, 92, 246, 0.2) 0%, transparent 100%);
+            padding: clamp(20px, 3vh, 25px) clamp(25px, 4vw, 35px) clamp(15px, 2vh, 18px);
+            border-bottom: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 15, 25, 0.5);
             position: relative;
             z-index: 1;
             flex-shrink: 0;
         }
 
         .character-creation-title {
-            text-align: center;
+            text-align: left;
             margin: 0;
-            font-size: var(--font-xxl);
-            font-weight: bold;
-            font-family: "Shadows Into Light", cursive;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 1) 0%, rgba(139, 92, 246, 1) 50%, rgba(74, 144, 226, 1) 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-            letter-spacing: clamp(2px, 0.3vw, 3px);
+            font-size: clamp(24px, 3vw, 32px);
+            font-weight: 600;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 1px;
         }
 
 
         .character-creation-footer {
-            padding: clamp(15px, 2vh, 20px) clamp(25px, 4vw, 40px);
-            border-top: clamp(2px, 0.25vw, 2px) solid rgba(255, 215, 0, 0.3);
-            background: linear-gradient(180deg, transparent 0%, rgba(74, 144, 226, 0.2) 100%);
+            padding: clamp(15px, 2vh, 20px) clamp(25px, 4vw, 35px);
+            border-top: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 15, 25, 0.5);
             position: relative;
             z-index: 1;
             flex-shrink: 0;
@@ -1802,6 +1868,46 @@
         .creation-section input[type="color"]:hover {
             border-color: #4a90e2;
             box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
+        }
+
+        /* WoW-style randomize name button */
+        .randomize-button {
+            padding: clamp(10px, 1.2vh, 12px) clamp(16px, 2vw, 20px);
+            background: rgba(139, 92, 246, 0.6);
+            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.2);
+            border-radius: clamp(6px, 0.8vw, 8px);
+            color: white;
+            font-size: clamp(14px, 1.5vw, 16px);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: clamp(6px, 0.8vw, 8px);
+        }
+
+        .randomize-button:hover {
+            background: rgba(139, 92, 246, 0.8);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .randomize-button:active {
+            transform: translateY(0);
+        }
+
+        .randomize-button i {
+            font-size: clamp(14px, 1.5vw, 16px);
+        }
+
+        /* Race-specific features styling */
+        .race-specific-label {
+            color: rgba(255, 215, 0, 0.9);
+        }
+
+        .race-specific-container {
+            margin-top: clamp(8px, 1vh, 12px);
         }
 
         .stat-slider-container {
@@ -2634,6 +2740,12 @@
         <div id="ui">
             <!-- Login Screen -->
             <div id="loginScreen">
+                <!-- Giphy ambient animations -->
+                <div class="giphy-ambient top-left" id="giphyAmbient1"></div>
+                <div class="giphy-ambient top-right" id="giphyAmbient2"></div>
+                <div class="giphy-ambient bottom-left" id="giphyAmbient3"></div>
+                <div class="giphy-ambient bottom-right" id="giphyAmbient4"></div>
+                
                 <div class="login-container">
                     <div class="game-logo">
                         <div class="game-logo-banner">
@@ -2742,41 +2854,41 @@
                 </div>
             </div>
 
-            <!-- Character Selection -->
+            <!-- Character Selection - WoW-style layout -->
             <div id="characterSelection" class="hidden">
-                <!-- Decorative corners -->
-                <div class="menu-corner-decoration top-left"></div>
-                <div class="menu-corner-decoration top-right"></div>
-                <div class="menu-corner-decoration bottom-left"></div>
-                <div class="menu-corner-decoration bottom-right"></div>
-                
                 <!-- Header -->
                 <div class="character-selection-header">
                     <h2 class="character-selection-title">Character Selection</h2>
-                    <div id="characterSelectionHeader">
-                        <button class="create-new-button" id="createNewFromSelectionButton">+ Create New</button>
-                    </div>
+                    <button class="create-new-button" id="createNewFromSelectionButton">+ Create New Character</button>
                 </div>
                 
-                <!-- Content -->
-                <div class="character-selection-content">
-                    <div id="characterList"></div>
+                <!-- Main Content Area (Preview Left, List Right) -->
+                <div style="display: flex; flex: 1; min-height: 0; overflow: hidden;">
+                    <!-- Character Preview Area (WoW-style left panel) -->
+                    <div class="character-selection-preview">
+                        <div class="character-selection-preview-placeholder" id="characterPreviewPlaceholder">
+                            <i class="fas fa-user-circle"></i>
+                            <p>Select a character to preview</p>
+                        </div>
+                        <!-- Character preview canvas will be inserted here when character is selected -->
+                        <canvas id="characterSelectionPreviewCanvas" style="display: none; max-width: 100%; max-height: 100%; border-radius: clamp(8px, 1vw, 12px); position: relative; z-index: 1;"></canvas>
+                    </div>
+                    
+                    <!-- Character List (WoW-style right panel) -->
+                    <div class="character-selection-content">
+                        <div id="characterList"></div>
+                    </div>
                 </div>
                 
                 <!-- Footer -->
                 <div class="character-selection-footer">
                     <button class="menu-button" id="backFromSelectionButton">← Back to Menu</button>
+                    <button class="menu-button primary" id="enterWorldButton" style="display: none;">Enter World</button>
                 </div>
             </div>
 
-            <!-- Character Creation -->
+            <!-- Character Creation - WoW-style minimalist -->
             <div id="characterCreation" class="hidden">
-                <!-- Decorative corners -->
-                <div class="menu-corner-decoration top-left"></div>
-                <div class="menu-corner-decoration top-right"></div>
-                <div class="menu-corner-decoration bottom-left"></div>
-                <div class="menu-corner-decoration bottom-right"></div>
-                
                 <!-- Header -->
                 <div class="character-creation-header">
                     <h2 class="character-creation-title">Create Character</h2>
@@ -2823,8 +2935,15 @@
 
                         <div class="creation-section">
                             <h3><i class="fas fa-pen"></i> Character Name</h3>
-                            <label>Enter your character's name:</label>
-                            <input type="text" id="characterName" placeholder="Enter name" maxlength="20">
+                            <div style="display: flex; gap: clamp(8px, 1vw, 12px); align-items: flex-end;">
+                                <div style="flex: 1;">
+                                    <label>Enter your character's name:</label>
+                                    <input type="text" id="characterName" placeholder="Enter name" maxlength="20">
+                                </div>
+                                <button type="button" id="randomizeNameButton" class="randomize-button" title="Randomize Name">
+                                    <i class="fas fa-dice"></i> Random
+                                </button>
+                            </div>
                         </div>
                         
                         <!-- Category 1: Face & Hair (WoW-style organization) -->
@@ -2845,6 +2964,9 @@
 
                             <label style="margin-top: 15px;"><i class="fas fa-paint-brush"></i> Hair Color:</label>
                             <input type="color" id="hairColor" value="#8B4513">
+                            
+                            <label style="margin-top: 15px;"><i class="fas fa-eye"></i> Eye Color:</label>
+                            <input type="color" id="eyeColor" value="#4A90E2" title="Select eye color">
                             
                             <label style="margin-top: 15px;"><i class="fas fa-smile"></i> Face Type:</label>
                             <div class="stat-slider-container">
@@ -2868,6 +2990,21 @@
                                     </div>
                                 </div>
                                 <input type="range" id="facialFeatures" min="0" max="9" step="1" value="0">
+                            </div>
+                            
+                            <!-- Race-Specific Features (WoW-style) -->
+                            <label style="margin-top: 15px;" id="raceFeaturesLabel" class="race-specific-label" style="display: none;">
+                                <i class="fas fa-star"></i> <span id="raceFeaturesLabelText">Race Features</span>:
+                            </label>
+                            <div class="stat-slider-container race-specific-container" id="raceFeaturesContainer" style="display: none;">
+                                <div class="stat-slider-header">
+                                    <label><span id="raceFeaturesType">Tattoos</span> <span id="raceFeaturesValue">0</span></label>
+                                    <div class="slider-controls">
+                                        <button class="slider-btn" id="raceFeaturesPrev"><i class="fas fa-chevron-left"></i></button>
+                                        <button class="slider-btn" id="raceFeaturesNext"><i class="fas fa-chevron-right"></i></button>
+                                    </div>
+                                </div>
+                                <input type="range" id="raceFeatures" min="0" max="9" step="1" value="0">
                             </div>
                         </div>
 
@@ -3109,6 +3246,124 @@
     </script>
 
     <script type="module" src="src/app.js"></script>
+    
+    <!-- Giphy SDK Integration for Login Animations -->
+    <script type="module">
+        // Giphy API Configuration
+        const GIPHY_API_KEY = 'VH9h1zuDsslzFhYglMgqY8v4G0HgtD7K';
+        
+        // Initialize Giphy Fetch API
+        const { GiphyFetch } = window.GiphyFetch;
+        const gf = new GiphyFetch(GIPHY_API_KEY);
+        
+        // Fantasy-themed search terms for ambient animations
+        const ambientSearchTerms = [
+            'magic particles',
+            'floating orbs',
+            'sparkles',
+            'magic aura',
+            'fantasy glow'
+        ];
+        
+        // Load ambient Giphy animations for login screen
+        async function loadAmbientAnimations() {
+            const containers = [
+                document.getElementById('giphyAmbient1'),
+                document.getElementById('giphyAmbient2'),
+                document.getElementById('giphyAmbient3'),
+                document.getElementById('giphyAmbient4')
+            ];
+            
+            // Only load if login screen is visible
+            const loginScreen = document.getElementById('loginScreen');
+            if (!loginScreen || loginScreen.classList.contains('hidden')) {
+                return;
+            }
+            
+            try {
+                for (let i = 0; i < containers.length; i++) {
+                    const container = containers[i];
+                    if (!container) continue;
+                    
+                    // Random search term for variety
+                    const searchTerm = ambientSearchTerms[Math.floor(Math.random() * ambientSearchTerms.length)];
+                    
+                    // Fetch a random GIF
+                    const { data } = await gf.random({ 
+                        tag: searchTerm,
+                        rating: 'g',
+                        type: 'gifs'
+                    });
+                    
+                    if (data && data.images && data.images.fixed_height_small) {
+                        const img = document.createElement('img');
+                        img.src = data.images.fixed_height_small.url;
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'contain';
+                        img.style.opacity = '0.3';
+                        img.style.filter = 'blur(1px)';
+                        container.appendChild(img);
+                    }
+                }
+            } catch (error) {
+                console.warn('Giphy ambient animations failed to load:', error);
+                // Silently fail - animations are optional
+            }
+        }
+        
+        // Load Giphy animation for button loading state
+        async function loadButtonLoadingAnimation(buttonElement) {
+            if (!buttonElement) return null;
+            
+            try {
+                const { data } = await gf.random({ 
+                    tag: 'loading magic',
+                    rating: 'g',
+                    type: 'gifs'
+                });
+                
+                if (data && data.images && data.images.fixed_height_small) {
+                    return data.images.fixed_height_small.url;
+                }
+            } catch (error) {
+                console.warn('Giphy loading animation failed:', error);
+            }
+            return null;
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                // Wait a bit for login screen to render
+                setTimeout(loadAmbientAnimations, 500);
+            });
+        } else {
+            setTimeout(loadAmbientAnimations, 500);
+        }
+        
+        // Watch for login screen visibility changes
+        const loginScreen = document.getElementById('loginScreen');
+        if (loginScreen) {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        if (!loginScreen.classList.contains('hidden')) {
+                            loadAmbientAnimations();
+                        }
+                    }
+                });
+            });
+            observer.observe(loginScreen, { attributes: true });
+        }
+        
+        // Export for use in other scripts
+        window.giphyUtils = {
+            loadButtonLoadingAnimation,
+            gf
+        };
+    </script>
+    
         <!-- Onboarding Overlay (WoW-style tutorial) -->
         <div id="onboardingOverlay">
             <div id="onboardingContent">

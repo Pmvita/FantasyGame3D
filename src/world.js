@@ -73,7 +73,7 @@ export class World {
             this.rockModel = rockData.scene;
             console.log('Rock model loaded');
 
-            // Load LowTreePond model
+            // Load LowTreePond model (optional - fallback geometry will be used if missing)
             try {
                 const pondData = await this.loader.loadAsync('src/World/Enviroment/LowTreePond.glb');
                 this.lowTreePondModel = pondData.scene;
@@ -93,7 +93,14 @@ export class World {
                     }
                 });
             } catch (pondError) {
-                console.warn('Failed to load LowTreePond model:', pondError);
+                // File doesn't exist (404) or other error - fallback geometry will be used
+                // This is expected if LowTreePond.glb doesn't exist yet
+                if (pondError.message && (pondError.message.includes('<!DOCTYPE') || pondError.message.includes('not valid JSON'))) {
+                    // Suppress expected 404 errors - file doesn't exist, fallback will be used
+                    console.log('LowTreePond.glb not found - using fallback geometry (this is expected if the file doesn\'t exist)');
+                } else {
+                    console.log('LowTreePond model unavailable - using fallback geometry');
+                }
             }
 
             this.modelsLoaded = true;
