@@ -124,6 +124,9 @@ export class UI {
                 
                 console.log(`Race selected: ${this.selectedRace}`);
                 
+                // Update race-specific features UI
+                this.updateRaceSpecificFeatures();
+                
                 // Apply race-specific default stats
                 const raceStats = this.getRaceDefaultStats(this.selectedRace);
                 document.getElementById('healthStat').value = raceStats.health;
@@ -177,8 +180,25 @@ export class UI {
         });
 
         // Hair color change
-        document.getElementById('hairColor').addEventListener('input', () => {
-            this.updatePreview();
+        document.getElementById('hairColor').addEventListener('input', async () => {
+            await this.updatePreview();
+        });
+
+        // Eye color change (WoW feature)
+        document.getElementById('eyeColor').addEventListener('input', async () => {
+            await this.updatePreview();
+        });
+
+        // Randomize name button (WoW feature)
+        document.getElementById('randomizeNameButton').addEventListener('click', () => {
+            this.randomizeCharacterName();
+        });
+
+        // Race-specific features slider
+        this.setupSliderControls('raceFeatures', 'raceFeaturesPrev', 'raceFeaturesNext', 'raceFeaturesValue');
+        document.getElementById('raceFeatures').addEventListener('input', async (e) => {
+            document.getElementById('raceFeaturesValue').textContent = parseInt(e.target.value) + 1;
+            await this.updatePreview();
         });
 
         // Character creation
@@ -663,6 +683,23 @@ export class UI {
         const characterSelection = document.getElementById('characterSelection');
         characterSelection.classList.remove('hidden');
         characterSelection.style.display = 'flex';
+        
+        // Reset preview placeholder
+        const placeholder = document.getElementById('characterPreviewPlaceholder');
+        const canvas = document.getElementById('characterSelectionPreviewCanvas');
+        if (placeholder) placeholder.style.display = 'block';
+        if (canvas) canvas.style.display = 'none';
+        
+        // Hide "Enter World" button initially
+        const enterWorldBtn = document.getElementById('enterWorldButton');
+        if (enterWorldBtn) enterWorldBtn.style.display = 'none';
+        
+        // Clear any selected character cards
+        document.querySelectorAll('.character-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        this.selectedCharacterIndex = null;
         await this.loadCharacterList();
     }
 
@@ -687,15 +724,22 @@ export class UI {
         document.querySelectorAll('.gender-button').forEach(b => b.classList.remove('selected'));
         document.getElementById('genderMale').classList.add('selected');
         
+        // Update race-specific features UI
+        this.updateRaceSpecificFeatures();
+        
         // Reset form to defaults
         document.getElementById('characterName').value = '';
         document.getElementById('hairColor').value = '#8B4513';
+        document.getElementById('eyeColor').value = '#4A90E2';
         document.getElementById('hairStyle').value = 0;
         document.getElementById('hairStyleValue').textContent = '1';
         document.getElementById('faceType').value = 0;
         document.getElementById('faceTypeValue').textContent = '1';
         document.getElementById('facialFeatures').value = 0;
         document.getElementById('facialFeaturesValue').textContent = '1';
+        document.getElementById('raceFeatures').value = 0;
+        document.getElementById('raceFeaturesValue').textContent = '0';
+        document.getElementById('eyeColor').value = '#4A90E2';
         document.getElementById('skinTone').value = 0.5;
         document.getElementById('skinToneValue').textContent = '0.5';
         document.getElementById('bodyShape').value = 0.5;
@@ -828,10 +872,12 @@ export class UI {
         if (!this.characterPreview) return;
         
         const hairColor = document.getElementById('hairColor').value;
+        const eyeColor = document.getElementById('eyeColor').value;
         const skinTone = parseFloat(document.getElementById('skinTone').value);
         const faceType = parseInt(document.getElementById('faceType').value);
         const hairStyle = parseInt(document.getElementById('hairStyle').value);
         const facialFeatures = parseInt(document.getElementById('facialFeatures').value);
+        const raceFeatures = parseInt(document.getElementById('raceFeatures').value) || 0;
         
         await this.characterPreview.updateCharacter(
             this.selectedRace, 
@@ -840,8 +886,67 @@ export class UI {
             skinTone, 
             faceType, 
             hairStyle, 
-            facialFeatures
+            facialFeatures,
+            eyeColor,
+            raceFeatures
         );
+    }
+
+    /**
+     * Randomizes character name (WoW feature)
+     */
+    randomizeCharacterName() {
+        const nameInput = document.getElementById('characterName');
+        const firstNameList = [
+            'Aelric', 'Bran', 'Caelum', 'Dravin', 'Eldric', 'Fenris', 'Gareth', 'Hawthorn',
+            'Ivor', 'Jareth', 'Kael', 'Lorin', 'Marius', 'Nolan', 'Orin', 'Perrin',
+            'Quinn', 'Roran', 'Soren', 'Theron', 'Ulric', 'Valen', 'Wren', 'Xander',
+            'Zephyr', 'Alara', 'Brienne', 'Celeste', 'Dara', 'Elara', 'Fiona', 'Gwen',
+            'Hazel', 'Iris', 'Jade', 'Kira', 'Luna', 'Mara', 'Nyx', 'Opal'
+        ];
+        
+        const lastNameList = [
+            'Stoneheart', 'Shadowbane', 'Brightblade', 'Stormwind', 'Ironforge',
+            'Moonwhisper', 'Dawnbreaker', 'Nightshade', 'Goldleaf', 'Silverwing',
+            'Darkthorn', 'Lightbringer', 'Firebrand', 'Icewind', 'Starweaver',
+            'Thunderclap', 'Frostweaver', 'Emberheart', 'Willowbrook', 'Ravenwood'
+        ];
+        
+        const firstName = firstNameList[Math.floor(Math.random() * firstNameList.length)];
+        const lastName = lastNameList[Math.floor(Math.random() * lastNameList.length)];
+        const randomName = `${firstName} ${lastName}`;
+        
+        nameInput.value = randomName;
+    }
+
+    /**
+     * Updates race-specific features UI based on selected race (WoW feature)
+     */
+    updateRaceSpecificFeatures() {
+        const label = document.getElementById('raceFeaturesLabel');
+        const labelText = document.getElementById('raceFeaturesLabelText');
+        const typeText = document.getElementById('raceFeaturesType');
+        const container = document.getElementById('raceFeaturesContainer');
+        
+        if (!label || !container) return;
+        
+        const raceFeatures = {
+            human: { label: 'Tattoos', show: true },
+            elf: { label: 'Markings', show: true },
+            dwarf: { label: 'Beard Style', show: true },
+            demon: { label: 'Horn Style', show: true }
+        };
+        
+        const feature = raceFeatures[this.selectedRace];
+        if (feature && feature.show) {
+            label.style.display = 'block';
+            container.style.display = 'block';
+            labelText.textContent = `${this.selectedRace.charAt(0).toUpperCase() + this.selectedRace.slice(1)} Features`;
+            typeText.textContent = feature.label;
+        } else {
+            label.style.display = 'none';
+            container.style.display = 'none';
+        }
     }
 
     showHUD() {
@@ -1137,11 +1242,13 @@ export class UI {
             gender: this.selectedGender,
             appearance: {
                 hairColor: document.getElementById('hairColor').value,
+                eyeColor: document.getElementById('eyeColor').value,
                 skinTone: parseFloat(document.getElementById('skinTone').value),
                 bodyShape: parseFloat(document.getElementById('bodyShape').value) || 0.5,
                 faceType: parseInt(document.getElementById('faceType').value) || 0,
                 hairStyle: parseInt(document.getElementById('hairStyle').value) || 0,
-                facialFeatures: parseInt(document.getElementById('facialFeatures').value) || 0
+                facialFeatures: parseInt(document.getElementById('facialFeatures').value) || 0,
+                raceFeatures: parseInt(document.getElementById('raceFeatures').value) || 0
             },
             stats: {
                 health: parseInt(document.getElementById('healthStat').value) || raceStats.health,
@@ -1193,8 +1300,72 @@ export class UI {
 
     async selectCharacter(index) {
         const characters = await this.getAllCharacters();
+        if (!characters[index]) return;
+        
+        const character = characters[index];
+        this.selectedCharacterIndex = index;
+        
+        // Update visual selection state (WoW-style)
+        document.querySelectorAll('.character-card').forEach((card, i) => {
+            if (i === index) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+        
+        // Show character preview in selection screen (WoW-style)
+        await this.showCharacterSelectionPreview(character);
+        
+        // Show "Enter World" button
+        const enterWorldBtn = document.getElementById('enterWorldButton');
+        if (enterWorldBtn) {
+            enterWorldBtn.style.display = 'block';
+            enterWorldBtn.onclick = () => this.startGameWithCharacter(index);
+        }
+    }
+    
+    /**
+     * Shows character preview in the character selection screen (WoW-style)
+     * @param {Object} character - Character data to preview
+     */
+    async showCharacterSelectionPreview(character) {
+        const placeholder = document.getElementById('characterPreviewPlaceholder');
+        const canvas = document.getElementById('characterSelectionPreviewCanvas');
+        
+        if (!placeholder || !canvas) return;
+        
+        // Hide placeholder, show canvas
+        placeholder.style.display = 'none';
+        canvas.style.display = 'block';
+        
+        // Initialize or reuse CharacterPreview instance for selection screen
+        if (!this.characterSelectionPreview) {
+            this.characterSelectionPreview = new CharacterPreview('characterSelectionPreviewCanvas');
+        }
+        
+        // Update character preview with character data
+        const appearance = character.appearance || {};
+        await this.characterSelectionPreview.updateCharacter(
+            character.race || 'human',
+            character.gender || 'male',
+            appearance.hairColor || '#8B4513',
+            appearance.skinTone || 0.5,
+            appearance.faceType || 0,
+            appearance.hairStyle || 0,
+            appearance.facialFeatures || 0,
+            appearance.eyeColor || '#4A90E2',
+            appearance.raceFeatures || 0
+        );
+    }
+    
+    /**
+     * Starts the game with the selected character
+     * @param {number} index - Character index to start with
+     */
+    async startGameWithCharacter(index) {
+        const characters = await this.getAllCharacters();
         if (characters[index]) {
-            // Convert API character format to game format if needed
             const character = characters[index];
             this.game.startGame(character);
         }
