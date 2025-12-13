@@ -54,6 +54,7 @@ async function getCharactersHandler(req, res) {
         id: char._id.toString(),
         name: char.name,
         race: char.race,
+        gender: char.gender || 'male', // Default to 'male' for backward compatibility
         appearance: char.appearance,
         stats: char.stats,
         equipment: char.equipment,

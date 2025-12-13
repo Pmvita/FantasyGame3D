@@ -1,14 +1,55 @@
 # Character Models Directory
 
-Place your 3D character models here in GLTF or GLB format.
+This directory contains character model asset sets organized by race and gender.
+
+## Folder Structure
+
+The game uses organized asset sets for each race and gender combination:
+
+```
+assets/characters/
+├── Human/
+│   ├── Male/
+│   │   └── FullSet.glb
+│   └── Female/
+│       └── FullSet.glb
+├── Elf/
+│   ├── Male/
+│   │   └── FullSet.glb
+│   └── Female/
+│       └── FullSet.glb
+├── Dwarf/
+│   ├── Male/
+│   │   └── FullSet.glb
+│   └── Female/
+│       └── FullSet.glb
+└── Demon/
+    ├── Male/
+    │   └── FullSet.glb
+    └── Female/
+        └── FullSet.glb
+```
+
+## Current Status
+
+- **Human Race**: ✅ Ready (Male: `HumanSet/Man/FullSet.glb`, Female: `HumanSet/Woman/` available)
+- **Elf Race**: ⚠️ Needs conversion (FBX files in `Elf Set/BodyA/` and `Elf Set/BodyB/` need conversion to GLB)
+- **Dwarf & Demon Races**: ⏳ No asset sets available yet (using fallback geometry)
 
 ## File Naming Convention
 
-Name your files based on race:
-- `human.glb` or `human.gltf` - Human character
-- `elf.glb` or `elf.gltf` - Elf character
-- `dwarf.glb` or `dwarf.gltf` - Dwarf character
-- `demon.glb` or `demon.gltf` - Demon character
+**Preferred (New Structure)**: Place models in `Race/Gender/FullSet.glb`
+- `Human/Male/FullSet.glb` - Human male character
+- `Human/Female/FullSet.glb` - Human female character
+- `Elf/Male/FullSet.glb` - Elf male character
+- `Elf/Female/FullSet.glb` - Elf female character
+- And so on for Dwarf and Demon races
+
+**Legacy (Fallback)**: The code will also try legacy paths:
+- `human.glb` or `human.gltf` - Human character (gender defaults to male)
+- `elf.glb` or `elf.gltf` - Elf character (gender defaults to male)
+- `dwarf.glb` or `dwarf.gltf` - Dwarf character (gender defaults to male)
+- `demon.glb` or `demon.gltf` - Demon character (gender defaults to male)
 
 **Note**: The code will try `.glb` first, then `.gltf`. **GLB is preferred** because it's a single file (includes textures), but GLTF also works.
 
