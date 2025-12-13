@@ -3139,11 +3139,11 @@
         /* HUD - MMORPG Style (WoW-inspired bottom-left positioning) */
         #hud {
             position: absolute;
-            bottom: clamp(80px, 12vh, 120px); /* Above action bars/skills */
-            left: clamp(15px, 2vw, 20px);
+            top: 15px;
+            left: 12px;
+            width: 277px;
+            height: 200px;
             display: none;
-            min-width: clamp(240px, 30vw, 280px);
-            max-width: clamp(240px, 30vw, 320px);
             z-index: 150;
         }
 
@@ -3439,6 +3439,7 @@
             z-index: 150;
             flex-wrap: wrap;
             justify-content: center;
+            width: 1050px;
             max-width: 95vw;
         }
 
