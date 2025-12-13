@@ -333,9 +333,12 @@ export class UI {
             // Check for LocalStorage characters to migrate
             await this.checkForLocalStorageMigration();
 
-            // Hide login screen and show main menu
-            this.hideLoginScreen();
-            this.showMainMenu();
+            // Hide login screen with WoW transition and show main menu
+            this.hideLoginScreen(true);
+            // showMainMenu will be called after transition completes
+            setTimeout(() => {
+                this.showMainMenu();
+            }, 1500);
         } catch (error) {
             this.showError(error.message || 'Login failed. Please check your credentials.');
         } finally {
@@ -355,8 +358,103 @@ export class UI {
         }
     }
 
-    hideLoginScreen() {
-        document.getElementById('loginScreen').classList.add('hidden');
+    hideLoginScreen(useTransition = false) {
+        const loginScreen = document.getElementById('loginScreen');
+        const gameCanvas = document.getElementById('gameCanvas');
+        
+        if (useTransition) {
+            // Trigger WoW-style transition animation
+            this.playWowTransition(() => {
+                // After transition completes, hide login screen
+                loginScreen.classList.add('hidden');
+                loginScreen.classList.remove('transitioning');
+                
+                // Fade in game canvas
+                if (gameCanvas) {
+                    gameCanvas.classList.add('fadeIn');
+                }
+            });
+        } else {
+            // Simple hide without transition
+            loginScreen.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Plays a WoW-style portal transition animation
+     * @param {Function} callback - Called when transition completes
+     */
+    playWowTransition(callback) {
+        const loginScreen = document.getElementById('loginScreen');
+        const gameContainer = document.getElementById('gameContainer');
+        
+        if (!loginScreen) {
+            if (callback) callback();
+            return;
+        }
+
+        // Add transitioning class to trigger CSS animation
+        loginScreen.classList.add('transitioning');
+
+        // Create portal overlay effect
+        const overlay = document.createElement('div');
+        overlay.className = 'wow-transition-overlay';
+        document.body.appendChild(overlay);
+
+        // Create magical particles
+        this.createWowParticles();
+
+        // Remove overlay and trigger callback after animation
+        setTimeout(() => {
+            overlay.remove();
+            if (callback) callback();
+        }, 1500); // Match animation duration
+    }
+
+    /**
+     * Creates magical particle effects during transition
+     */
+    createWowParticles() {
+        const particleCount = 30;
+        const colors = [
+            'rgba(139, 92, 246, 0.8)',  // Purple
+            'rgba(74, 144, 226, 0.8)',  // Blue
+            'rgba(255, 215, 0, 0.8)',   // Gold
+            'rgba(255, 255, 255, 0.6)'  // White
+        ];
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'wow-particle';
+            
+            // Random position around center
+            const angle = (Math.PI * 2 * i) / particleCount;
+            const distance = 100 + Math.random() * 200;
+            const startX = window.innerWidth / 2 + Math.cos(angle) * 50;
+            const startY = window.innerHeight / 2 + Math.sin(angle) * 50;
+            
+            // Random end position
+            const endX = (Math.random() - 0.5) * window.innerWidth;
+            const endY = (Math.random() - 0.5) * window.innerHeight - 100;
+            
+            particle.style.left = startX + 'px';
+            particle.style.top = startY + 'px';
+            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.setProperty('--particle-x', endX + 'px');
+            particle.style.setProperty('--particle-y', endY + 'px');
+            
+            // Random delay for staggered effect
+            particle.style.animationDelay = (Math.random() * 0.5) + 's';
+            
+            document.body.appendChild(particle);
+            
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 2500);
+        }
     }
 
     showCreateAccountScreen() {
@@ -617,7 +715,7 @@ export class UI {
 
     showMainMenu() {
         this.hideAllMenus();
-        this.hideLoginScreen();
+        // Login screen should already be hidden by this point
         const mainMenu = document.getElementById('mainMenu');
         mainMenu.classList.remove('hidden');
         mainMenu.style.display = 'flex';
