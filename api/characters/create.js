@@ -104,11 +104,8 @@ async function createCharacterHandler(req, res) {
           },
         },
       });
-    } catch (error) {
-      // Error handler middleware will catch this
-      throw error;
-    }
   } catch (error) {
+    // Error handler middleware will catch this
     throw error;
   }
 }

@@ -71,6 +71,35 @@
             height: 100vh;
             position: relative;
             overflow: hidden;
+            /* Fantasy landing background */
+            background-image: url('assets/backgrounds/fantast-landing-bg.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        /* Background overlay for better canvas visibility */
+        #gameContainer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                rgba(26, 26, 46, 0.1) 0%,
+                rgba(20, 20, 35, 0.1) 100%
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Ensure canvas is above background */
+        #gameCanvas {
+            position: relative;
+            z-index: 2;
         }
 
         #ui {
@@ -361,6 +390,135 @@
 
         #loginScreen.hidden {
             display: none;
+        }
+
+        /* WoW-style Transition Animation */
+        #loginScreen.transitioning {
+            animation: wowFadeOut 1.5s ease-in-out forwards;
+            pointer-events: none;
+        }
+
+        #gameCanvas {
+            cursor: crosshair;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        #gameCanvas.fadeIn {
+            opacity: 1;
+        }
+
+        /* WoW Portal Effect Overlay */
+        .wow-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.3) 30%, rgba(0, 0, 0, 0.7) 60%, rgba(0, 0, 0, 1) 100%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 250;
+            animation: wowPortalEffect 1.5s ease-in-out forwards;
+        }
+
+        /* Portal particles effect */
+        .wow-transition-overlay::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.8) 0%, rgba(74, 144, 226, 0.6) 30%, transparent 70%);
+            transform: translate(-50%, -50%);
+            animation: wowPortalExpand 1.5s ease-in-out forwards;
+        }
+
+        .wow-transition-overlay::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, rgba(139, 92, 246, 0.3) 20%, transparent 50%);
+            transform: translate(-50%, -50%);
+            animation: wowPortalExpand 1.5s ease-in-out 0.2s forwards;
+        }
+
+        @keyframes wowFadeOut {
+            0% {
+                opacity: 1;
+                filter: blur(0px);
+            }
+            50% {
+                opacity: 0.3;
+                filter: blur(2px);
+            }
+            100% {
+                opacity: 0;
+                filter: blur(5px);
+            }
+        }
+
+        @keyframes wowPortalEffect {
+            0% {
+                opacity: 0;
+            }
+            30% {
+                opacity: 1;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes wowPortalExpand {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+            50% {
+                width: 200vmax;
+                height: 200vmax;
+                opacity: 0.8;
+            }
+            100% {
+                width: 300vmax;
+                height: 300vmax;
+                opacity: 0;
+            }
+        }
+
+        /* Magical particles during transition */
+        .wow-particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: rgba(139, 92, 246, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 251;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 1);
+            animation: wowParticleFloat 2s ease-out forwards;
+        }
+
+        @keyframes wowParticleFloat {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--particle-x, 0), var(--particle-y, -100px)) scale(0);
+            }
         }
 
         /* Account Creation Screen */
@@ -2710,9 +2868,7 @@
         }
 
         /* Cursor styles - will be controlled by JavaScript */
-        #gameCanvas {
-            cursor: crosshair;
-        }
+        /* Note: #gameCanvas opacity and fadeIn are defined earlier in WoW transition section */
 
         /* Ripple animation */
         .ripple {

@@ -24,8 +24,10 @@ class Fantasy3D {
     init() {
         // Create scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x87CEEB); // Sky blue
-        this.scene.fog = new THREE.Fog(0x87CEEB, 0, 1000);
+        // Set background to null so CSS background image shows through
+        this.scene.background = null;
+        // Use a subtle fog that blends with the fantasy background
+        this.scene.fog = new THREE.Fog(0x4a5d23, 200, 800); // Green-tinted fog for fantasy atmosphere
 
         // Create camera
         this.camera = new THREE.PerspectiveCamera(
@@ -38,12 +40,18 @@ class Fantasy3D {
         this.camera.layers.disable(1); // Disable minimap layer for main camera
         this.scene.userData.mainCamera = this.camera; // Store for minimap
 
-        // Create renderer
+        // Create renderer with alpha support for background blending
         const canvas = document.getElementById('gameCanvas');
-        this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        this.renderer = new THREE.WebGLRenderer({ 
+            canvas, 
+            antialias: true,
+            alpha: true  // Enable transparency to show CSS background
+        });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        // Clear to transparent so CSS background shows through
+        this.renderer.setClearColor(0x000000, 0); // Fully transparent
 
         // Initialize UI
         this.ui = new UI(this);
