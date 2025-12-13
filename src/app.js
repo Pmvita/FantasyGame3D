@@ -40,18 +40,18 @@ class Fantasy3D {
         this.camera.layers.disable(1); // Disable minimap layer for main camera
         this.scene.userData.mainCamera = this.camera; // Store for minimap
 
-        // Create renderer with alpha support for background blending
+        // Create renderer - NO alpha, show the actual 3D world
         const canvas = document.getElementById('gameCanvas');
         this.renderer = new THREE.WebGLRenderer({ 
             canvas, 
             antialias: true,
-            alpha: true  // Enable transparency to show CSS background
+            alpha: false  // Opaque renderer to show 3D world properly
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        // Clear to transparent so CSS background shows through
-        this.renderer.setClearColor(0x000000, 0); // Fully transparent
+        // Clear to black (will be replaced by scene background or world)
+        this.renderer.setClearColor(0x000000, 1); // Opaque black
 
         // Initialize UI
         this.ui = new UI(this);
@@ -114,6 +114,54 @@ class Fantasy3D {
             }).catch(() => {}); // Silently fail if endpoint doesn't exist
         } catch (e) {}
         
+        // Remove landing page background - NO BACKGROUND, show the actual 3D world
+        const gameContainer = document.getElementById('gameContainer');
+        if (gameContainer) {
+            // Remove CSS background completely
+            gameContainer.style.backgroundImage = 'none';
+            gameContainer.style.backgroundColor = 'transparent';
+        }
+        
+        // NO background color - show the actual 3D world
+        this.scene.background = null;
+        
+        // Renderer should be opaque - world objects will render on top
+        this.renderer.setClearColor(0x000000, 1); // Black background, world will show
+        
+        // Remove fog completely - it was blocking the world
+        this.scene.fog = null;
+        
+        // Ensure world is fully loaded before continuing
+        if (this.world) {
+            // Wait for world creation to complete (max 5 seconds)
+            let waitCount = 0;
+            while (!this.world.worldCreated && waitCount < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                waitCount++;
+            }
+            if (this.world.worldCreated) {
+                console.log('✅ World is ready!');
+            } else {
+                console.warn('⚠️ World creation timeout, continuing anyway...');
+            }
+        }
+        
+        // Debug: Log what's in the scene
+        console.log('🌍 Scene children count:', this.scene.children.length);
+        const worldObjects = this.scene.children.filter(c => 
+            c.type === 'Mesh' || c.type === 'Group' || c.type === 'Object3D'
+        );
+        console.log('🌍 World objects:', worldObjects.length);
+        console.log('💡 Lights:', this.scene.children.filter(c => c.type.includes('Light')).length);
+        
+        // Add a test cube to verify rendering works (temporary debug)
+        const testGeometry = new THREE.BoxGeometry(5, 5, 5);
+        const testMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        const testCube = new THREE.Mesh(testGeometry, testMaterial);
+        testCube.position.set(0, 2.5, 0);
+        this.scene.add(testCube);
+        console.log('🔴 Added test red cube at origin to verify rendering');
+        
         // Hide menus
         this.ui.hideAllMenus();
         this.ui.showHUD();
@@ -138,14 +186,30 @@ class Fantasy3D {
             charPos.set(0, 0, 0);
         }
         
-        // Initialize camera position (will be updated by controls in next frame)
+        // Initialize camera position - WoW-style third-person view
+        // Camera should be behind and above the character, looking down at the world
         this.camera.position.set(
-            charPos.x,
-            charPos.y + 5,
-            charPos.z + 10
+            charPos.x - 8,  // Behind character
+            charPos.y + 12,  // Elevated view to see the world
+            charPos.z + 15  // Distance from character
         );
         
-        console.log('Game started - Character position:', charPos);
+        // Make sure camera looks at character and can see the ground
+        const lookAtY = Math.max(charPos.y + 1, 2); // Look at character or slightly above ground
+        this.camera.lookAt(charPos.x, lookAtY, charPos.z);
+        
+        // Update camera projection to ensure world is visible
+        this.camera.updateProjectionMatrix();
+        
+        console.log('🎮 Game started - Character position:', charPos);
+        console.log('📷 Camera position:', this.camera.position);
+        console.log('👀 Camera looking at:', charPos.x, lookAtY, charPos.z);
+        console.log('🌍 World objects in scene:', this.scene.children.length);
+        console.log('🎨 Scene background:', this.scene.background);
+        console.log('💡 Lights in scene:', this.scene.children.filter(c => c.type.includes('Light')).length);
+        
+        // Force render once to ensure world is visible
+        this.renderer.render(this.scene, this.camera);
 
         // Initialize controls
         this.controls = new Controls(this.character, this.camera, this.scene);
@@ -457,7 +521,15 @@ class Fantasy3D {
         }
 
         // Always render the scene (even if character isn't ready)
+        // Make sure we're rendering with the correct settings
         this.renderer.render(this.scene, this.camera);
+        
+        // Debug: Log if scene is empty (only on first frame)
+        if (!this._renderDebugged && this.scene.children.length < 5) {
+            console.warn('⚠️ Scene has very few objects:', this.scene.children.length);
+            console.warn('Scene children:', this.scene.children.map(c => c.type));
+            this._renderDebugged = true;
+        }
     }
 
     onWindowResize() {

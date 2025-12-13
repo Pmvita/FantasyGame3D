@@ -10,16 +10,38 @@ export class World {
         this.rockModel = null;
         this.lowTreePondModel = null;
         this.modelsLoaded = false;
-        this.createWorld();
+        this.worldCreated = false;
+        // Create world immediately - don't wait
+        this.createWorld().then(() => {
+            this.worldCreated = true;
+            console.log('✅ World creation complete! Objects in scene:', this.scene.children.length);
+        }).catch((error) => {
+            console.error('❌ Error creating world:', error);
+        });
     }
 
     async createWorld() {
-        // Create ground
-        const groundGeometry = new THREE.PlaneGeometry(200, 200);
+        // Create ground - WoW-style grassy terrain
+        // Larger ground plane for better visibility
+        const groundGeometry = new THREE.PlaneGeometry(500, 500, 50, 50);
+        
+        // Add some variation to the ground (subtle height variation)
+        const vertices = groundGeometry.attributes.position;
+        for (let i = 0; i < vertices.count; i++) {
+            const x = vertices.getX(i);
+            const z = vertices.getZ(i);
+            // Add subtle noise for terrain variation
+            const noise = Math.sin(x * 0.1) * Math.cos(z * 0.1) * 0.5;
+            vertices.setY(i, noise);
+        }
+        vertices.needsUpdate = true;
+        groundGeometry.computeVertexNormals();
+        
+        // WoW-style grass material - brighter, more vibrant
         const groundMaterial = new THREE.MeshStandardMaterial({
-            color: 0x4a5d23,
-            roughness: 0.8,
-            metalness: 0.1
+            color: 0x5a7d33, // Brighter green for WoW-style grass
+            roughness: 0.9,
+            metalness: 0.0
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
@@ -39,26 +61,34 @@ export class World {
         // Load 3D models and then create trees/rocks
         await this.loadModels();
 
-        // Add trees using 3D models
-        for (let i = 0; i < 20; i++) {
-            const x = (Math.random() - 0.5) * 150;
-            const z = (Math.random() - 0.5) * 150;
+        // Add trees using 3D models - more trees for WoW-style density
+        for (let i = 0; i < 50; i++) {
+            const x = (Math.random() - 0.5) * 400;
+            const z = (Math.random() - 0.5) * 400;
             this.createTree(x, z);
         }
 
         // Add rocks using 3D models
-        for (let i = 0; i < 15; i++) {
-            const x = (Math.random() - 0.5) * 150;
-            const z = (Math.random() - 0.5) * 150;
+        for (let i = 0; i < 30; i++) {
+            const x = (Math.random() - 0.5) * 400;
+            const z = (Math.random() - 0.5) * 400;
             this.createRock(x, z);
         }
 
         // Add LowTreePond features
-        for (let i = 0; i < 5; i++) {
-            const x = (Math.random() - 0.5) * 150;
-            const z = (Math.random() - 0.5) * 150;
+        for (let i = 0; i < 10; i++) {
+            const x = (Math.random() - 0.5) * 400;
+            const z = (Math.random() - 0.5) * 400;
             this.createLowTreePond(x, z);
         }
+        
+        console.log('🌍 World created! Total objects:', this.scene.children.length);
+        const groundMesh = this.scene.children.find(c => c.type === 'Mesh' && c.material?.color?.getHex() === 0x5a7d33);
+        console.log('   Ground added:', !!groundMesh);
+        console.log('   Buildings added:', this.scene.children.filter(c => c.userData?.type === 'building').length);
+        console.log('   Trees added:', this.scene.children.filter(c => c.userData?.type === 'tree').length);
+        console.log('   Rocks added:', this.scene.children.filter(c => c.userData?.type === 'rock').length);
+        console.log('   Lights added:', this.scene.children.filter(c => c.type.includes('Light')).length);
     }
 
     async loadModels() {
@@ -335,13 +365,13 @@ export class World {
     }
 
     createLighting() {
-        // Ambient light
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        // Ambient light - brighter for WoW-style visibility
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         this.scene.add(ambientLight);
 
-        // Directional light (sun)
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(50, 50, 50);
+        // Directional light (sun) - brighter and better positioned
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        directionalLight.position.set(50, 100, 50); // Higher up for better lighting
         directionalLight.castShadow = true;
         directionalLight.shadow.camera.left = -50;
         directionalLight.shadow.camera.right = 50;
