@@ -33,14 +33,14 @@ The starting point for all characters. These are the fundamental classes:
 
 ### B-Rank (First Specialization)
 Early branching paths that define initial specialization:
-- **Warrior** → Knight, Berserker, Paladin, Thief
-- **Mage** → Battle Mage
-- **Healer** → Cleric
+- **Warrior** → Knight, Berserker, Paladin, Thief, Ranger
+- **Mage** → Battle Mage, Enchanter
+- **Healer** → Cleric, Bard
 
 ### A-Rank (Advanced Specialization)
 More refined specializations building on B-Rank:
-- **Warrior** → Arch Knight, Hunter, Warlord
-- **Mage** → Wizard, Witch, Warlock, Elemental Mages (Fire, Water, Wind, Earth, Light, Dark)
+- **Warrior** → Arch Knight, Hunter, Warlord, Gladiator
+- **Mage** → Wizard, Witch, Warlock, Elemental Mages (Fire, Water, Wind, Earth, Light, Dark), Chronomancer
 - **Healer** → Priest
 
 ### S-Rank (Elite Classes)
@@ -179,10 +179,33 @@ A-Rank: Priest → S-Rank: Divine Priest → SS-Rank: Angel → SSS-Rank: Arch A
 A-Rank: Priest → S-Rank: Necromancer → SS-Rank: Demon → SSS-Rank: Arch Demon
 ```
 
+## Class Details
+
+Each class has a detailed README file containing:
+- **Role:** The class's primary function in combat
+- **Rank:** The progression tier of the class
+- **Base Class:** The foundational class this specialization derives from
+- **Description:** Comprehensive overview of the class's playstyle and capabilities
+- **Skills:** Five core abilities unique to the class, each with:
+  - Type (Damage, Heal, Buff, Debuff, etc.)
+  - Mana Cost
+  - Cooldown time
+  - Detailed description of effects
+
+## Additional MMORPG Classes Added
+
+To enhance diversity and fill progression gaps, the following popular MMORPG classes have been added:
+- **Ranger** (Warrior B-Rank): Ranged physical DPS with tracking abilities
+- **Gladiator** (Warrior A-Rank): Arena specialist and duelist
+- **Enchanter** (Mage B-Rank): Buff and debuff specialist
+- **Chronomancer** (Mage A-Rank): Time magic specialist
+- **Bard** (Healer B-Rank): Musical support and buffer
+
 ## Notes
 
-- Each class directory should contain class-specific files, scripts, and documentation
+- Each class directory contains a README.md file with full class description and 5 main skills
 - Progression from one rank to another typically requires meeting level and quest requirements
 - Some classes may have prerequisites or require specific achievements
 - Each advancement unlocks new abilities, stats, and playstyles
+- Skills are designed to be balanced and thematic to each class's role and identity
 
