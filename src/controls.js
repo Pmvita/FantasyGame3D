@@ -19,11 +19,21 @@ export class Controls {
         this.lastKeyPress = {}; // Track last key press time and key
         this.doubleTapDelay = 300; // milliseconds
         this.isRunning = false; // Running state
+        
+        // Mouse drag controls for character rotation
+        this.isMouseDragging = false;
+        this.lastMouseX = 0;
+        this.lastMouseY = 0;
+        this.mouseSensitivity = 0.003; // Rotation sensitivity
+        this.mouseRotationTarget = null; // Target rotation from mouse drag
 
         this.setupEventListeners();
     }
 
     setupEventListeners() {
+        const canvas = document.getElementById('gameCanvas');
+        if (!canvas) return;
+        
         // Keyboard events
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
@@ -44,6 +54,50 @@ export class Controls {
                     this.isRunning = false;
                 }
             }
+        });
+
+        // Mouse drag controls for character rotation
+        canvas.addEventListener('mousedown', (e) => {
+            // Only enable drag on left mouse button and when not clicking UI
+            if (e.button === 0) {
+                this.isMouseDragging = true;
+                this.lastMouseX = e.clientX;
+                this.lastMouseY = e.clientY;
+                canvas.style.cursor = 'grabbing';
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (this.isMouseDragging) {
+                const deltaX = e.clientX - this.lastMouseX;
+                const deltaY = e.clientY - this.lastMouseY;
+                
+                // Rotate character based on horizontal mouse movement
+                const rotationDelta = deltaX * this.mouseSensitivity;
+                
+                if (this.character && this.character.mesh) {
+                    // Update character rotation directly
+                    this.character.mesh.rotation.y -= rotationDelta;
+                    
+                    // Also update camera angle to match
+                    this.cameraAngleY -= rotationDelta;
+                }
+                
+                this.lastMouseX = e.clientX;
+                this.lastMouseY = e.clientY;
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (e.button === 0) {
+                this.isMouseDragging = false;
+                canvas.style.cursor = 'crosshair';
+            }
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            this.isMouseDragging = false;
+            canvas.style.cursor = 'crosshair';
         });
 
         // Camera rotation with Q/E keys (optional)
@@ -108,18 +162,22 @@ export class Controls {
             // Move character with running state
             this.character.move(worldMoveVector, this.isRunning);
             
-            // Make character face movement direction smoothly
-            const targetAngle = Math.atan2(-worldMoveVector.x, -worldMoveVector.z);
-            // Smooth rotation towards target angle
-            let currentAngle = this.character.mesh.rotation.y;
-            let angleDiff = targetAngle - currentAngle;
-            
-            // Normalize angle difference to [-PI, PI]
-            while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-            while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-            
-            // Smoothly rotate towards target
-            this.character.mesh.rotation.y += angleDiff * 0.2;
+            // Only rotate character to face movement direction if not dragging mouse
+            // When mouse is dragging, mouse controls the rotation instead
+            if (!this.isMouseDragging) {
+                // Make character face movement direction smoothly
+                const targetAngle = Math.atan2(-worldMoveVector.x, -worldMoveVector.z);
+                // Smooth rotation towards target angle
+                let currentAngle = this.character.mesh.rotation.y;
+                let angleDiff = targetAngle - currentAngle;
+                
+                // Normalize angle difference to [-PI, PI]
+                while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                
+                // Smoothly rotate towards target
+                this.character.mesh.rotation.y += angleDiff * 0.2;
+            }
         } else {
             // No movement keys pressed - stop running
             if (this.isRunning) {

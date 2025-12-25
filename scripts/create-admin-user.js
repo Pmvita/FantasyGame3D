@@ -11,11 +11,15 @@ const SALT_ROUNDS = 10;
 
 async function createAdminUser() {
   try {
-    // Configuration - Update these values as needed
-    const username = 'pmvita';
-    const password = 'admin123';
-    const email = 'petermvita@hotmail.com';
+    // Configuration - Use environment variables or update these values
+    const username = process.env.ADMIN_USERNAME || 'admin';
+    const password = process.env.ADMIN_PASSWORD || 'changeme123';
+    const email = process.env.ADMIN_EMAIL || 'admin@example.com';
     const role = 'admin';
+    
+    if (password === 'changeme123') {
+      console.warn('⚠️  WARNING: Using default password. Set ADMIN_PASSWORD environment variable for security.');
+    }
 
     console.log('Creating/updating admin user...');
 

@@ -56,20 +56,24 @@ class Fantasy3D {
         // Initialize UI
         this.ui = new UI(this);
         
-        // Check for auto-login (if user was previously logged in)
-        // This will automatically show main menu if logged in, or login screen if not
+        // Show landing page first - user will choose Sign Up or Sign In
+        // Auto-login check will happen when user clicks Sign In (handled in UI)
+        this.ui.showLandingPage();
+        
+        // Check for auto-login in background (if user was previously logged in, skip landing page)
         this.ui.checkAutoLogin().then((autoLoggedIn) => {
-            if (!autoLoggedIn) {
-                // Show login screen if auto-login failed or user logged out
-                console.log('Showing login screen (auto-login failed or user logged out)');
-                this.ui.showLoginScreen();
+            if (autoLoggedIn) {
+                console.log('Auto-login successful, skipping landing page');
+                // Hide landing page and show main menu directly
+                this.ui.hideLandingPage();
+                // Main menu should already be visible from checkAutoLogin
             } else {
-                console.log('Auto-login successful, main menu should be visible');
+                console.log('No auto-login, showing landing page');
+                // Landing page is already shown, user will choose Sign Up or Sign In
             }
         }).catch((error) => {
             console.error('Error during auto-login check:', error);
-            // On error, show login screen
-            this.ui.showLoginScreen();
+            // On error, keep landing page visible
         });
 
         // Initialize world (but don't show until game starts)

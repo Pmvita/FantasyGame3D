@@ -115,28 +115,499 @@
             pointer-events: auto;
         }
 
-        /* Login Screen - WoW-style minimalist */
+        /* Landing Page - Epic MMORPG Landing */
+        #landingPage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #2d1b3d 100%);
+            background-image: 
+                url('https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1920&q=80'),
+                linear-gradient(135deg, rgba(10, 10, 26, 0.95) 0%, rgba(26, 10, 46, 0.95) 50%, rgba(45, 27, 61, 0.95) 100%);
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            overflow: hidden;
+            animation: fadeIn 1s ease-in;
+        }
+        
+        #landingPage.hidden {
+            display: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        /* Animated Background Elements */
+        .landing-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, rgba(139, 92, 246, 0.3), transparent),
+                radial-gradient(2px 2px at 60% 70%, rgba(74, 144, 226, 0.3), transparent),
+                radial-gradient(1px 1px at 50% 50%, rgba(255, 255, 255, 0.2), transparent),
+                radial-gradient(1px 1px at 80% 10%, rgba(255, 215, 0, 0.2), transparent),
+                radial-gradient(2px 2px at 90% 80%, rgba(139, 92, 246, 0.2), transparent);
+            background-size: 200% 200%;
+            animation: particleFloat 20s ease-in-out infinite;
+        }
+        
+        @keyframes particleFloat {
+            0%, 100% { background-position: 0% 0%, 100% 100%, 50% 50%, 80% 20%, 90% 80%; }
+            50% { background-position: 100% 100%, 0% 0%, 50% 50%, 20% 80%, 10% 20%; }
+        }
+        
+        .magic-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.6;
+            animation: orbFloat 8s ease-in-out infinite;
+        }
+        
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.8), transparent);
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .orb-2 {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(74, 144, 226, 0.8), transparent);
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+        
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.6), transparent);
+            bottom: 20%;
+            left: 50%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        /* Landing Content */
+        .landing-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 40px;
+            max-width: 1400px;
+            width: 100%;
+        }
+        
+        /* Logo Section */
+        .landing-logo-container {
+            position: relative;
+            margin-bottom: 60px;
+        }
+        
+        .landing-logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent);
+            border-radius: 50%;
+            animation: pulseGlow 3s ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+        }
+        
+        .landing-title {
+            font-family: "Shadows Into Light", cursive;
+            font-size: clamp(60px, 8vw, 120px);
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 
+                0 0 20px rgba(139, 92, 246, 0.8),
+                0 0 40px rgba(139, 92, 246, 0.6),
+                0 0 60px rgba(74, 144, 226, 0.4),
+                0 4px 10px rgba(0, 0, 0, 0.5);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            animation: titleEntrance 1.5s ease-out;
+        }
+        
+        @keyframes titleEntrance {
+            0% { 
+                opacity: 0;
+                transform: translateY(-50px) scale(0.8);
+            }
+            100% { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .title-word {
+            display: inline-block;
+            animation: wordFloat 3s ease-in-out infinite;
+        }
+        
+        .title-word-1 {
+            animation-delay: 0s;
+        }
+        
+        .title-word-2 {
+            animation-delay: 1.5s;
+        }
+        
+        @keyframes wordFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .title-gem {
+            font-size: clamp(40px, 6vw, 80px);
+            animation: gemSpin 4s linear infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+        }
+        
+        @keyframes gemSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        .landing-subtitle {
+            font-size: clamp(20px, 2.5vw, 32px);
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            animation: subtitleFade 2s ease-out;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+        
+        @keyframes subtitleFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Feature Cards */
+        .landing-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .feature-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 15px;
+            padding: 30px 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            animation: cardEntrance 1s ease-out backwards;
+        }
+        
+        .feature-card:nth-child(1) { animation-delay: 0.2s; }
+        .feature-card:nth-child(2) { animation-delay: 0.4s; }
+        .feature-card:nth-child(3) { animation-delay: 0.6s; }
+        .feature-card:nth-child(4) { animation-delay: 0.8s; }
+        
+        @keyframes cardEntrance {
+            0% { 
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            100% { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: rgba(139, 92, 246, 0.8);
+            box-shadow: 
+                0 10px 40px rgba(139, 92, 246, 0.4),
+                0 0 20px rgba(139, 92, 246, 0.2);
+            background: rgba(0, 0, 0, 0.6);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.6));
+        }
+        
+        .feature-card h3 {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        /* Call to Action Buttons */
+        .landing-cta {
+            margin: 60px 0;
+        }
+        
+        .landing-buttons-container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .landing-cta-button {
+            position: relative;
+            padding: 18px 50px;
+            font-size: clamp(16px, 2.2vw, 24px);
+            font-weight: bold;
+            color: #fff;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            min-width: 180px;
+            animation: buttonPulse 2s ease-in-out infinite;
+        }
+        
+        .landing-signup-button {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            box-shadow: 
+                0 10px 40px rgba(81, 207, 102, 0.5),
+                0 0 20px rgba(64, 192, 87, 0.3);
+        }
+        
+        .landing-signup-button:hover {
+            background: linear-gradient(135deg, #69db7c 0%, #51cf66 100%);
+            box-shadow: 
+                0 15px 50px rgba(81, 207, 102, 0.7),
+                0 0 30px rgba(64, 192, 87, 0.5);
+        }
+        
+        .landing-signin-button {
+            background: linear-gradient(135deg, #8b5cf6 0%, #4a90e2 100%);
+            box-shadow: 
+                0 10px 40px rgba(139, 92, 246, 0.5),
+                0 0 20px rgba(74, 144, 226, 0.3);
+        }
+        
+        .landing-signin-button:hover {
+            background: linear-gradient(135deg, #9d6df7 0%, #5ba0f2 100%);
+            box-shadow: 
+                0 15px 50px rgba(139, 92, 246, 0.7),
+                0 0 30px rgba(74, 144, 226, 0.5);
+        }
+        
+        @keyframes buttonPulse {
+            0%, 100% { 
+                transform: scale(1);
+            }
+            50% { 
+                transform: scale(1.02);
+            }
+        }
+        
+        .landing-cta-button:hover {
+            transform: translateY(-5px) scale(1.05);
+        }
+        
+        .landing-cta-button:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+        
+        .button-text {
+            position: relative;
+            z-index: 2;
+            display: inline-block;
+        }
+        
+        .button-arrow,
+        .button-icon {
+            position: relative;
+            z-index: 2;
+            display: inline-block;
+            margin-left: 15px;
+            transition: transform 0.3s ease;
+        }
+        
+        .landing-cta-button:hover .button-arrow {
+            transform: translateX(10px);
+        }
+        
+        .landing-cta-button:hover .button-icon {
+            transform: rotate(360deg) scale(1.2);
+        }
+        
+        .button-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent);
+            border-radius: 50%;
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+        
+        .landing-cta-button:hover .button-glow {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .landing-cta-subtext {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: clamp(14px, 1.5vw, 18px);
+            font-style: italic;
+        }
+        
+        /* Stats Section */
+        .landing-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 80px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: clamp(36px, 5vw, 64px);
+            font-weight: bold;
+            color: #8b5cf6;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: clamp(12px, 1.5vw, 16px);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+        
+        .scroll-arrow {
+            width: 30px;
+            height: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 25px;
+            position: relative;
+        }
+        
+        .scroll-arrow::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: scrollBounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes scrollBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+            50% { transform: translateX(-50%) translateY(20px); opacity: 0.5; }
+        }
+        
+        /* Login Screen - Enhanced Professional Design */
         #loginScreen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* Fallback gradient if background image not loaded */
-            background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(20, 20, 35, 0.98) 100%);
-            /* Fantasy background image - add your image to assets/backgrounds/ */
+            /* Enhanced fantasy background with better image */
+            background: linear-gradient(135deg, rgba(10, 10, 26, 0.98) 0%, rgba(26, 10, 46, 0.98) 50%, rgba(45, 27, 61, 0.98) 100%);
             background-image: 
-                linear-gradient(135deg, rgba(26, 26, 46, 0.6) 0%, rgba(20, 20, 35, 0.6) 100%),
-                url('assets/backgrounds/fantasy-login-bg.jpeg');
+                url('https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1920&q=80'),
+                linear-gradient(135deg, rgba(10, 10, 26, 0.85) 0%, rgba(26, 10, 46, 0.85) 50%, rgba(45, 27, 61, 0.85) 100%);
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            background-blend-mode: normal;
+            background-blend-mode: overlay;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 200;
+            animation: loginFadeIn 0.8s ease-in;
+        }
+        
+        @keyframes loginFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         /* Subtle background pattern/texture overlay */
@@ -156,21 +627,54 @@
 
         /* Giphy utilities reserved for future chat integration */
 
-        /* WoW-style login container - clean and focused */
+        /* Enhanced login container - professional MMORPG style */
         .login-container {
-            width: clamp(320px, 90vw, 450px);
-            padding: clamp(40px, 7vh, 60px) clamp(30px, 5vw, 50px);
+            width: clamp(380px, 90vw, 500px);
+            padding: clamp(50px, 8vh, 70px) clamp(40px, 6vw, 60px);
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: clamp(25px, 4vh, 35px);
-            background: rgba(0, 0, 0, 0.4);
-            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.1);
-            border-radius: clamp(8px, 1vw, 12px);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                0 0 40px rgba(139, 92, 246, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             position: relative;
             z-index: 1;
+            animation: containerSlideIn 0.8s ease-out;
+        }
+        
+        @keyframes containerSlideIn {
+            0% { 
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            100% { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(74, 144, 226, 0.5));
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .login-container:hover::before {
+            opacity: 0.3;
         }
 
         /* WoW-style clean logo - minimalist */
@@ -200,23 +704,39 @@
 
         .login-input {
             width: 100%;
-            padding: clamp(12px, 1.5vh, 15px) clamp(15px, 2vw, 20px);
-            background: rgba(0, 0, 0, 0.7);
-            border: clamp(2px, 0.25vw, 2px) solid rgba(139, 92, 246, 0.5);
-            border-radius: clamp(5px, 0.6vw, 5px);
-            color: #e0e0e0;
+            padding: clamp(14px, 2vh, 18px) clamp(20px, 3vw, 25px);
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: 10px;
+            color: #fff;
             font-size: var(--font-md);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
             transition: all 0.3s ease;
             height: var(--input-height);
+            position: relative;
+        }
+        
+        .login-input::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
         }
 
         .login-input:focus {
             outline: none;
             border-color: rgba(139, 92, 246, 1);
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
-            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 
+                0 0 20px rgba(139, 92, 246, 0.6),
+                inset 0 0 10px rgba(139, 92, 246, 0.2);
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.02);
         }
 
         .login-input::placeholder {
@@ -241,55 +761,62 @@
             accent-color: rgba(139, 92, 246, 0.8);
         }
 
-        /* WoW-style login button - clean and professional */
+        /* Enhanced login button - professional MMORPG style */
         .login-button {
+            position: relative;
             width: 100%;
-            padding: clamp(14px, 2vh, 16px);
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.85) 0%, rgba(74, 144, 226, 0.85) 100%);
-            border: clamp(1px, 0.15vw, 1px) solid rgba(255, 255, 255, 0.2);
-            border-radius: clamp(4px, 0.5vw, 6px);
+            padding: clamp(16px, 2.5vh, 20px);
+            background: linear-gradient(135deg, #8b5cf6 0%, #4a90e2 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
             color: white;
-            font-size: var(--font-md);
-            font-weight: 600;
+            font-size: clamp(16px, 2vw, 18px);
+            font-weight: 700;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-transform: none;
-            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 8px 24px rgba(139, 92, 246, 0.4),
+                0 0 20px rgba(74, 144, 226, 0.3);
             height: var(--button-height);
-            min-height: 44px; /* Accessibility touch target */
-        }
-
-        .login-button::before,
-        .login-button::after {
-            content: '▶';
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 215, 0, 0.9);
-            font-size: 16px;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+            min-height: 50px;
+            overflow: hidden;
         }
 
         .login-button::before {
-            left: 20px;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
         }
 
-        .login-button::after {
-            right: 20px;
-            transform: translateY(-50%) scaleX(-1);
+        .login-button:hover::before {
+            left: 100%;
         }
 
         .login-button:hover {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(74, 144, 226, 0.95) 100%);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, #9d6df7 0%, #5ba0f2 100%);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 
+                0 12px 32px rgba(139, 92, 246, 0.6),
+                0 0 30px rgba(74, 144, 226, 0.5);
+            transform: translateY(-2px) scale(1.02);
         }
 
         .login-button:active {
-            transform: translateY(0);
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .login-footer {
@@ -297,13 +824,14 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px 30px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7), transparent);
+            padding: 20px 40px;
             display: flex;
-            justify-content: flex-end;
+            justify-content: center;
             align-items: center;
-            gap: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 30px;
+            border-top: 1px solid rgba(139, 92, 246, 0.2);
+            backdrop-filter: blur(10px);
         }
 
         .footer-link {
@@ -3426,6 +3954,196 @@
             margin-right: 10px;
             color: #4a90e2;
         }
+        
+        /* Settings Menu Buttons */
+        .settings-menu-buttons {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .settings-menu-button {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: center;
+        }
+        
+        .settings-menu-button:hover {
+            background: rgba(74, 144, 226, 0.3);
+            border-color: #4a90e2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+        
+        .settings-menu-button i {
+            font-size: 1.1em;
+        }
+        
+        .settings-menu-button.logout-button {
+            background: rgba(200, 50, 50, 0.2);
+            border-color: rgba(200, 50, 50, 0.4);
+        }
+        
+        .settings-menu-button.logout-button:hover {
+            background: rgba(200, 50, 50, 0.4);
+            border-color: #c83232;
+            box-shadow: 0 4px 12px rgba(200, 50, 50, 0.4);
+        }
+        
+        /* Instructions Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(20, 20, 35, 0.98) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .instructions-modal {
+            width: clamp(400px, 60vw, 700px);
+        }
+        
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header h2 {
+            color: #fff;
+            margin: 0;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-close-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+        
+        .modal-close-button:hover {
+            background: rgba(200, 50, 50, 0.3);
+            border-color: #c83232;
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            max-height: calc(90vh - 100px);
+        }
+        
+        .instructions-content {
+            color: #e0e0e0;
+        }
+        
+        .instruction-section {
+            margin-bottom: 25px;
+        }
+        
+        .instruction-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .instruction-section h3 {
+            color: #4a90e2;
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(74, 144, 226, 0.3);
+            padding-bottom: 8px;
+        }
+        
+        .instruction-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .instruction-section li {
+            padding: 10px 0;
+            padding-left: 25px;
+            border-left: 3px solid rgba(74, 144, 226, 0.3);
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            padding-left: 20px;
+            border-radius: 5px;
+        }
+        
+        .instruction-section li strong {
+            color: #fff;
+        }
 
         /* Skills Section */
         #skillsSection {
@@ -3809,8 +4527,95 @@
         <canvas id="gameCanvas"></canvas>
         
         <div id="ui">
+            <!-- Landing Page -->
+            <div id="landingPage" class="landing-page">
+                <!-- Animated Background Elements -->
+                <div class="landing-background">
+                    <div class="floating-particles"></div>
+                    <div class="magic-orb orb-1"></div>
+                    <div class="magic-orb orb-2"></div>
+                    <div class="magic-orb orb-3"></div>
+                </div>
+                
+                <!-- Main Content -->
+                <div class="landing-content">
+                    <!-- Logo Section with Animation -->
+                    <div class="landing-logo-container">
+                        <div class="landing-logo-glow"></div>
+                        <h1 class="landing-title">
+                            <span class="title-word title-word-1">Fantasy</span>
+                            <span class="title-gem">⚔️</span>
+                            <span class="title-word title-word-2">3D</span>
+                        </h1>
+                        <p class="landing-subtitle">Epic MMORPG Adventure Awaits</p>
+                    </div>
+                    
+                    <!-- Feature Highlights -->
+                    <div class="landing-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">🗡️</div>
+                            <h3>Epic Battles</h3>
+                            <p>Engage in thrilling combat</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🏰</div>
+                            <h3>Vast World</h3>
+                            <p>Explore endless realms</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">👥</div>
+                            <h3>Join Forces</h3>
+                            <p>Team up with friends</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">✨</div>
+                            <h3>Magic & Power</h3>
+                            <p>Master ancient abilities</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Call to Action -->
+                    <div class="landing-cta">
+                        <div class="landing-buttons-container">
+                            <button id="signUpButton" class="landing-cta-button landing-signup-button">
+                                <span class="button-text">Sign Up</span>
+                                <span class="button-icon">✨</span>
+                                <div class="button-glow"></div>
+                            </button>
+                            <button id="signInButton" class="landing-cta-button landing-signin-button">
+                                <span class="button-text">Sign In</span>
+                                <span class="button-arrow">→</span>
+                                <div class="button-glow"></div>
+                            </button>
+                        </div>
+                        <p class="landing-cta-subtext">Begin your legendary journey today</p>
+                    </div>
+                    
+                    <!-- Animated Stats -->
+                    <div class="landing-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" data-target="10000">0</div>
+                            <div class="stat-label">Active Players</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" data-target="500">0</div>
+                            <div class="stat-label">Epic Quests</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" data-target="50">0</div>
+                            <div class="stat-label">Unique Classes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Scroll Indicator -->
+                <div class="scroll-indicator">
+                    <div class="scroll-arrow"></div>
+                </div>
+            </div>
+            
             <!-- Login Screen -->
-            <div id="loginScreen">
+            <div id="loginScreen" class="hidden">
                 
                 <div class="login-container">
                     <div class="game-logo">
@@ -4355,11 +5160,74 @@
                 </div>
                 <div class="instruction-item">
                     <i class="fas fa-mouse"></i>
-                    <strong>Mouse:</strong> Interact with objects
+                    <strong>Mouse:</strong> Interact with objects<br>
+                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Drag to rotate character</span>
                 </div>
                 <div class="instruction-item">
                     <i class="fas fa-sync-alt"></i>
                     <strong>E / Q:</strong> Pan camera left / right
+                </div>
+                
+                <!-- Settings Menu Buttons -->
+                <div class="settings-menu-buttons">
+                    <button id="instructionsButton" class="settings-menu-button">
+                        <i class="fas fa-book"></i> Instructions
+                    </button>
+                    <button id="characterSelectButton" class="settings-menu-button">
+                        <i class="fas fa-user"></i> Character Selection
+                    </button>
+                    <button id="logoutButton" class="settings-menu-button logout-button">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Instructions Modal -->
+            <div id="instructionsModal" class="modal-overlay" style="display: none;">
+                <div class="modal-content instructions-modal">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-book"></i> Game Instructions</h2>
+                        <button id="closeInstructionsButton" class="modal-close-button">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body instructions-content">
+                        <div class="instruction-section">
+                            <h3><i class="fas fa-keyboard"></i> Movement Controls</h3>
+                            <ul>
+                                <li><strong>Arrow Keys / WASD:</strong> Move your character</li>
+                                <li><strong>Double-tap:</strong> Run (1.5x speed, consumes energy)</li>
+                                <li><strong>Mouse Drag:</strong> Rotate character facing direction</li>
+                                <li><strong>Q / E:</strong> Pan camera left / right</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="instruction-section">
+                            <h3><i class="fas fa-mouse"></i> Interaction</h3>
+                            <ul>
+                                <li><strong>Click:</strong> Interact with objects and create ripple effects</li>
+                                <li><strong>Hover:</strong> Cursor changes when over interactive objects</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="instruction-section">
+                            <h3><i class="fas fa-cog"></i> Game Systems</h3>
+                            <ul>
+                                <li><strong>B Key:</strong> Open/close inventory</li>
+                                <li><strong>ESC:</strong> Close menus</li>
+                                <li><strong>1-0 Keys:</strong> Activate skills and abilities</li>
+                                <li><strong>Energy System:</strong> Running consumes energy, regenerates over time</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="instruction-section">
+                            <h3><i class="fas fa-map"></i> Navigation</h3>
+                            <ul>
+                                <li><strong>Minimap:</strong> Top-right corner shows your location</li>
+                                <li><strong>HUD:</strong> Top-left shows health, magic, and item counters</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 

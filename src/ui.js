@@ -35,6 +35,26 @@ export class UI {
     }
 
     setupEventListeners() {
+        // Landing page buttons
+        const signUpButton = document.getElementById('signUpButton');
+        if (signUpButton) {
+            signUpButton.addEventListener('click', () => {
+                this.hideLandingPage();
+                // Small delay for smooth transition, then show account creation
+                setTimeout(() => {
+                    this.showCreateAccountScreen();
+                }, 800);
+            });
+        }
+        
+        const signInButton = document.getElementById('signInButton');
+        if (signInButton) {
+            signInButton.addEventListener('click', () => {
+                this.hideLandingPage();
+                this.showLoginScreen();
+            });
+        }
+        
         // Login screen buttons
         document.getElementById('loginButton').addEventListener('click', () => {
             this.handleLogin();
@@ -329,6 +349,48 @@ export class UI {
         document.getElementById('settingsButton').addEventListener('click', () => {
             this.toggleSettings();
         });
+        
+        // Instructions button in settings menu
+        const instructionsButton = document.getElementById('instructionsButton');
+        if (instructionsButton) {
+            instructionsButton.addEventListener('click', () => {
+                this.showInstructionsModal();
+            });
+        }
+        
+        // Character selection button in settings menu
+        const characterSelectButton = document.getElementById('characterSelectButton');
+        if (characterSelectButton) {
+            characterSelectButton.addEventListener('click', () => {
+                this.returnToCharacterSelection();
+            });
+        }
+        
+        // Logout button in settings menu
+        const logoutButtonFromSettings = document.getElementById('logoutButton');
+        if (logoutButtonFromSettings) {
+            logoutButtonFromSettings.addEventListener('click', () => {
+                this.handleLogout();
+            });
+        }
+        
+        // Close instructions modal button
+        const closeInstructionsButton = document.getElementById('closeInstructionsButton');
+        if (closeInstructionsButton) {
+            closeInstructionsButton.addEventListener('click', () => {
+                this.hideInstructionsModal();
+            });
+        }
+        
+        // Close instructions modal when clicking outside
+        const instructionsModal = document.getElementById('instructionsModal');
+        if (instructionsModal) {
+            instructionsModal.addEventListener('click', (e) => {
+                if (e.target === instructionsModal) {
+                    this.hideInstructionsModal();
+                }
+            });
+        }
 
         // Close settings when clicking outside
         document.addEventListener('click', (e) => {
@@ -365,8 +427,15 @@ export class UI {
             if (e.key.toLowerCase() === 'b' && this.game.character) {
                 this.toggleInventory();
             }
-            // ESC to close menus
+            // ESC to close menus and modals
             if (e.key === 'Escape') {
+                // Close instructions modal if open
+                const instructionsModal = document.getElementById('instructionsModal');
+                if (instructionsModal && instructionsModal.style.display !== 'none') {
+                    this.hideInstructionsModal();
+                    return;
+                }
+                // Close other menus
                 this.closeAllMenus();
             }
             // Number keys 1-9 and 0 for skills (0 = slot 10)
@@ -467,19 +536,69 @@ export class UI {
         }
     }
 
-    showLoginScreen() {
-        document.getElementById('loginScreen').classList.remove('hidden');
-        // Load saved username if exists
-        const savedUsername = localStorage.getItem('fantasy3DUsername');
-        const remember = localStorage.getItem('fantasy3DRemember') === 'true';
-        
-        if (savedUsername) {
-            document.getElementById('usernameInput').value = savedUsername;
-            document.getElementById('rememberCheckbox').checked = remember;
-        } else {
-            // Clear checkbox if no saved username
-            document.getElementById('rememberCheckbox').checked = false;
+    async showLandingPage() {
+        const landingPage = document.getElementById('landingPage');
+        if (landingPage) {
+            landingPage.classList.remove('hidden');
+            landingPage.style.display = 'flex';
+            
+            // Animate stats counter
+            this.animateStats();
         }
+    }
+    
+    hideLandingPage() {
+        const landingPage = document.getElementById('landingPage');
+        if (landingPage) {
+            landingPage.style.animation = 'fadeOut 0.8s ease-out forwards';
+            setTimeout(() => {
+                landingPage.classList.add('hidden');
+                landingPage.style.display = 'none';
+            }, 800);
+        }
+    }
+    
+    animateStats() {
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach(stat => {
+            const target = parseInt(stat.getAttribute('data-target'));
+            const duration = 2000; // 2 seconds
+            const increment = target / (duration / 16); // 60fps
+            let current = 0;
+            
+            const updateStat = () => {
+                current += increment;
+                if (current < target) {
+                    stat.textContent = Math.floor(current).toLocaleString();
+                    requestAnimationFrame(updateStat);
+                } else {
+                    stat.textContent = target.toLocaleString();
+                }
+            };
+            
+            updateStat();
+        });
+    }
+    
+    showLoginScreen() {
+        // Hide landing page if visible
+        this.hideLandingPage();
+        
+        // Show login screen with delay for smooth transition
+        setTimeout(() => {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            // Load saved username if exists
+            const savedUsername = localStorage.getItem('fantasy3DUsername');
+            const remember = localStorage.getItem('fantasy3DRemember') === 'true';
+            
+            if (savedUsername) {
+                document.getElementById('usernameInput').value = savedUsername;
+                document.getElementById('rememberCheckbox').checked = remember;
+            } else {
+                // Clear checkbox if no saved username
+                document.getElementById('rememberCheckbox').checked = false;
+            }
+        }, 800);
     }
 
     /**
@@ -970,6 +1089,23 @@ export class UI {
     async handleLogout() {
         console.log('User logging out...');
         
+        // Close all menus
+        this.closeAllMenus();
+        
+        // Stop the game if running
+        if (this.game && this.game.character) {
+            // Clean up game state
+            if (this.game.minimap) {
+                this.game.minimap = null;
+            }
+            if (this.game.controls) {
+                this.game.controls = null;
+            }
+            if (this.game.character) {
+                this.game.character = null;
+            }
+        }
+        
         // Set logged out flag to prevent auto-login
         localStorage.setItem('fantasy3DLoggedOut', 'true');
         
@@ -1357,6 +1493,13 @@ export class UI {
     }
 
     hideAllMenus() {
+        // Hide landing page
+        const landingPage = document.getElementById('landingPage');
+        if (landingPage) {
+            landingPage.style.display = 'none';
+            landingPage.classList.add('hidden');
+        }
+        
         const mainMenu = document.getElementById('mainMenu');
         if (mainMenu) {
             mainMenu.style.display = 'none';
@@ -1403,6 +1546,45 @@ export class UI {
     closeAllMenus() {
         document.getElementById('settingsMenu').style.display = 'none';
         document.getElementById('inventoryMenu').style.display = 'none';
+        this.hideInstructionsModal();
+    }
+    
+    showInstructionsModal() {
+        const instructionsModal = document.getElementById('instructionsModal');
+        if (instructionsModal) {
+            instructionsModal.style.display = 'flex';
+            // Close settings menu when opening instructions
+            this.toggleSettings();
+        }
+    }
+    
+    hideInstructionsModal() {
+        const instructionsModal = document.getElementById('instructionsModal');
+        if (instructionsModal) {
+            instructionsModal.style.display = 'none';
+        }
+    }
+    
+    returnToCharacterSelection() {
+        // Close settings menu
+        this.closeAllMenus();
+        
+        // Stop the game if running
+        if (this.game && this.game.character) {
+            // Clean up game state
+            if (this.game.minimap) {
+                this.game.minimap = null;
+            }
+            if (this.game.controls) {
+                this.game.controls = null;
+            }
+            if (this.game.character) {
+                this.game.character = null;
+            }
+        }
+        
+        // Show character selection screen
+        this.showCharacterSelection();
     }
 
     updateInventoryDisplay() {

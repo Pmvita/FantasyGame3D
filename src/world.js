@@ -21,73 +21,100 @@ export class World {
     }
 
     async createWorld() {
-        // Create ground - WoW-style grassy terrain
-        // Larger ground plane for better visibility
-        const groundGeometry = new THREE.PlaneGeometry(500, 500, 50, 50);
+        // Create realistic fantasy world terrain
+        // Larger, more detailed ground plane with varied terrain
+        const groundGeometry = new THREE.PlaneGeometry(800, 800, 100, 100);
         
-        // Add some variation to the ground (subtle height variation)
+        // Add realistic terrain variation with multiple noise layers
         const vertices = groundGeometry.attributes.position;
         for (let i = 0; i < vertices.count; i++) {
             const x = vertices.getX(i);
             const z = vertices.getZ(i);
-            // Add subtle noise for terrain variation
-            const noise = Math.sin(x * 0.1) * Math.cos(z * 0.1) * 0.5;
-            vertices.setY(i, noise);
+            
+            // Multi-layer terrain noise for realistic variation
+            const noise1 = Math.sin(x * 0.05) * Math.cos(z * 0.05) * 2;
+            const noise2 = Math.sin(x * 0.15) * Math.cos(z * 0.15) * 0.8;
+            const noise3 = Math.sin(x * 0.3) * Math.cos(z * 0.3) * 0.3;
+            
+            // Combine noise layers for natural terrain
+            const height = noise1 + noise2 + noise3;
+            vertices.setY(i, height);
         }
         vertices.needsUpdate = true;
         groundGeometry.computeVertexNormals();
         
-        // WoW-style grass material - brighter, more vibrant
+        // Realistic fantasy grass material with texture variation
         const groundMaterial = new THREE.MeshStandardMaterial({
-            color: 0x5a7d33, // Brighter green for WoW-style grass
-            roughness: 0.9,
-            metalness: 0.0
+            color: 0x4a6b2f, // Rich fantasy green
+            roughness: 0.95,
+            metalness: 0.0,
+            envMapIntensity: 0.5
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
         ground.position.y = 0;
         ground.receiveShadow = true;
+        ground.userData.type = 'ground';
         this.scene.add(ground);
 
-        // Add some simple buildings/structures
-        this.createBuilding(10, 0, 10, 4, 4, 6);
-        this.createBuilding(-10, 0, 10, 4, 4, 6);
-        this.createBuilding(10, 0, -10, 4, 4, 6);
-        this.createBuilding(-10, 0, -10, 4, 4, 6);
+        // Add realistic fantasy structures with varied designs
+        // Village center with main buildings
+        this.createFantasyBuilding(0, 0, -20, 8, 8, 12, 0x8B7355); // Town hall
+        this.createFantasyBuilding(-15, 0, -15, 6, 6, 10, 0x6B5B4F); // House 1
+        this.createFantasyBuilding(15, 0, -15, 6, 6, 10, 0x7B6B5F); // House 2
+        this.createFantasyBuilding(-25, 0, 10, 5, 5, 8, 0x6B5545); // Small house
+        this.createFantasyBuilding(25, 0, 10, 5, 5, 8, 0x7B6555); // Small house
+        
+        // Create fantasy towers
+        this.createTower(-30, 0, -30, 4, 15);
+        this.createTower(30, 0, -30, 4, 15);
+        
+        // Add fantasy pathways
+        this.createPathway(0, 0.1, -40, 0, 0.1, 40, 3); // North-South path
+        this.createPathway(-40, 0.1, 0, 40, 0.1, 0, 3); // East-West path
 
-        // Add lighting
+        // Enhanced lighting for realistic fantasy atmosphere
         this.createLighting();
 
-        // Load 3D models and then create trees/rocks
+        // Load 3D models
         await this.loadModels();
 
-        // Add trees using 3D models - more trees for WoW-style density
-        for (let i = 0; i < 50; i++) {
-            const x = (Math.random() - 0.5) * 400;
-            const z = (Math.random() - 0.5) * 400;
-            this.createTree(x, z);
+        // Create realistic forest clusters with varied density
+        // Dense forest area in the north
+        for (let i = 0; i < 80; i++) {
+            const x = (Math.random() - 0.5) * 600;
+            const z = (Math.random() - 0.5) * 600;
+            // Avoid placing trees on buildings
+            if (Math.abs(x) > 20 || Math.abs(z) > 20) {
+                this.createTree(x, z);
+            }
         }
 
-        // Add rocks using 3D models
-        for (let i = 0; i < 30; i++) {
-            const x = (Math.random() - 0.5) * 400;
-            const z = (Math.random() - 0.5) * 400;
+        // Scattered rocks and boulders
+        for (let i = 0; i < 50; i++) {
+            const x = (Math.random() - 0.5) * 600;
+            const z = (Math.random() - 0.5) * 600;
             this.createRock(x, z);
         }
 
-        // Add LowTreePond features
-        for (let i = 0; i < 10; i++) {
-            const x = (Math.random() - 0.5) * 400;
-            const z = (Math.random() - 0.5) * 400;
-            this.createLowTreePond(x, z);
+        // Fantasy ponds and water features
+        for (let i = 0; i < 15; i++) {
+            const x = (Math.random() - 0.5) * 600;
+            const z = (Math.random() - 0.5) * 600;
+            if (Math.abs(x) > 30 || Math.abs(z) > 30) {
+                this.createLowTreePond(x, z);
+            }
         }
         
-        console.log('🌍 World created! Total objects:', this.scene.children.length);
-        const groundMesh = this.scene.children.find(c => c.type === 'Mesh' && c.material?.color?.getHex() === 0x5a7d33);
-        console.log('   Ground added:', !!groundMesh);
+        // Add decorative fantasy elements
+        this.createFantasyDecorations();
+        
+        console.log('🌍 Fantasy world created! Total objects:', this.scene.children.length);
+        console.log('   Ground added: ✅');
         console.log('   Buildings added:', this.scene.children.filter(c => c.userData?.type === 'building').length);
         console.log('   Trees added:', this.scene.children.filter(c => c.userData?.type === 'tree').length);
         console.log('   Rocks added:', this.scene.children.filter(c => c.userData?.type === 'rock').length);
+        console.log('   Ponds added:', this.scene.children.filter(c => c.userData?.type === 'pond').length);
         console.log('   Lights added:', this.scene.children.filter(c => c.type.includes('Light')).length);
     }
 
@@ -141,33 +168,148 @@ export class World {
     }
 
     createBuilding(x, y, z, width, depth, height) {
+        // Legacy method - redirect to new fantasy building
+        this.createFantasyBuilding(x, y, z, width, depth, height, 0x8B7355);
+    }
+    
+    createFantasyBuilding(x, y, z, width, depth, height, color = 0x8B7355) {
+        const buildingGroup = new THREE.Group();
+        buildingGroup.userData.interactive = true;
+        buildingGroup.userData.type = 'building';
+        
+        // Main structure with more detail
         const geometry = new THREE.BoxGeometry(width, height, depth);
         const material = new THREE.MeshStandardMaterial({
+            color: color,
+            roughness: 0.75,
+            metalness: 0.1
+        });
+        const building = new THREE.Mesh(geometry, material);
+        building.position.set(0, height / 2, 0);
+        building.castShadow = true;
+        building.receiveShadow = true;
+        buildingGroup.add(building);
+
+        // Fantasy-style peaked roof
+        const roofHeight = Math.min(height * 0.4, 4);
+        const roofGeometry = new THREE.ConeGeometry(width * 0.85, roofHeight, 4);
+        const roofMaterial = new THREE.MeshStandardMaterial({
+            color: 0x5a3d2a,
+            roughness: 0.8
+        });
+        const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+        roof.position.set(0, height + roofHeight / 2, 0);
+        roof.rotation.y = Math.PI / 4;
+        roof.castShadow = true;
+        buildingGroup.add(roof);
+        
+        // Add decorative elements - windows
+        const windowGeometry = new THREE.BoxGeometry(0.8, 1.2, 0.1);
+        const windowMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4a90e2,
+            emissive: 0x1a4a7a,
+            emissiveIntensity: 0.3
+        });
+        
+        // Front windows
+        const window1 = new THREE.Mesh(windowGeometry, windowMaterial);
+        window1.position.set(width * 0.3, height * 0.4, depth / 2 + 0.05);
+        buildingGroup.add(window1);
+        
+        const window2 = new THREE.Mesh(windowGeometry, windowMaterial);
+        window2.position.set(-width * 0.3, height * 0.4, depth / 2 + 0.05);
+        buildingGroup.add(window2);
+        
+        buildingGroup.position.set(x, y, z);
+        this.scene.add(buildingGroup);
+    }
+    
+    createTower(x, y, z, radius, height) {
+        const towerGroup = new THREE.Group();
+        towerGroup.userData.interactive = true;
+        towerGroup.userData.type = 'building';
+        
+        // Tower base
+        const baseGeometry = new THREE.CylinderGeometry(radius, radius * 1.2, height * 0.7, 8);
+        const baseMaterial = new THREE.MeshStandardMaterial({
+            color: 0x6B5B4F,
+            roughness: 0.8
+        });
+        const base = new THREE.Mesh(baseGeometry, baseMaterial);
+        base.position.set(0, height * 0.35, 0);
+        base.castShadow = true;
+        base.receiveShadow = true;
+        towerGroup.add(base);
+        
+        // Tower top
+        const topGeometry = new THREE.CylinderGeometry(radius * 0.8, radius, height * 0.3, 8);
+        const top = new THREE.Mesh(topGeometry, baseMaterial);
+        top.position.set(0, height * 0.85, 0);
+        top.castShadow = true;
+        towerGroup.add(top);
+        
+        // Tower spire
+        const spireGeometry = new THREE.ConeGeometry(radius * 0.5, height * 0.2, 8);
+        const spireMaterial = new THREE.MeshStandardMaterial({
             color: 0x8B7355,
             roughness: 0.7
         });
-        const building = new THREE.Mesh(geometry, material);
-        building.position.set(x, y + height / 2, z);
-        building.castShadow = true;
-        building.receiveShadow = true;
-        // Mark as interactive object
-        building.userData.interactive = true;
-        building.userData.type = 'building';
-        this.scene.add(building);
-
-        // Add roof
-        const roofGeometry = new THREE.ConeGeometry(width * 0.8, 2, 4);
-        const roofMaterial = new THREE.MeshStandardMaterial({
-            color: 0x654321
+        const spire = new THREE.Mesh(spireGeometry, spireMaterial);
+        spire.position.set(0, height * 1.1, 0);
+        spire.castShadow = true;
+        towerGroup.add(spire);
+        
+        towerGroup.position.set(x, y, z);
+        this.scene.add(towerGroup);
+    }
+    
+    createPathway(x1, y1, z1, x2, y2, z2, width) {
+        const pathLength = Math.sqrt((x2 - x1) ** 2 + (z2 - z1) ** 2);
+        const pathGeometry = new THREE.PlaneGeometry(width, pathLength);
+        const pathMaterial = new THREE.MeshStandardMaterial({
+            color: 0x6B5B4F,
+            roughness: 0.9
         });
-        const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-        roof.position.set(x, y + height + 1, z);
-        roof.rotation.y = Math.PI / 4;
-        roof.castShadow = true;
-        // Mark roof as part of interactive building
-        roof.userData.interactive = true;
-        roof.userData.type = 'building';
-        this.scene.add(roof);
+        const path = new THREE.Mesh(pathGeometry, pathMaterial);
+        
+        const centerX = (x1 + x2) / 2;
+        const centerZ = (z1 + z2) / 2;
+        const angle = Math.atan2(z2 - z1, x2 - x1);
+        
+        path.rotation.x = -Math.PI / 2;
+        path.rotation.z = angle;
+        path.position.set(centerX, y1, centerZ);
+        path.receiveShadow = true;
+        path.userData.type = 'pathway';
+        this.scene.add(path);
+    }
+    
+    createFantasyDecorations() {
+        // Add magical glowing crystals scattered around
+        for (let i = 0; i < 20; i++) {
+            const x = (Math.random() - 0.5) * 500;
+            const z = (Math.random() - 0.5) * 500;
+            
+            const crystalGeometry = new THREE.OctahedronGeometry(0.3 + Math.random() * 0.3);
+            const crystalMaterial = new THREE.MeshStandardMaterial({
+                color: new THREE.Color().setHSL(0.6 + Math.random() * 0.2, 0.8, 0.6),
+                emissive: new THREE.Color().setHSL(0.6 + Math.random() * 0.2, 0.8, 0.3),
+                emissiveIntensity: 0.5,
+                metalness: 0.5,
+                roughness: 0.3
+            });
+            const crystal = new THREE.Mesh(crystalGeometry, crystalMaterial);
+            crystal.position.set(x, 0.5 + Math.random() * 0.5, z);
+            crystal.rotation.set(
+                Math.random() * Math.PI,
+                Math.random() * Math.PI * 2,
+                Math.random() * Math.PI
+            );
+            crystal.castShadow = true;
+            crystal.userData.type = 'decoration';
+            crystal.userData.interactive = true;
+            this.scene.add(crystal);
+        }
     }
 
     createTree(x, z) {
@@ -365,21 +507,42 @@ export class World {
     }
 
     createLighting() {
-        // Ambient light - brighter for WoW-style visibility
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        // Ambient light - realistic fantasy atmosphere
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         this.scene.add(ambientLight);
 
-        // Directional light (sun) - brighter and better positioned
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-        directionalLight.position.set(50, 100, 50); // Higher up for better lighting
+        // Main directional light (sun) - realistic fantasy daylight
+        const directionalLight = new THREE.DirectionalLight(0xfff5e1, 1.2);
+        directionalLight.position.set(80, 120, 60);
         directionalLight.castShadow = true;
-        directionalLight.shadow.camera.left = -50;
-        directionalLight.shadow.camera.right = 50;
-        directionalLight.shadow.camera.top = 50;
-        directionalLight.shadow.camera.bottom = -50;
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.camera.left = -100;
+        directionalLight.shadow.camera.right = 100;
+        directionalLight.shadow.camera.top = 100;
+        directionalLight.shadow.camera.bottom = -100;
+        directionalLight.shadow.camera.near = 0.5;
+        directionalLight.shadow.camera.far = 500;
+        directionalLight.shadow.mapSize.width = 4096;
+        directionalLight.shadow.mapSize.height = 4096;
+        directionalLight.shadow.bias = -0.0001;
         this.scene.add(directionalLight);
+
+        // Fill light for better visibility
+        const fillLight = new THREE.DirectionalLight(0x4a90e2, 0.3);
+        fillLight.position.set(-50, 50, -50);
+        this.scene.add(fillLight);
+        
+        // Atmospheric point lights for fantasy ambiance
+        const pointLight1 = new THREE.PointLight(0xffaa44, 0.5, 100);
+        pointLight1.position.set(0, 20, -30);
+        this.scene.add(pointLight1);
+        
+        const pointLight2 = new THREE.PointLight(0x88aaff, 0.4, 80);
+        pointLight2.position.set(-40, 15, 40);
+        this.scene.add(pointLight2);
+        
+        // Hemisphere light for natural sky color
+        const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x4a5d23, 0.4);
+        this.scene.add(hemisphereLight);
     }
 }
 
