@@ -5363,17 +5363,20 @@
                 <h3><i class="fas fa-cog"></i> Settings & Controls</h3>
                 <div class="instruction-item">
                     <i class="fas fa-keyboard"></i>
-                    <strong>Arrow Keys / WASD:</strong> Move character<br>
+                    <strong>WASD / Arrow Keys:</strong> Move character<br>
+                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">W/↑ Forward, S/↓ Backward, A/← Strafe Left, D/→ Strafe Right</span><br>
                     <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Double-tap to run (1.5x speed)</span>
                 </div>
                 <div class="instruction-item">
                     <i class="fas fa-mouse"></i>
-                    <strong>Mouse:</strong> Interact with objects<br>
-                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Drag to rotate character</span>
+                    <strong>Mouse:</strong> Camera controls<br>
+                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Left-click drag: Rotate camera</span><br>
+                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Right-click drag: Rotate camera + character</span><br>
+                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Scroll wheel: Zoom in/out</span>
                 </div>
                 <div class="instruction-item">
                     <i class="fas fa-sync-alt"></i>
-                    <strong>E / Q:</strong> Pan camera left / right
+                    <strong>Q / E:</strong> Rotate character left / right
                 </div>
                 
                 <!-- Settings Menu Buttons -->
@@ -5401,18 +5404,24 @@
                     </div>
                     <div class="modal-body instructions-content">
                         <div class="instruction-section">
-                            <h3><i class="fas fa-keyboard"></i> Movement Controls</h3>
+                            <h3><i class="fas fa-keyboard"></i> Movement Controls (WoW-style)</h3>
                             <ul>
-                                <li><strong>Arrow Keys / WASD:</strong> Move your character</li>
-                                <li><strong>Double-tap:</strong> Run (1.5x speed, consumes energy)</li>
-                                <li><strong>Mouse Drag:</strong> Rotate character facing direction</li>
-                                <li><strong>Q / E:</strong> Pan camera left / right</li>
+                                <li><strong>W / ↑ Arrow:</strong> Move forward (in character's facing direction)</li>
+                                <li><strong>S / ↓ Arrow:</strong> Move backward</li>
+                                <li><strong>A / ← Arrow:</strong> Strafe left (move left while maintaining facing direction)</li>
+                                <li><strong>D / → Arrow:</strong> Strafe right (move right while maintaining facing direction)</li>
+                                <li><strong>Double-tap movement key:</strong> Run (1.5x speed, consumes energy)</li>
+                                <li><strong>Q:</strong> Rotate character left</li>
+                                <li><strong>E:</strong> Rotate character right</li>
                             </ul>
                         </div>
                         
                         <div class="instruction-section">
-                            <h3><i class="fas fa-mouse"></i> Interaction</h3>
+                            <h3><i class="fas fa-mouse"></i> Camera Controls (WoW-style)</h3>
                             <ul>
+                                <li><strong>Left-click + Drag:</strong> Rotate camera around character (camera only)</li>
+                                <li><strong>Right-click + Drag:</strong> Rotate both camera and character together</li>
+                                <li><strong>Mouse Wheel:</strong> Zoom camera in/out</li>
                                 <li><strong>Click:</strong> Interact with objects and create ripple effects</li>
                                 <li><strong>Hover:</strong> Cursor changes when over interactive objects</li>
                             </ul>

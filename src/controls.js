@@ -9,10 +9,10 @@ export class Controls {
         
         this.keys = {};
         
-        // Camera rotation angles (fixed or controlled by keys)
+        // Camera rotation angles (WoW-style)
         this.cameraAngleX = 0.3; // Vertical rotation (pitch) - slight downward angle
         this.cameraAngleY = 0; // Horizontal rotation (yaw)
-        this.cameraDistance = 10; // Distance from character
+        this.cameraDistance = 15; // Distance from character (default WoW-style)
         this.cameraHeight = 5; // Height above character
         
         // Double-tap detection for running
@@ -20,12 +20,18 @@ export class Controls {
         this.doubleTapDelay = 300; // milliseconds
         this.isRunning = false; // Running state
         
-        // Mouse drag controls for character rotation
-        this.isMouseDragging = false;
+        // Mouse controls (WoW-style)
+        this.isLeftMouseDown = false;
+        this.isRightMouseDown = false;
         this.lastMouseX = 0;
         this.lastMouseY = 0;
-        this.mouseSensitivity = 0.003; // Rotation sensitivity
-        this.mouseRotationTarget = null; // Target rotation from mouse drag
+        this.mouseSensitivity = 0.002; // Camera rotation sensitivity (WoW-style)
+        this.cameraPitchMin = -Math.PI / 3; // Maximum upward camera angle
+        this.cameraPitchMax = Math.PI / 6; // Maximum downward camera angle (45 degrees down)
+        
+        // Mouse wheel zoom
+        this.cameraDistanceMin = 5;
+        this.cameraDistanceMax = 30;
 
         this.setupEventListeners();
     }
@@ -56,11 +62,22 @@ export class Controls {
             }
         });
 
-        // Mouse drag controls for character rotation
+        // Mouse controls (WoW-style)
+        // Left-click drag: Rotate camera only
+        // Right-click drag: Rotate both camera and character
         canvas.addEventListener('mousedown', (e) => {
-            // Only enable drag on left mouse button and when not clicking UI
-            if (e.button === 0) {
-                this.isMouseDragging = true;
+            // Prevent context menu on right-click
+            if (e.button === 2) {
+                e.preventDefault();
+            }
+            
+            if (e.button === 0) { // Left mouse button
+                this.isLeftMouseDown = true;
+                this.lastMouseX = e.clientX;
+                this.lastMouseY = e.clientY;
+                canvas.style.cursor = 'grabbing';
+            } else if (e.button === 2) { // Right mouse button
+                this.isRightMouseDown = true;
                 this.lastMouseX = e.clientX;
                 this.lastMouseY = e.clientY;
                 canvas.style.cursor = 'grabbing';
@@ -68,20 +85,33 @@ export class Controls {
         });
 
         canvas.addEventListener('mousemove', (e) => {
-            if (this.isMouseDragging) {
-                const deltaX = e.clientX - this.lastMouseX;
-                const deltaY = e.clientY - this.lastMouseY;
+            const deltaX = e.clientX - this.lastMouseX;
+            const deltaY = e.clientY - this.lastMouseY;
+            
+            // Left-click drag: Rotate camera only (WoW-style)
+            if (this.isLeftMouseDown) {
+                // Horizontal movement rotates camera horizontally
+                this.cameraAngleY -= deltaX * this.mouseSensitivity;
                 
-                // Rotate character based on horizontal mouse movement
+                // Vertical movement adjusts camera pitch (vertical angle)
+                this.cameraAngleX -= deltaY * this.mouseSensitivity;
+                // Clamp camera pitch
+                this.cameraAngleX = Math.max(this.cameraPitchMin, Math.min(this.cameraPitchMax, this.cameraAngleX));
+                
+                this.lastMouseX = e.clientX;
+                this.lastMouseY = e.clientY;
+            }
+            
+            // Right-click drag: Rotate both camera and character (WoW-style)
+            if (this.isRightMouseDown && this.character && this.character.mesh) {
+                // Horizontal movement rotates both camera and character
                 const rotationDelta = deltaX * this.mouseSensitivity;
+                this.cameraAngleY -= rotationDelta;
+                this.character.mesh.rotation.y -= rotationDelta;
                 
-                if (this.character && this.character.mesh) {
-                    // Update character rotation directly
-                    this.character.mesh.rotation.y -= rotationDelta;
-                    
-                    // Also update camera angle to match
-                    this.cameraAngleY -= rotationDelta;
-                }
+                // Vertical movement adjusts camera pitch only
+                this.cameraAngleX -= deltaY * this.mouseSensitivity;
+                this.cameraAngleX = Math.max(this.cameraPitchMin, Math.min(this.cameraPitchMax, this.cameraAngleX));
                 
                 this.lastMouseX = e.clientX;
                 this.lastMouseY = e.clientY;
@@ -89,19 +119,35 @@ export class Controls {
         });
 
         canvas.addEventListener('mouseup', (e) => {
-            if (e.button === 0) {
-                this.isMouseDragging = false;
-                canvas.style.cursor = 'crosshair';
+            if (e.button === 0) { // Left mouse button
+                this.isLeftMouseDown = false;
+                canvas.style.cursor = 'default';
+            } else if (e.button === 2) { // Right mouse button
+                this.isRightMouseDown = false;
+                canvas.style.cursor = 'default';
             }
         });
 
         canvas.addEventListener('mouseleave', () => {
-            this.isMouseDragging = false;
-            canvas.style.cursor = 'crosshair';
+            this.isLeftMouseDown = false;
+            this.isRightMouseDown = false;
+            canvas.style.cursor = 'default';
         });
 
-        // Camera rotation with Q/E keys (optional)
-        // Q/E can rotate camera around character if needed
+        // Prevent context menu on right-click
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+
+        // Mouse wheel: Zoom camera in/out (WoW-style)
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomDelta = e.deltaY * 0.01; // Negative deltaY = scroll up = zoom in
+            this.cameraDistance = Math.max(
+                this.cameraDistanceMin, 
+                Math.min(this.cameraDistanceMax, this.cameraDistance - zoomDelta)
+            );
+        }, { passive: false });
     }
 
     handleKeyPress(key) {
@@ -129,30 +175,49 @@ export class Controls {
     update(deltaTime) {
         if (!this.character || !this.character.mesh) return;
 
-        const moveVector = new THREE.Vector3();
+        // Q/E keys: Rotate character left/right (WoW-style)
+        if (this.keys['q']) {
+            this.character.mesh.rotation.y += 2.0 * deltaTime; // Turn left
+        }
+        if (this.keys['e']) {
+            this.character.mesh.rotation.y -= 2.0 * deltaTime; // Turn right
+        }
 
-        // WASD movement
+        // WASD/Arrow keys movement (WoW-style)
+        // W/↑: Move forward in character's facing direction
+        // S/↓: Move backward (opposite of facing direction)
+        // A/←: Strafe left (move left while maintaining facing direction)
+        // D/→: Strafe right (move right while maintaining facing direction)
+        
+        const moveVector = new THREE.Vector3();
+        const characterRotation = this.character.mesh.rotation.y;
+        const characterForward = new THREE.Vector3(0, 0, -1);
+        const characterRight = new THREE.Vector3(1, 0, 0);
+        
+        // Apply character rotation to forward/right vectors
+        characterForward.applyAxisAngle(new THREE.Vector3(0, 1, 0), characterRotation);
+        characterRight.applyAxisAngle(new THREE.Vector3(0, 1, 0), characterRotation);
+
+        // Forward/Backward movement (relative to character facing)
         if (this.keys['w'] || this.keys['arrowup']) {
-            moveVector.z -= 1;
+            moveVector.add(characterForward); // Move forward in character's facing direction
         }
         if (this.keys['s'] || this.keys['arrowdown']) {
-            moveVector.z += 1;
+            moveVector.sub(characterForward); // Move backward
         }
+        
+        // Strafe left/right (relative to character facing, not camera)
         if (this.keys['a'] || this.keys['arrowleft']) {
-            moveVector.x -= 1;
+            moveVector.sub(characterRight); // Strafe left
         }
         if (this.keys['d'] || this.keys['arrowright']) {
-            moveVector.x += 1;
+            moveVector.add(characterRight); // Strafe right
         }
 
-        // Apply movement relative to camera direction
+        // Apply movement
         if (moveVector.length() > 0) {
             // Normalize movement vector
             moveVector.normalize();
-            
-            // Rotate movement vector based on camera's horizontal rotation
-            const worldMoveVector = moveVector.clone();
-            worldMoveVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.cameraAngleY);
             
             // Check energy before allowing running
             if (this.isRunning && this.character && this.character.energy < this.character.minEnergyToRun) {
@@ -160,37 +225,15 @@ export class Controls {
             }
             
             // Move character with running state
-            this.character.move(worldMoveVector, this.isRunning);
+            this.character.move(moveVector, this.isRunning);
             
-            // Only rotate character to face movement direction if not dragging mouse
-            // When mouse is dragging, mouse controls the rotation instead
-            if (!this.isMouseDragging) {
-                // Make character face movement direction smoothly
-                const targetAngle = Math.atan2(-worldMoveVector.x, -worldMoveVector.z);
-                // Smooth rotation towards target angle
-                let currentAngle = this.character.mesh.rotation.y;
-                let angleDiff = targetAngle - currentAngle;
-                
-                // Normalize angle difference to [-PI, PI]
-                while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-                while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-                
-                // Smoothly rotate towards target
-                this.character.mesh.rotation.y += angleDiff * 0.2;
-            }
+            // In WoW, character doesn't auto-rotate when moving - only Q/E or right-click drag rotate the character
+            // Movement keeps the character facing the same direction unless explicitly rotated
         } else {
             // No movement keys pressed - stop running
             if (this.isRunning) {
                 this.isRunning = false;
             }
-        }
-
-        // Camera rotation with Q/E keys (continuous while held)
-        if (this.keys['e']) {
-            this.cameraAngleY -= 0.07 * deltaTime * 60; // Pan left (counter-clockwise) - reduced from 0.1
-        }
-        if (this.keys['q']) {
-            this.cameraAngleY += 0.07 * deltaTime * 60; // Pan right (clockwise) - reduced from 0.1
         }
     }
 }
