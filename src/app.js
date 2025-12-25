@@ -24,10 +24,10 @@ class Fantasy3D {
     init() {
         // Create scene
         this.scene = new THREE.Scene();
-        // Set background to null so CSS background image shows through
+        // Set initial background to null (will be set to sky color when game starts)
         this.scene.background = null;
-        // Use a subtle fog that blends with the fantasy background
-        this.scene.fog = new THREE.Fog(0x4a5d23, 200, 800); // Green-tinted fog for fantasy atmosphere
+        // No fog initially (will be set when game starts)
+        this.scene.fog = null;
 
         // Create camera
         this.camera = new THREE.PerspectiveCamera(
@@ -118,22 +118,25 @@ class Fantasy3D {
             }).catch(() => {}); // Silently fail if endpoint doesn't exist
         } catch (e) {}
         
-        // Remove landing page background - NO BACKGROUND, show the actual 3D world
+        // Remove landing page background - show the actual 3D world
         const gameContainer = document.getElementById('gameContainer');
         if (gameContainer) {
-            // Remove CSS background completely
+            // Add class to remove CSS background and show 3D scene
+            gameContainer.classList.add('game-active');
+            // Also set styles directly as backup
             gameContainer.style.backgroundImage = 'none';
             gameContainer.style.backgroundColor = 'transparent';
         }
         
-        // NO background color - show the actual 3D world
-        this.scene.background = null;
+        // Set a sky blue background color for the 3D world (fantasy sky)
+        const skyColor = new THREE.Color(0x87CEEB); // Sky blue
+        this.scene.background = skyColor;
         
         // Renderer should be opaque - world objects will render on top
-        this.renderer.setClearColor(0x000000, 1); // Black background, world will show
+        this.renderer.setClearColor(skyColor, 1); // Sky blue background
         
-        // Remove fog completely - it was blocking the world
-        this.scene.fog = null;
+        // Add subtle fog for depth (fantasy atmosphere) - very subtle
+        this.scene.fog = new THREE.Fog(skyColor, 600, 1400); // Sky blue fog for depth, far away
         
         // Ensure world is fully loaded before continuing
         if (this.world) {
@@ -158,17 +161,19 @@ class Fantasy3D {
         console.log('🌍 World objects:', worldObjects.length);
         console.log('💡 Lights:', this.scene.children.filter(c => c.type.includes('Light')).length);
         
-        // Add a test cube to verify rendering works (temporary debug)
-        const testGeometry = new THREE.BoxGeometry(5, 5, 5);
-        const testMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-        const testCube = new THREE.Mesh(testGeometry, testMaterial);
-        testCube.position.set(0, 2.5, 0);
-        this.scene.add(testCube);
-        console.log('🔴 Added test red cube at origin to verify rendering');
+        // Remove test cube - no longer needed
+        // The world should be visible now with proper background and lighting
         
         // Hide menus
         this.ui.hideAllMenus();
         this.ui.showHUD();
+        
+        // Ensure canvas is visible (fade in if not already)
+        const gameCanvas = document.getElementById('gameCanvas');
+        if (gameCanvas) {
+            gameCanvas.classList.add('fadeIn');
+            gameCanvas.style.opacity = '1'; // Force visible immediately
+        }
 
         // Create character (will load model if available)
         this.character = new Character(this.scene, characterData);
@@ -191,16 +196,18 @@ class Fantasy3D {
         }
         
         // Initialize camera position - WoW-style third-person view
-        // Camera should be behind and above the character, looking down at the world
+        // Position camera to see both character and world (character at origin, world around it)
+        // Camera should be behind, above, and to the side of character
         this.camera.position.set(
-            charPos.x - 8,  // Behind character
-            charPos.y + 12,  // Elevated view to see the world
-            charPos.z + 15  // Distance from character
+            10,   // To the right side
+            15,   // Elevated view to see the world
+            20    // Behind character (positive Z is "back" in standard setup)
         );
         
         // Make sure camera looks at character and can see the ground
-        const lookAtY = Math.max(charPos.y + 1, 2); // Look at character or slightly above ground
-        this.camera.lookAt(charPos.x, lookAtY, charPos.z);
+        // Character is at origin (0, 0, 0), ground is at y=0
+        const lookAtY = 2; // Look slightly above ground level
+        this.camera.lookAt(0, lookAtY, 0); // Look at character position (origin)
         
         // Update camera projection to ensure world is visible
         this.camera.updateProjectionMatrix();
@@ -526,12 +533,21 @@ class Fantasy3D {
 
         // Always render the scene (even if character isn't ready)
         // Make sure we're rendering with the correct settings
-        this.renderer.render(this.scene, this.camera);
+        if (this.renderer && this.scene && this.camera) {
+            this.renderer.render(this.scene, this.camera);
+        }
         
-        // Debug: Log if scene is empty (only on first frame)
-        if (!this._renderDebugged && this.scene.children.length < 5) {
-            console.warn('⚠️ Scene has very few objects:', this.scene.children.length);
-            console.warn('Scene children:', this.scene.children.map(c => c.type));
+        // Debug: Log scene state (only on first few frames)
+        if (!this._renderDebugged) {
+            console.log('🎨 Rendering scene:', {
+                sceneChildren: this.scene.children.length,
+                cameraPosition: this.camera.position.clone(),
+                cameraRotation: this.camera.rotation.clone(),
+                sceneBackground: this.scene.background,
+                sceneFog: this.scene.fog,
+                rendererClearColor: this.renderer.getClearColor(new THREE.Color()),
+                worldObjects: this.scene.children.filter(c => c.type === 'Mesh' || c.type === 'Group').length
+            });
             this._renderDebugged = true;
         }
     }

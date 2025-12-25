@@ -51,15 +51,15 @@ Highly specialized elite classes:
 
 ### SS-Rank (Master Classes)
 Master-level classes with unique abilities:
-- **Warrior** → Death Knight, Holy Knight, Sword Master, Sword Saint
-- **Mage** → Card Caster, Illusionist, Shaman, Spell Master, Sword Caster, Vampire
+- **Warrior** → Death Knight, Holy Knight, Sword Master, Sword Saint, Blood Knight
+- **Mage** → Card Caster, Illusionist, Shaman, Spell Master, Sword Caster, Vampire, Chronomancer, Void Warlock
 - **Healer** → Angel, Demon, Druid, Monk
 
 ### SSS-Rank (Legendary Classes)
 The ultimate legendary classes, representing the pinnacle of each path:
-- **Warrior** → Magic Swordsman
-- **Mage** → Akashic Caster, Omni Caster, Spell Breaker
-- **Healer** → Arch Angel, Arch Demon, Sage, Summoner
+- **Warrior** → Magic Swordsman, Dragon Knight
+- **Mage** → Akashic Caster, Omni Caster, Spell Breaker, Reality Architect
+- **Healer** → Arch Angel, Arch Demon, Sage, Summoner, Avatar
 
 ## Directory Structure
 

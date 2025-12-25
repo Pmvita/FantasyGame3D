@@ -219,8 +219,8 @@ export class UI {
             });
         });
         
-        // Class selection (WoW-style)
-        this.selectedClass = 'paladin'; // Default class
+        // Class selection (WoW-style) - Only 3 starter classes: Warrior, Mage, Healer
+        this.selectedClass = 'warrior'; // Default class
         document.querySelectorAll('.wow-class-item').forEach(button => {
             button.addEventListener('click', () => {
                 // Remove selected class from all
@@ -1213,11 +1213,11 @@ export class UI {
         const maleGender = document.getElementById('genderMale');
         if (maleGender) maleGender.classList.add('selected');
         
-        // Set default class selection
-        this.selectedClass = 'paladin';
+        // Set default class selection (Warrior as first starter class)
+        this.selectedClass = 'warrior';
         document.querySelectorAll('.wow-class-item').forEach(b => b.classList.remove('selected'));
-        const paladinClass = document.querySelector('.wow-class-item[data-class="paladin"]');
-        if (paladinClass) paladinClass.classList.add('selected');
+        const warriorClass = document.querySelector('.wow-class-item[data-class="warrior"]');
+        if (warriorClass) warriorClass.classList.add('selected');
         
         // Set default character type
         this.characterType = 'new';
@@ -1484,6 +1484,13 @@ export class UI {
         document.getElementById('inventoryButton').style.display = 'flex';
         document.getElementById('minimapContainer').style.display = 'block';
         
+        // Ensure game canvas is visible
+        const gameCanvas = document.getElementById('gameCanvas');
+        if (gameCanvas) {
+            gameCanvas.classList.add('fadeIn');
+            gameCanvas.style.opacity = '1'; // Force visible immediately
+        }
+        
         // Initialize inventory and skills systems
         if (this.game.character) {
             this.inventorySystem = new InventorySystem(this.game.character);
@@ -1724,7 +1731,7 @@ export class UI {
             const raceName = char.race ? char.race.charAt(0).toUpperCase() + char.race.slice(1) : 'Human';
             const genderIcon = char.gender === 'female' ? '<i class="fas fa-venus"></i>' : '<i class="fas fa-mars"></i>';
             const level = char.stats?.level || char.level || 1;
-            const className = char.class || 'Paladin';
+            const className = char.class || 'Warrior';
             
             card.innerHTML = `
                 <button class="wow-character-card-delete" data-character-index="${index}" aria-label="Delete character">
@@ -1855,7 +1862,7 @@ export class UI {
             name: (nameInput && nameInput.value) || 'Unnamed Character',
             race: this.selectedRace,
             gender: this.selectedGender,
-            class: this.selectedClass || 'paladin',
+            class: this.selectedClass || 'warrior',
             characterType: this.characterType || 'new',
             appearance: {
                 hairColor: (hairColorInput && hairColorInput.value) || '#8B4513',
@@ -2020,7 +2027,7 @@ export class UI {
                 raceEl.textContent = race.charAt(0).toUpperCase() + race.slice(1);
             }
             if (classEl) {
-                const className = (character.class || 'Paladin');
+                const className = (character.class || 'Warrior');
                 classEl.textContent = className.charAt(0).toUpperCase() + className.slice(1);
             }
             if (levelEl) levelEl.textContent = character.stats?.level || character.level || 1;

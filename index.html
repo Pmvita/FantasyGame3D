@@ -70,12 +70,18 @@
             height: 100vh;
             position: relative;
             overflow: hidden;
-            /* Fantasy landing background */
+            /* Fantasy landing background - will be removed when game starts */
             background-image: url('assets/backgrounds/fantast-landing-bg.jpeg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
+        }
+
+        /* Hide background when game is active - show 3D world */
+        #gameContainer.game-active {
+            background-image: none !important;
+            background-color: transparent !important;
         }
 
         /* Background overlay for better canvas visibility */
@@ -93,6 +99,11 @@
             );
             pointer-events: none;
             z-index: 1;
+        }
+
+        /* Hide ::before pseudo-element when game is active */
+        #gameContainer.game-active::before {
+            display: none !important;
         }
 
         /* Ensure canvas is above background */
@@ -5145,53 +5156,17 @@
                     <div class="wow-class-panel">
                         <div class="wow-panel-header">CLASS</div>
                         <div class="wow-class-list">
-                            <div class="wow-class-item" data-class="warrior">
+                            <div class="wow-class-item selected" data-class="warrior">
                                 <div class="wow-class-icon"><i class="fas fa-sword"></i></div>
                                 <div class="wow-class-name">Warrior</div>
-                            </div>
-                            <div class="wow-class-item selected" data-class="paladin">
-                                <div class="wow-class-icon"><i class="fas fa-shield-alt"></i></div>
-                                <div class="wow-class-name">Paladin</div>
-                            </div>
-                            <div class="wow-class-item" data-class="hunter">
-                                <div class="wow-class-icon"><i class="fas fa-bow-arrow"></i></div>
-                                <div class="wow-class-name">Hunter</div>
-                            </div>
-                            <div class="wow-class-item" data-class="rogue">
-                                <div class="wow-class-icon"><i class="fas fa-user-secret"></i></div>
-                                <div class="wow-class-name">Rogue</div>
-                            </div>
-                            <div class="wow-class-item" data-class="priest">
-                                <div class="wow-class-icon"><i class="fas fa-pray"></i></div>
-                                <div class="wow-class-name">Priest</div>
-                            </div>
-                            <div class="wow-class-item" data-class="shaman">
-                                <div class="wow-class-icon"><i class="fas fa-bolt"></i></div>
-                                <div class="wow-class-name">Shaman</div>
                             </div>
                             <div class="wow-class-item" data-class="mage">
                                 <div class="wow-class-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
                                 <div class="wow-class-name">Mage</div>
                             </div>
-                            <div class="wow-class-item" data-class="warlock">
-                                <div class="wow-class-icon"><i class="fas fa-skull"></i></div>
-                                <div class="wow-class-name">Warlock</div>
-                            </div>
-                            <div class="wow-class-item" data-class="monk">
-                                <div class="wow-class-icon"><i class="fas fa-fist-raised"></i></div>
-                                <div class="wow-class-name">Monk</div>
-                            </div>
-                            <div class="wow-class-item" data-class="druid">
-                                <div class="wow-class-icon"><i class="fas fa-tree"></i></div>
-                                <div class="wow-class-name">Druid</div>
-                            </div>
-                            <div class="wow-class-item" data-class="demon-hunter">
-                                <div class="wow-class-icon"><i class="fas fa-eye"></i></div>
-                                <div class="wow-class-name">Demon Hunter</div>
-                            </div>
-                            <div class="wow-class-item" data-class="death-knight">
-                                <div class="wow-class-icon"><i class="fas fa-skull-crossbones"></i></div>
-                                <div class="wow-class-name">Death Knight</div>
+                            <div class="wow-class-item" data-class="healer">
+                                <div class="wow-class-icon"><i class="fas fa-heart"></i></div>
+                                <div class="wow-class-name">Healer</div>
                             </div>
                         </div>
                     </div>
