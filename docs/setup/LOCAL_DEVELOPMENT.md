@@ -9,11 +9,13 @@
 
 2. **Create `.env.local` file** in the project root:
    ```bash
-   MONGODB_URI=mongodb+srv://pmvita_db_user:tKEwhFA3e8v0pLcW@fantasy3d.scuo4fx.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
-   JWT_SECRET=t3hXEbVbtNNnNpEVHHq7/z2cucAV2SUEduvNqWjT5rE=
+   MONGODB_URI=your-mongodb-connection-string
+   JWT_SECRET=your-secret-key-here
    JWT_EXPIRES_IN=7d
    FRONTEND_URL=http://localhost:3000
    ```
+   
+   **⚠️ Important**: Replace placeholder values with your actual credentials. Never commit `.env.local` to Git!
 
 3. **Start the server**:
    ```bash
@@ -69,7 +71,7 @@
 1. Server is running (`npm start`)
 2. `.env.local` file exists with correct values
 3. MongoDB connection is working
-4. Admin user exists (username: `pmvita`, password: `admin123`)
+4. Admin user exists (see [Admin Users](../admin/ADMIN_USERS.md) for credentials - **not committed to Git**)
 
 ## Environment Variables
 
@@ -85,10 +87,10 @@ Required in `.env.local`:
 Once the server is running, you can test the API:
 
 ```bash
-# Test login
+# Test login (replace with your credentials)
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"pmvita","password":"admin123"}'
+  -d '{"username":"your-username","password":"your-password"}'
 ```
 
 ## Development Workflow
@@ -100,6 +102,6 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 ## Next Steps
 
-- See `SETUP.md` for more detailed setup instructions
-- See `DEPLOYMENT.md` for production deployment
-- See `ADMIN_USERS.md` for admin user management
+- See [SETUP.md](./SETUP.md) for more detailed setup instructions
+- See [Deployment Guide](../deployment/DEPLOYMENT.md) for production deployment
+- See [Admin Users](../admin/ADMIN_USERS.md) for admin user management

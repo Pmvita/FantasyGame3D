@@ -41,6 +41,15 @@ out/
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+
+# Sensitive files with credentials
+ADMIN_USERS.md
+*credentials*
+*secrets*
+*.key
+*.pem
 
 # Temporary files
 *.tmp

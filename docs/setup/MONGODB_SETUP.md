@@ -11,8 +11,10 @@
 ## Connection String
 
 ```
-mongodb+srv://pmvita_db_user:tKEwhFA3e8v0pLcW@fantasy3d.scuo4fx.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
+mongodb+srv://username:password@cluster.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
 ```
+
+**⚠️ Important**: Replace `username` and `password` with your MongoDB Atlas credentials. Never commit actual credentials to Git!
 
 ## Manual Setup (Reference Only)
 

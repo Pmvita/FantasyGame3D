@@ -65,8 +65,8 @@
 
 ### Environment Variables
 - ⏳ **Vercel Environment Variables** - Need to be set in Vercel dashboard:
-  - `MONGODB_URI` - Already configured
-  - `JWT_SECRET` - Generated: `t3hXEbVbtNNnNpEVHHq7/z2cucAV2SUEduvNqWjT5rE=`
+  - `MONGODB_URI` - Your MongoDB connection string
+  - `JWT_SECRET` - Generate a secure secret key (e.g., `openssl rand -base64 32`)
   - `JWT_EXPIRES_IN` - `7d`
   - `FRONTEND_URL` - Set after deployment
 
@@ -114,7 +114,7 @@
 
 ## 🔗 Related Documentation
 
-- `DEPLOYMENT.md` - Complete deployment guide
-- `MONGODB_SETUP.md` - MongoDB setup reference
-- `SETUP.md` - Local development setup
-- `README.md` - Project overview
+- [Deployment Guide](../deployment/DEPLOYMENT.md) - Complete deployment guide
+- [MongoDB Setup](../setup/MONGODB_SETUP.md) - MongoDB setup reference
+- [Setup Guide](../setup/SETUP.md) - Local development setup
+- [README.md](../../README.md) - Project overview

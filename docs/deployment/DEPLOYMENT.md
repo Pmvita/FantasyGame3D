@@ -24,10 +24,10 @@ Complete guide for deploying Fantasy3D to Vercel with MongoDB Atlas.
 
 ### Connection String
 ```
-mongodb+srv://pmvita_db_user:tKEwhFA3e8v0pLcW@fantasy3d.scuo4fx.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
+mongodb+srv://username:password@cluster.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
 ```
 
-**Note**: MongoDB setup is complete. See `MONGODB_SETUP.md` for reference.
+**Note**: Replace `username` and `password` with your MongoDB Atlas credentials. See [MongoDB Setup](../setup/MONGODB_SETUP.md) for reference.
 
 ## Step 2: Deploy to Vercel
 
@@ -41,12 +41,12 @@ mongodb+srv://pmvita_db_user:tKEwhFA3e8v0pLcW@fantasy3d.scuo4fx.mongodb.net/fant
 
 2. **Configure Environment Variables**:
    - Go to Project Settings → Environment Variables
-   - Add the following:
+   - Add the following (replace with your actual values):
      ```
-     MONGODB_URI=mongodb+srv://pmvita_db_user:tKEwhFA3e8v0pLcW@fantasy3d.scuo4fx.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
-     JWT_SECRET=t3hXEbVbtNNnNpEVHHq7/z2cucAV2SUEduvNqWjT5rE=
+     MONGODB_URI=your-mongodb-connection-string
+     JWT_SECRET=your-secret-key-here
      JWT_EXPIRES_IN=7d
-     FRONTEND_URL=https://fantasy-game3-d-pierres-projects-3ccb9894.vercel.app
+     FRONTEND_URL=https://your-project.vercel.app
      ```
 
 3. **Deploy**:
@@ -200,4 +200,4 @@ For issues or questions:
 - Check Vercel function logs
 - Review MongoDB Atlas logs
 - Check browser console for frontend errors
-- See `IMPLEMENTATION_STATUS.md` for current status
+- See [Implementation Status](../project/IMPLEMENTATION_STATUS.md) for current status

@@ -18,12 +18,14 @@ Quick guide for setting up Fantasy3D for local development.
    ```bash
    # Create .env.local file in project root
    cat > .env.local << EOF
-   MONGODB_URI=mongodb+srv://pmvita_db_user:tKEwhFA3e8v0pLcW@fantasy3d.scuo4fx.mongodb.net/fantasy3d?retryWrites=true&w=majority&appName=fantasy3d
-   JWT_SECRET=t3hXEbVbtNNnNpEVHHq7/z2cucAV2SUEduvNqWjT5rE=
+   MONGODB_URI=your-mongodb-connection-string
+   JWT_SECRET=your-secret-key-here
    JWT_EXPIRES_IN=7d
    FRONTEND_URL=http://localhost:3000
    EOF
    ```
+   
+   **⚠️ Important**: Replace placeholder values with your actual credentials. Never commit `.env.local` to Git!
 
 3. **Start development server**:
    ```bash
@@ -88,8 +90,8 @@ FantasyGame3D/
 
 ## Next Steps
 
-- **Add 3D Models**: See `QUICK_MODEL_SETUP.md`
-- **Deploy to Production**: See `DEPLOYMENT.md`
+- **Add 3D Models**: See [Quick Model Setup](../development/QUICK_MODEL_SETUP.md)
+- **Deploy to Production**: See [Deployment Guide](../deployment/DEPLOYMENT.md)
 - **Customize World**: Edit `src/world.js`
 - **Add Features**: Extend game systems in `src/`
 
