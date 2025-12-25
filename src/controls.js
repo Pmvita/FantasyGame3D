@@ -223,8 +223,10 @@ export class Controls {
             
             // Character should always face the direction it's moving (WoW-style)
             // Calculate target angle based on movement direction in world space
-            // In Three.js: -Z is forward, so atan2(-x, -z) gives us the correct angle
-            const targetAngle = Math.atan2(-moveVector.x, -moveVector.z);
+            // Character has initial rotation of Math.PI (180 deg), so we need to account for that
+            // For movement direction (x, z), the angle should be atan2(-x, -z) 
+            // but since character is rotated 180 deg, we use atan2(x, z) to get correct facing
+            const targetAngle = Math.atan2(moveVector.x, moveVector.z);
             
             // Only auto-rotate character if not using right-click drag (right-click drag takes priority)
             if (!this.isRightMouseDown && this.character && this.character.mesh) {

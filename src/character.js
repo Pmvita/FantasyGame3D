@@ -133,8 +133,9 @@ export class Character {
             
             this.mesh = model;
             
-            // Character starts facing forward (no rotation needed - will be controlled by movement)
-            this.mesh.rotation.y = 0; // No initial rotation - character faces -Z (forward in Three.js)
+            // Character model faces backwards by default, so rotate 180 degrees to face forward
+            // In Three.js, -Z is forward, so we rotate to face -Z
+            this.mesh.rotation.y = Math.PI; // 180 degrees - character now faces forward (-Z)
             
             // Setup animations if available
             if (animations.length > 0) {
@@ -377,8 +378,8 @@ export class Character {
         // Position fallback character so feet are at y=0
         this.mesh.position.set(0, 0, 0);
         
-        // Character starts facing forward (no rotation needed)
-        this.mesh.rotation.y = 0; // No initial rotation - character faces -Z (forward in Three.js)
+        // Character model faces backwards by default, so rotate 180 degrees to face forward
+        this.mesh.rotation.y = Math.PI; // 180 degrees - character now faces forward (-Z)
         
         this.scene.add(this.mesh);
     }
