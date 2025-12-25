@@ -34,6 +34,32 @@ export class UI {
         ];
     }
 
+    setupCharacterPreviewControls() {
+        // Toggle auto-rotation
+        const toggleAutoRotateBtn = document.getElementById('toggleAutoRotate');
+        if (toggleAutoRotateBtn && this.characterPreview) {
+            toggleAutoRotateBtn.addEventListener('click', () => {
+                this.characterPreview.autoRotate = !this.characterPreview.autoRotate;
+                toggleAutoRotateBtn.classList.toggle('active', this.characterPreview.autoRotate);
+            });
+            // Set initial state
+            toggleAutoRotateBtn.classList.add('active'); // Auto-rotate enabled by default
+        }
+        
+        // Reset camera
+        const resetCameraBtn = document.getElementById('resetCamera');
+        if (resetCameraBtn && this.characterPreview) {
+            resetCameraBtn.addEventListener('click', () => {
+                this.characterPreview.targetZoom = 1.0;
+                this.characterPreview.zoomLevel = 1.0;
+                this.characterPreview.targetCameraAngleY = 0;
+                this.characterPreview.cameraAngleY = 0;
+                this.characterPreview.autoRotate = true;
+                if (toggleAutoRotateBtn) toggleAutoRotateBtn.classList.add('active');
+            });
+        }
+    }
+    
     setupEventListeners() {
         // Landing page buttons
         const signUpButton = document.getElementById('signUpButton');
@@ -1172,6 +1198,9 @@ export class UI {
             this.characterPreview = new CharacterPreview('characterPreviewCanvas');
         }
         
+        // Setup character preview controls
+        this.setupCharacterPreviewControls();
+        
         // Set default race selection (WoW-style)
         this.selectedRace = 'human';
         document.querySelectorAll('.wow-race-item').forEach(b => b.classList.remove('selected'));
@@ -1235,8 +1264,14 @@ export class UI {
         // Check if this is a new player and show tip (WoW-style)
         this.checkAndShowNewPlayerTip();
         
-        // Update preview with initial values
-        this.updatePreview();
+        // Update preview with initial values - use setTimeout to ensure canvas is visible
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+            setTimeout(async () => {
+                console.log('Initializing character preview...');
+                await this.updatePreview();
+            }, 300);
+        });
     }
 
     // Check if user is new and show helpful tip (WoW character creation pattern)
@@ -1345,27 +1380,44 @@ export class UI {
     }
 
     async updatePreview() {
-        if (!this.characterPreview) return;
+        if (!this.characterPreview) {
+            console.error('Character preview not initialized!');
+            return;
+        }
         
-        const hairColor = document.getElementById('hairColor').value;
-        const eyeColor = document.getElementById('eyeColor').value;
-        const skinTone = parseFloat(document.getElementById('skinTone').value);
-        const faceType = parseInt(document.getElementById('faceType').value);
-        const hairStyle = parseInt(document.getElementById('hairStyle').value);
-        const facialFeatures = parseInt(document.getElementById('facialFeatures').value);
-        const raceFeatures = parseInt(document.getElementById('raceFeatures').value) || 0;
+        const hairColor = document.getElementById('hairColor')?.value || '#8B4513';
+        const eyeColor = document.getElementById('eyeColor')?.value || '#4A90E2';
+        const skinTone = parseFloat(document.getElementById('skinTone')?.value || 0.5);
+        const faceType = parseInt(document.getElementById('faceType')?.value || 0);
+        const hairStyle = parseInt(document.getElementById('hairStyle')?.value || 0);
+        const facialFeatures = parseInt(document.getElementById('facialFeatures')?.value || 0);
+        const raceFeatures = parseInt(document.getElementById('raceFeatures')?.value || 0);
         
-        await this.characterPreview.updateCharacter(
-            this.selectedRace, 
-            this.selectedGender, 
-            hairColor, 
-            skinTone, 
-            faceType, 
-            hairStyle, 
-            facialFeatures,
-            eyeColor,
-            raceFeatures
-        );
+        console.log('Updating character preview:', {
+            race: this.selectedRace,
+            gender: this.selectedGender,
+            hairColor,
+            skinTone,
+            faceType,
+            hairStyle
+        });
+        
+        try {
+            await this.characterPreview.updateCharacter(
+                this.selectedRace || 'human', 
+                this.selectedGender || 'male', 
+                hairColor, 
+                skinTone, 
+                faceType, 
+                hairStyle, 
+                facialFeatures,
+                eyeColor,
+                raceFeatures
+            );
+            console.log('Character preview updated successfully');
+        } catch (error) {
+            console.error('Error updating character preview:', error);
+        }
     }
 
     /**

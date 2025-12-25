@@ -17,6 +17,23 @@ export class CharacterPreview {
         this.animationId = null;
         this.loadedModels = {}; // Cache loaded models by race-gender key
         
+        // Interactive controls (WoW-style)
+        this.isDragging = false;
+        this.lastMouseX = 0;
+        this.lastMouseY = 0;
+        this.rotationSpeed = 0.005; // Rotation speed when dragging
+        this.autoRotate = true; // Auto-rotation enabled by default
+        this.autoRotateSpeed = 0.008; // Slower auto-rotation
+        this.zoomLevel = 1.0; // Current zoom level (1.0 = default)
+        this.minZoom = 0.5; // Minimum zoom (closer)
+        this.maxZoom = 2.0; // Maximum zoom (farther)
+        this.targetZoom = 1.0;
+        this.baseCameraDistance = 7; // Base camera distance
+        this.cameraDistance = this.baseCameraDistance;
+        this.cameraAngleX = 0; // Vertical angle (pitch)
+        this.cameraAngleY = 0; // Horizontal angle (yaw)
+        this.targetCameraAngleY = 0;
+        
         this.init();
     }
 
@@ -33,45 +50,91 @@ export class CharacterPreview {
             0.1,
             1000
         );
-        // Default camera position (will be adjusted when model loads)
-        this.camera.position.set(0, 2, 6);
-        this.camera.lookAt(0, 1, 0);
+        // Default camera position - positioned to see full character
+        this.baseCameraDistance = 7;
+        this.cameraDistance = this.baseCameraDistance;
+        this.zoomLevel = 1.0;
+        this.targetZoom = 1.0;
+        this.characterCenterY = 1.25; // Default character center
+        this.cameraAngleX = 0;
+        this.cameraAngleY = 0;
+        this.targetCameraAngleY = 0;
+        
+        // Set initial camera position manually (updateCameraPosition will be called after renderer is created)
+        this.camera.position.set(0, 1.25, 7);
+        this.camera.lookAt(0, 1.25, 0);
 
-        // Create renderer
+        // Create renderer with enhanced settings for realistic character preview
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
             antialias: true,
-            alpha: true
+            alpha: true,
+            powerPreference: "high-performance"
         });
         this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
-        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap at 2x for performance
         this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Soft shadows for realism
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace; // Proper color space
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping; // Better tone mapping
+        this.renderer.toneMappingExposure = 1.2; // Slightly brighter exposure
 
-        // Add lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        this.scene.add(ambientLight);
+        // Enhanced professional lighting setup (WoW-style character preview)
+        // Main key light (bright, warm, from front-right)
+        const keyLight = new THREE.DirectionalLight(0xfff8e1, 1.2);
+        keyLight.position.set(5, 8, 6);
+        keyLight.castShadow = true;
+        keyLight.shadow.mapSize.width = 2048;
+        keyLight.shadow.mapSize.height = 2048;
+        keyLight.shadow.camera.near = 0.5;
+        keyLight.shadow.camera.far = 50;
+        keyLight.shadow.camera.left = -10;
+        keyLight.shadow.camera.right = 10;
+        keyLight.shadow.camera.top = 10;
+        keyLight.shadow.camera.bottom = -10;
+        keyLight.shadow.bias = -0.0001;
+        this.scene.add(keyLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(5, 10, 5);
-        directionalLight.castShadow = true;
-        this.scene.add(directionalLight);
-
-        // Add a subtle rotation light
-        const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-        fillLight.position.set(-5, 5, -5);
+        // Fill light (softer, cooler, from front-left to reduce harsh shadows)
+        const fillLight = new THREE.DirectionalLight(0xb3d9ff, 0.5);
+        fillLight.position.set(-4, 6, 5);
         this.scene.add(fillLight);
 
-        // Create ground plane
-        const groundGeometry = new THREE.PlaneGeometry(10, 10);
+        // Rim light (backlight for character edge definition)
+        const rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        rimLight.position.set(-3, 4, -8);
+        this.scene.add(rimLight);
+
+        // Ambient light (subtle overall illumination)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        this.scene.add(ambientLight);
+
+        // Additional point lights for character details
+        const pointLight1 = new THREE.PointLight(0xfff8e1, 0.5, 15);
+        pointLight1.position.set(3, 3, 3);
+        this.scene.add(pointLight1);
+
+        const pointLight2 = new THREE.PointLight(0xb3d9ff, 0.3, 15);
+        pointLight2.position.set(-3, 3, 3);
+        this.scene.add(pointLight2);
+
+        // No pedestal - character will stand on ground plane
+        // Create invisible ground plane for shadows only
+        const groundGeometry = new THREE.PlaneGeometry(20, 20);
         const groundMaterial = new THREE.MeshStandardMaterial({
-            color: 0x4a5d23,
-            roughness: 0.8
+            color: 0x0a0a0a,
+            roughness: 1.0,
+            metalness: 0.0,
+            visible: false // Make ground invisible but still receive shadows
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
         ground.position.y = 0;
         ground.receiveShadow = true;
         this.scene.add(ground);
+        
+        // Initialize character center Y (will be updated when character loads)
+        this.characterCenterY = 1.25;
 
         // Ensure canvas is properly sized on initialization
         // Wait a frame to ensure CSS has been applied
@@ -83,8 +146,11 @@ export class CharacterPreview {
             }
         });
 
-        // Create initial character (fallback to simple if no model)
-        this.updateCharacter('human', 'male', '#8B4513', 0.5, 0, 0, 0);
+        // Setup interactive controls (WoW-style)
+        this.setupInteractiveControls();
+
+        // Note: Initial character will be created by UI when character creation screen is shown
+        // This allows the UI to set the correct default values
 
         // Start animation loop
         this.animate();
@@ -94,6 +160,56 @@ export class CharacterPreview {
         
         // Handle container resize (more responsive than window resize)
         this.setupResizeObserver();
+    }
+    
+    setupInteractiveControls() {
+        // Mouse drag to rotate character
+        this.canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 0) { // Left mouse button
+                this.isDragging = true;
+                this.lastMouseX = e.clientX;
+                this.lastMouseY = e.clientY;
+                this.canvas.style.cursor = 'grabbing';
+                this.autoRotate = false; // Disable auto-rotate while dragging
+            }
+        });
+        
+        this.canvas.addEventListener('mousemove', (e) => {
+            if (this.isDragging) {
+                const deltaX = e.clientX - this.lastMouseX;
+                
+                // Rotate character horizontally
+                this.targetCameraAngleY -= deltaX * this.rotationSpeed;
+                
+                this.lastMouseX = e.clientX;
+                this.lastMouseY = e.clientY;
+            }
+        });
+        
+        this.canvas.addEventListener('mouseup', (e) => {
+            if (e.button === 0) {
+                this.isDragging = false;
+                this.canvas.style.cursor = 'grab';
+                // Optionally re-enable auto-rotate after a delay
+                // this.autoRotate = true;
+            }
+        });
+        
+        this.canvas.addEventListener('mouseleave', () => {
+            this.isDragging = false;
+            this.canvas.style.cursor = 'grab';
+        });
+        
+        // Mouse wheel to zoom
+        this.canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomDelta = e.deltaY > 0 ? 0.1 : -0.1;
+            this.targetZoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.targetZoom + zoomDelta));
+            this.autoRotate = false; // Disable auto-rotate when zooming
+        });
+        
+        // Set initial cursor style
+        this.canvas.style.cursor = 'grab';
     }
 
     setupResizeObserver() {
@@ -330,7 +446,7 @@ export class CharacterPreview {
                 const scaledSize = box.getSize(new THREE.Vector3());
                 const bottomY = box.min.y;
                 
-                // Position so bottom of model is at y=0 (ground level)
+                // Position so bottom of model is at y=0 (ground level), centered on X and Z
                 model.position.set(-box.getCenter(new THREE.Vector3()).x, -bottomY, -box.getCenter(new THREE.Vector3()).z);
             } else {
                 // Target height for preview (around 2.5 units)
@@ -352,11 +468,21 @@ export class CharacterPreview {
                 // Position so bottom of model is at y=0 (ground level), centered on X and Z
                 model.position.set(-centerX, -bottomY, -centerZ);
                 
-                // Adjust camera to frame the character nicely
+                // Adjust camera to frame the character nicely and ensure it's fully visible
                 const maxDimension = Math.max(scaledSize.x, scaledSize.y, scaledSize.z);
-                const cameraDistance = maxDimension * 3;
-                this.camera.position.set(0, scaledSize.y * 0.6, cameraDistance);
-                this.camera.lookAt(0, scaledSize.y * 0.3, 0);
+                // Base camera distance to fit character in view
+                this.baseCameraDistance = maxDimension * 3.5;
+                this.cameraDistance = this.baseCameraDistance;
+                this.zoomLevel = 1.0; // Reset zoom
+                this.targetZoom = 1.0;
+                // Camera height to look at center of character
+                this.characterCenterY = box.getCenter(new THREE.Vector3()).y;
+                this.cameraAngleX = 0; // Reset angles
+                this.cameraAngleY = 0;
+                this.targetCameraAngleY = 0;
+                
+                // Update camera position
+                this.updateCameraPosition();
             }
             
             model.traverse((child) => {
@@ -364,16 +490,73 @@ export class CharacterPreview {
                     child.castShadow = true;
                     child.receiveShadow = true;
                     
-                    // Apply customization if possible
+                    // Enhance materials for realistic rendering
                     if (child.material) {
-                        // Try to update hair color
-                        if (child.material.name && child.material.name.toLowerCase().includes('hair')) {
-                            child.material.color.setStyle(hairColor);
-                        }
-                        // Try to update skin tone
-                        if (child.material.name && child.material.name.toLowerCase().includes('skin')) {
-                            const skinColor = this.getSkinColor(skinTone, race);
-                            child.material.color.copy(skinColor);
+                        // Handle both single materials and material arrays
+                        const materials = Array.isArray(child.material) ? child.material : [child.material];
+                        
+                        materials.forEach(material => {
+                            if (material) {
+                                // Enable shadows
+                                material.shadowSide = THREE.FrontSide;
+                                
+                                // Apply customization if possible
+                                const materialName = material.name ? material.name.toLowerCase() : '';
+                                
+                                // Hair material improvements
+                                if (materialName.includes('hair')) {
+                                    material.color.setStyle(hairColor);
+                                    material.roughness = 0.8;
+                                    material.metalness = 0.1;
+                                    // Add slight sheen to hair
+                                    material.envMapIntensity = 0.5;
+                                }
+                                
+                                // Skin material improvements for realistic rendering
+                                if (materialName.includes('skin') || materialName.includes('face') || materialName.includes('body')) {
+                                    const skinColor = this.getSkinColor(skinTone, race);
+                                    material.color.copy(skinColor);
+                                    // Realistic skin properties
+                                    material.roughness = 0.85;
+                                    material.metalness = 0.05;
+                                    material.specular = new THREE.Color(0xffffff);
+                                    material.specularIntensity = 0.3;
+                                    material.clearcoat = 0.1; // Subtle skin sheen
+                                    material.clearcoatRoughness = 0.9;
+                                    material.envMapIntensity = 0.3;
+                                }
+                                
+                                // Eye material
+                                if (materialName.includes('eye')) {
+                                    material.emissive.setStyle(eyeColor);
+                                    material.emissiveIntensity = 0.2;
+                                    material.roughness = 0.1;
+                                    material.metalness = 0.0;
+                                }
+                                
+                                // Enhance all materials with better default properties
+                                if (!materialName.includes('hair') && !materialName.includes('skin') && !materialName.includes('eye')) {
+                                    // Improve material quality for clothing/armor
+                                    if (material.roughness !== undefined) {
+                                        material.roughness = Math.max(0.3, material.roughness || 0.7);
+                                    }
+                                    if (material.metalness !== undefined) {
+                                        material.metalness = Math.min(0.8, material.metalness || 0.1);
+                                    }
+                                }
+                                
+                                // Enable material updates
+                                material.needsUpdate = true;
+                            }
+                        });
+                        
+                        // Update shadow settings
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(mat => {
+                                if (mat) mat.shadowSide = THREE.FrontSide;
+                            });
+                        } else {
+                            child.material.shadowSide = THREE.FrontSide;
                         }
                     }
                 }
@@ -386,15 +569,25 @@ export class CharacterPreview {
         }
 
         this.scene.add(this.characterGroup);
+        
+        // Ensure character is visible - log for debugging
+        console.log('Character preview updated:', {
+            race,
+            gender,
+            characterGroup: this.characterGroup,
+            childrenCount: this.characterGroup.children.length,
+            sceneChildren: this.scene.children.length
+        });
     }
 
     createFallbackCharacter(race, gender, hairColor, skinTone, faceType = 0, hairStyle = 0, facialFeatures = 0, eyeColor = '#4A90E2', raceFeatures = 0) {
         // Enhanced fallback character with race and gender-specific features
+        // Using more realistic geometry and materials
         const raceProps = this.getRaceProperties(race, gender);
         const isFemale = gender === 'female';
         const skinColor = this.getSkinColor(skinTone, race);
 
-        // Create torso (more detailed for gender differences)
+        // Create torso with more realistic proportions
         const torsoGeometry = new THREE.BoxGeometry(
             raceProps.bodyWidth,
             raceProps.bodyHeight * 0.6,
@@ -402,12 +595,18 @@ export class CharacterPreview {
         );
         const torsoMaterial = new THREE.MeshStandardMaterial({
             color: skinColor,
-            metalness: 0.1,
-            roughness: 0.8
+            metalness: 0.05,
+            roughness: 0.85,
+            specular: new THREE.Color(0xffffff),
+            specularIntensity: 0.3,
+            clearcoat: 0.1,
+            clearcoatRoughness: 0.9,
+            envMapIntensity: 0.3
         });
         const torso = new THREE.Mesh(torsoGeometry, torsoMaterial);
         torso.position.y = raceProps.bodyHeight * 0.3;
         torso.castShadow = true;
+        torso.receiveShadow = true;
         this.characterGroup.add(torso);
 
         // Create hips (wider for females, narrower for males)
@@ -427,34 +626,46 @@ export class CharacterPreview {
         hips.castShadow = true;
         this.characterGroup.add(hips);
 
-        // Create head with face type variation
+        // Create head with more realistic shape (rounded box)
         const headSize = raceProps.headSize * (1 + faceType * 0.05); // Slight variation based on face type
+        // Use sphere for more realistic head shape
         const headGeometry = new THREE.BoxGeometry(
             headSize,
             headSize,
-            headSize * 0.9
+            headSize * 0.9,
+            8, 8, 8 // More segments for smoother appearance
         );
         const headMaterial = new THREE.MeshStandardMaterial({
             color: skinColor,
-            metalness: 0.1,
-            roughness: 0.8
+            metalness: 0.05,
+            roughness: 0.85,
+            specular: new THREE.Color(0xffffff),
+            specularIntensity: 0.3,
+            clearcoat: 0.1,
+            clearcoatRoughness: 0.9,
+            envMapIntensity: 0.3
         });
         const head = new THREE.Mesh(headGeometry, headMaterial);
         head.position.y = raceProps.bodyHeight + headSize / 2;
         head.castShadow = true;
+        head.receiveShadow = true;
         this.characterGroup.add(head);
 
-        // Create hair with style variations
+        // Create hair with style variations (enhanced materials)
         const hairStyles = this.getHairStyleGeometry(hairStyle, headSize, raceProps.hairHeight, isFemale);
         const hairMaterial = new THREE.MeshStandardMaterial({
             color: hairColor,
-            metalness: 0.2,
-            roughness: 0.9
+            metalness: 0.1,
+            roughness: 0.8,
+            envMapIntensity: 0.5, // Hair sheen
+            specular: new THREE.Color(0xffffff),
+            specularIntensity: 0.4
         });
         
         hairStyles.forEach((hairGeom, index) => {
-            const hair = new THREE.Mesh(hairGeom, hairMaterial);
+            const hair = new THREE.Mesh(hairGeom, hairMaterial.clone());
             hair.position.y = raceProps.bodyHeight + headSize + (index * 0.1);
+            hair.castShadow = true;
             this.characterGroup.add(hair);
         });
 
@@ -511,13 +722,23 @@ export class CharacterPreview {
         const scale = targetHeight / totalHeight;
         this.characterGroup.scale.set(scale, scale, scale);
         
-        // Position so feet are at y=0
+        // Position so feet are at y=0 (ground level)
         const scaledLegHeight = raceProps.legLength * scale;
         this.characterGroup.position.y = scaledLegHeight / 2;
         
-        // Adjust camera for fallback character
-        this.camera.position.set(0, totalHeight * scale * 0.4, 6);
-        this.camera.lookAt(0, totalHeight * scale * 0.2, 0);
+        // Adjust camera to ensure full character is visible
+        const characterHeight = totalHeight * scale;
+        this.characterCenterY = (raceProps.bodyHeight * scale) / 2 + (headSize * scale) / 2; // Character center
+        this.baseCameraDistance = characterHeight * 3.5; // Base distance to fit character
+        this.cameraDistance = this.baseCameraDistance;
+        this.zoomLevel = 1.0; // Reset zoom
+        this.targetZoom = 1.0;
+        this.cameraAngleX = 0; // Reset angles
+        this.cameraAngleY = 0;
+        this.targetCameraAngleY = 0;
+        
+        // Update camera position
+        this.updateCameraPosition();
     }
 
     getHairStyleGeometry(hairStyle, headSize, hairHeight, isFemale) {
@@ -822,14 +1043,48 @@ export class CharacterPreview {
 
         return new THREE.Color(r, g, b);
     }
-
+    
+    updateCameraPosition() {
+        // Apply zoom smoothly
+        const actualDistance = this.baseCameraDistance * this.zoomLevel;
+        this.cameraDistance = THREE.MathUtils.lerp(this.cameraDistance, actualDistance, 0.15);
+        
+        // Smooth camera angle transitions
+        let angleDiff = this.targetCameraAngleY - this.cameraAngleY;
+        // Normalize angle difference to [-PI, PI]
+        while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+        while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+        this.cameraAngleY += angleDiff * 0.15;
+        
+        // Calculate camera position using spherical coordinates
+        const horizontalDistance = Math.cos(this.cameraAngleX) * this.cameraDistance;
+        const verticalOffset = Math.sin(this.cameraAngleX) * this.cameraDistance;
+        
+        // Use stored character center Y (updated when character loads)
+        const characterCenterY = this.characterCenterY || 1.25;
+        
+        // Calculate camera position
+        const cameraX = Math.sin(this.cameraAngleY) * horizontalDistance;
+        const cameraY = characterCenterY + verticalOffset;
+        const cameraZ = Math.cos(this.cameraAngleY) * horizontalDistance;
+        
+        this.camera.position.set(cameraX, cameraY, cameraZ);
+        this.camera.lookAt(0, characterCenterY, 0);
+    }
+    
     animate() {
         this.animationId = requestAnimationFrame(() => this.animate());
 
-        // Rotate character slowly - ensure it always rotates
-        if (this.characterGroup && this.characterGroup.children.length > 0) {
-            this.characterGroup.rotation.y += 0.01;
+        // Auto-rotate character when not dragging (WoW-style)
+        if (this.autoRotate && !this.isDragging) {
+            this.targetCameraAngleY += this.autoRotateSpeed;
         }
+        
+        // Smooth zoom interpolation
+        this.zoomLevel = THREE.MathUtils.lerp(this.zoomLevel, this.targetZoom, 0.1);
+        
+        // Update camera position (handles rotation, zoom, and smooth transitions)
+        this.updateCameraPosition();
 
         this.renderer.render(this.scene, this.camera);
     }
