@@ -197,17 +197,18 @@ class Fantasy3D {
         
         // Initialize camera position - WoW-style third-person view
         // Position camera to see both character and world (character at origin, world around it)
-        // Camera should be behind, above, and to the side of character
+        // In Three.js: X=right, Y=up, Z=towards camera (so negative Z is "forward/away from camera")
+        // Position camera behind and above character, looking down at the world
         this.camera.position.set(
-            10,   // To the right side
-            15,   // Elevated view to see the world
-            20    // Behind character (positive Z is "back" in standard setup)
+            0,    // Centered on X
+            20,   // Elevated view (higher to see more of the world)
+            30    // Behind character (positive Z = towards camera = character is "in front" of camera)
         );
         
         // Make sure camera looks at character and can see the ground
-        // Character is at origin (0, 0, 0), ground is at y=0
-        const lookAtY = 2; // Look slightly above ground level
-        this.camera.lookAt(0, lookAtY, 0); // Look at character position (origin)
+        // Character is at origin (0, 0, 0), ground is at y=0, rotated -90deg on X axis (horizontal)
+        const lookAtY = 0; // Look at ground level to see the world
+        this.camera.lookAt(0, lookAtY, 0); // Look at origin (character position)
         
         // Update camera projection to ensure world is visible
         this.camera.updateProjectionMatrix();
@@ -537,17 +538,40 @@ class Fantasy3D {
             this.renderer.render(this.scene, this.camera);
         }
         
-        // Debug: Log scene state (only on first few frames)
+        // Debug: Log scene state (only on first frame)
         if (!this._renderDebugged) {
-            console.log('🎨 Rendering scene:', {
-                sceneChildren: this.scene.children.length,
-                cameraPosition: this.camera.position.clone(),
-                cameraRotation: this.camera.rotation.clone(),
-                sceneBackground: this.scene.background,
-                sceneFog: this.scene.fog,
-                rendererClearColor: this.renderer.getClearColor(new THREE.Color()),
-                worldObjects: this.scene.children.filter(c => c.type === 'Mesh' || c.type === 'Group').length
+            const worldMeshes = this.scene.children.filter(c => {
+                return c.type === 'Mesh' || 
+                       c.type === 'Group' || 
+                       (c.userData && (c.userData.type === 'ground' || c.userData.type === 'building' || c.userData.type === 'tree'));
             });
+            
+            console.log('🎨 FIRST FRAME RENDER:', {
+                sceneChildren: this.scene.children.length,
+                worldMeshes: worldMeshes.length,
+                cameraPosition: this.camera.position.toArray(),
+                cameraRotation: this.camera.rotation.toArray(),
+                cameraNear: this.camera.near,
+                cameraFar: this.camera.far,
+                sceneBackground: this.scene.background ? this.scene.background.getHexString() : 'null',
+                sceneFog: this.scene.fog ? 'yes' : 'no',
+                rendererClearColor: this.renderer.getClearColor(new THREE.Color()).getHexString(),
+                characterExists: !!this.character,
+                characterMeshExists: !!(this.character && this.character.mesh),
+                characterPosition: this.character && this.character.mesh ? this.character.mesh.position.toArray() : 'no character',
+                controlsExists: !!this.controls
+            });
+            
+            // Log some world object positions
+            const ground = this.scene.children.find(c => c.userData && c.userData.type === 'ground');
+            if (ground) {
+                console.log('🌍 Ground found:', {
+                    position: ground.position.toArray(),
+                    rotation: ground.rotation.toArray(),
+                    visible: ground.visible
+                });
+            }
+            
             this._renderDebugged = true;
         }
     }
