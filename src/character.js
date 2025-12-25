@@ -133,6 +133,9 @@ export class Character {
             
             this.mesh = model;
             
+            // Character starts facing forward (no rotation needed - will be controlled by movement)
+            this.mesh.rotation.y = 0; // No initial rotation - character faces -Z (forward in Three.js)
+            
             // Setup animations if available
             if (animations.length > 0) {
                 this.mixer = new THREE.AnimationMixer(model);
@@ -373,6 +376,10 @@ export class Character {
 
         // Position fallback character so feet are at y=0
         this.mesh.position.set(0, 0, 0);
+        
+        // Character starts facing forward (no rotation needed)
+        this.mesh.rotation.y = 0; // No initial rotation - character faces -Z (forward in Three.js)
+        
         this.scene.add(this.mesh);
     }
 

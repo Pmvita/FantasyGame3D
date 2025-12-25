@@ -184,34 +184,36 @@ export class Controls {
         }
 
         // WASD/Arrow keys movement (WoW-style)
-        // W/↑: Move forward in character's facing direction
-        // S/↓: Move backward (opposite of facing direction)
-        // A/←: Strafe left (move left while maintaining facing direction)
-        // D/→: Strafe right (move right while maintaining facing direction)
+        // Movement is relative to CAMERA direction, not character direction
+        // W/↑: Move forward relative to camera
+        // S/↓: Move backward relative to camera
+        // A/←: Strafe left relative to camera
+        // D/→: Strafe right relative to camera
+        // Character automatically faces the movement direction
         
         const moveVector = new THREE.Vector3();
-        const characterRotation = this.character.mesh.rotation.y;
-        const characterForward = new THREE.Vector3(0, 0, -1);
-        const characterRight = new THREE.Vector3(1, 0, 0);
+        const cameraForward = new THREE.Vector3(0, 0, -1); // Default forward in Three.js
+        const cameraRight = new THREE.Vector3(1, 0, 0);   // Default right in Three.js
         
-        // Apply character rotation to forward/right vectors
-        characterForward.applyAxisAngle(new THREE.Vector3(0, 1, 0), characterRotation);
-        characterRight.applyAxisAngle(new THREE.Vector3(0, 1, 0), characterRotation);
+        // Apply camera's horizontal rotation (yaw) to forward/right vectors
+        // cameraAngleY is the horizontal rotation of the camera
+        cameraForward.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.cameraAngleY);
+        cameraRight.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.cameraAngleY);
 
-        // Forward/Backward movement (relative to character facing)
+        // Forward/Backward movement (relative to camera direction)
         if (this.keys['w'] || this.keys['arrowup']) {
-            moveVector.add(characterForward); // Move forward in character's facing direction
+            moveVector.add(cameraForward); // Move forward relative to camera
         }
         if (this.keys['s'] || this.keys['arrowdown']) {
-            moveVector.sub(characterForward); // Move backward
+            moveVector.sub(cameraForward); // Move backward relative to camera
         }
         
-        // Strafe left/right (relative to character facing, not camera)
+        // Strafe left/right (relative to camera direction)
         if (this.keys['a'] || this.keys['arrowleft']) {
-            moveVector.sub(characterRight); // Strafe left
+            moveVector.sub(cameraRight); // Strafe left relative to camera
         }
         if (this.keys['d'] || this.keys['arrowright']) {
-            moveVector.add(characterRight); // Strafe right
+            moveVector.add(cameraRight); // Strafe right relative to camera
         }
 
         // Apply movement
@@ -219,16 +221,32 @@ export class Controls {
             // Normalize movement vector
             moveVector.normalize();
             
+            // Character should always face the direction it's moving (WoW-style)
+            // Calculate target angle based on movement direction in world space
+            // In Three.js: -Z is forward, so atan2(-x, -z) gives us the correct angle
+            const targetAngle = Math.atan2(-moveVector.x, -moveVector.z);
+            
+            // Only auto-rotate character if not using right-click drag (right-click drag takes priority)
+            if (!this.isRightMouseDown && this.character && this.character.mesh) {
+                // Smoothly rotate character to face movement direction
+                let currentAngle = this.character.mesh.rotation.y;
+                let angleDiff = targetAngle - currentAngle;
+                
+                // Normalize angle difference to [-PI, PI]
+                while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                
+                // Smoothly rotate towards target (faster rotation for better responsiveness)
+                this.character.mesh.rotation.y += angleDiff * 0.4; // Faster rotation for better responsiveness
+            }
+            
             // Check energy before allowing running
             if (this.isRunning && this.character && this.character.energy < this.character.minEnergyToRun) {
                 this.isRunning = false;
             }
             
-            // Move character with running state
+            // Move character with running state (in world space direction)
             this.character.move(moveVector, this.isRunning);
-            
-            // In WoW, character doesn't auto-rotate when moving - only Q/E or right-click drag rotate the character
-            // Movement keeps the character facing the same direction unless explicitly rotated
         } else {
             // No movement keys pressed - stop running
             if (this.isRunning) {
