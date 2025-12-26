@@ -270,6 +270,11 @@ export class UI {
                 } else {
                     this.hideClassRankDropdown();
                 }
+                
+                // Update character preview to show class equipment
+                if (this.characterPreview) {
+                    this.updateCharacterPreview();
+                }
             });
         });
         
@@ -284,16 +289,8 @@ export class UI {
             });
         });
         
-        // Customize button - toggle customization panel
-        const customizeBtn = document.getElementById('wowCustomizeButton');
-        if (customizeBtn) {
-            customizeBtn.addEventListener('click', () => {
-                const panel = document.getElementById('wowCustomizationPanel');
-                if (panel) {
-                    panel.classList.toggle('hidden');
-                }
-            });
-        }
+        // Save button is now in the footer (replaced customize button)
+        // The saveCharacterButton event listener is already set up below
         
         // Back button
         const backBtn = document.getElementById('wowBackButton');
@@ -1506,12 +1503,21 @@ export class UI {
                 hairStyle, 
                 facialFeatures,
                 eyeColor,
-                raceFeatures
+                raceFeatures,
+                this.selectedClass || null,
+                this.selectedClassRank || null
             );
             console.log('Character preview updated successfully');
         } catch (error) {
             console.error('Error updating character preview:', error);
         }
+    }
+    
+    /**
+     * Wrapper method for updating character preview (called from event listeners)
+     */
+    async updateCharacterPreview() {
+        await this.updatePreview();
     }
 
     /**
@@ -2518,6 +2524,11 @@ export class UI {
             select.addEventListener('change', (e) => {
                 this.selectedClassRank = e.target.value || null;
                 console.log(`Class rank selected: ${this.selectedClassRank}`);
+                
+                // Update character preview to show class equipment for selected rank
+                if (this.characterPreview) {
+                    this.updateCharacterPreview();
+                }
             });
             this.classRankSelectListenerAdded = true;
         }

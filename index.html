@@ -2471,6 +2471,7 @@
             flex: 1;
             padding: 20px;
             overflow: hidden;
+            min-height: 0; /* Allow grid items to shrink below content size */
         }
         
         /* Left Panel: Race Selection */
@@ -2479,7 +2480,49 @@
             flex-direction: column;
             gap: 15px;
             overflow-y: auto;
+            overflow-x: hidden;
             padding-right: 10px;
+            height: 100%;
+            max-height: 100%;
+        }
+        
+        /* Custom scrollbar styling for race panel */
+        .wow-race-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .wow-race-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+        
+        .wow-race-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.5);
+            border-radius: 4px;
+        }
+        
+        .wow-race-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 215, 0, 0.7);
+        }
+        
+        /* Customization sections within race panel */
+        .wow-race-panel > .wow-custom-section {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            flex-shrink: 0; /* Prevent sections from shrinking */
+        }
+        
+        .wow-race-panel > .wow-custom-section .wow-custom-section-title {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        
+        /* Ensure faction sections don't shrink */
+        .wow-race-panel > .wow-faction-section {
+            flex-shrink: 0;
         }
         
         .wow-faction-section {
@@ -2989,26 +3032,13 @@
             padding: 10px;
         }
         
-        /* Customization Panel */
+        /* Customization Panel (kept hidden - customization is now in race panel) */
         .wow-customization-panel {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 800px;
-            max-height: 60vh;
-            background: rgba(0, 0, 0, 0.95);
-            border: 2px solid rgba(255, 215, 0, 0.5);
-            border-radius: 12px;
-            padding: 20px;
-            overflow-y: auto;
-            z-index: 20;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            display: none !important;
         }
         
         .wow-customization-panel.hidden {
-            display: none;
+            display: none !important;
         }
         
         .wow-customization-content {
@@ -5459,6 +5489,95 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Customization Sections (in race panel) -->
+                        <div class="wow-custom-section">
+                            <h3 class="wow-custom-section-title">Face & Hair</h3>
+                            
+                            <div class="wow-custom-item">
+                                <label>Hair Style: <span id="hairStyleValue">1</span></label>
+                                <div class="wow-slider-controls">
+                                    <button class="wow-slider-btn" id="hairStylePrev"><i class="fas fa-chevron-left"></i></button>
+                                    <input type="range" id="hairStyle" min="0" max="9" step="1" value="0" class="wow-range-slider">
+                                    <button class="wow-slider-btn" id="hairStyleNext"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Hair Color:</label>
+                                <input type="color" id="hairColor" value="#8B4513" class="wow-color-picker">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Eye Color:</label>
+                                <input type="color" id="eyeColor" value="#4A90E2" class="wow-color-picker">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Face Type: <span id="faceTypeValue">1</span></label>
+                                <div class="wow-slider-controls">
+                                    <button class="wow-slider-btn" id="faceTypePrev"><i class="fas fa-chevron-left"></i></button>
+                                    <input type="range" id="faceType" min="0" max="9" step="1" value="0" class="wow-range-slider">
+                                    <button class="wow-slider-btn" id="faceTypeNext"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Facial Features: <span id="facialFeaturesValue">1</span></label>
+                                <div class="wow-slider-controls">
+                                    <button class="wow-slider-btn" id="facialFeaturesPrev"><i class="fas fa-chevron-left"></i></button>
+                                    <input type="range" id="facialFeatures" min="0" max="9" step="1" value="0" class="wow-range-slider">
+                                    <button class="wow-slider-btn" id="facialFeaturesNext"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="wow-custom-item race-specific" id="raceFeaturesItem" style="display: none;">
+                                <label id="raceFeaturesLabel"><span id="raceFeaturesLabelText">Race Features</span>: <span id="raceFeaturesValue">0</span></label>
+                                <div class="wow-slider-controls">
+                                    <button class="wow-slider-btn" id="raceFeaturesPrev"><i class="fas fa-chevron-left"></i></button>
+                                    <input type="range" id="raceFeatures" min="0" max="9" step="1" value="0" class="wow-range-slider">
+                                    <button class="wow-slider-btn" id="raceFeaturesNext"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="wow-custom-section">
+                            <h3 class="wow-custom-section-title">Body & Appearance</h3>
+                            
+                            <div class="wow-custom-item">
+                                <label>Skin Tone: <span id="skinToneValue">0.5</span></label>
+                                <input type="range" id="skinTone" min="0" max="1" step="0.1" value="0.5" class="wow-range-slider">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Body Shape: <span id="bodyShapeValue">0.5</span></label>
+                                <input type="range" id="bodyShape" min="0" max="1" step="0.1" value="0.5" class="wow-range-slider">
+                            </div>
+                        </div>
+                        
+                        <div class="wow-custom-section">
+                            <h3 class="wow-custom-section-title">Character Stats</h3>
+                            
+                            <div class="wow-custom-item">
+                                <label>Health: <span id="healthValue">50</span></label>
+                                <input type="range" id="healthStat" min="0" max="100" value="50" class="wow-range-slider">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Strength: <span id="strengthValue">10</span></label>
+                                <input type="range" id="strengthStat" min="0" max="100" value="10" class="wow-range-slider">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Magic: <span id="magicValue">10</span></label>
+                                <input type="range" id="magicStat" min="0" max="100" value="10" class="wow-range-slider">
+                            </div>
+                            
+                            <div class="wow-custom-item">
+                                <label>Speed: <span id="speedValue">10</span></label>
+                                <input type="range" id="speedStat" min="0" max="100" value="10" class="wow-range-slider">
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Center Panel: Character Model (Large, Centered) -->
@@ -5621,13 +5740,13 @@
                     </div>
                 </div>
                 
-                <!-- Bottom Buttons: Back, Customize, More Info -->
+                <!-- Bottom Buttons: Back, Save, More Info -->
                 <div class="wow-creation-footer">
                     <button class="wow-footer-button" id="wowBackButton">
                         <i class="fas fa-arrow-left"></i> Back
                     </button>
-                    <button class="wow-footer-button wow-footer-button-primary" id="wowCustomizeButton">
-                        <i class="fas fa-chevron-left"></i> Customize <i class="fas fa-chevron-right"></i>
+                    <button class="wow-footer-button wow-footer-button-primary" id="saveCharacterButton">
+                        <i class="fas fa-save"></i> Save Character
                     </button>
                     <button class="wow-footer-button" id="wowMoreInfoButton">
                         More Info <i class="fas fa-info-circle"></i>

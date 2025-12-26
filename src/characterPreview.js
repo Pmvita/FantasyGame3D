@@ -1,6 +1,7 @@
 // 3D Character Preview for Character Creation
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { getEquipmentScaleOverride } from './equipmentScaling.js';
 
 export class CharacterPreview {
     constructor(canvasId) {
@@ -403,7 +404,189 @@ export class CharacterPreview {
         }
     }
 
-    async updateCharacter(race, gender, hairColor, skinTone, faceType = 0, hairStyle = 0, facialFeatures = 0, eyeColor = '#4A90E2', raceFeatures = 0) {
+    /**
+     * Load a single equipment item from the specified folder
+     * @param {string} classPath - Base path to the class folder (e.g., 'assets/Classes/Warrior/C-Rank/Warrior/Male')
+     * @param {string} equipmentType - Type of equipment (Armour, Boots, Cape, Helmet, Weapon) - capitalized
+     * @param {string} className - The class name (for generating file name patterns)
+     * @param {string} gender - The character gender ('male' or 'female')
+     * @returns {Promise<THREE.Group|null>} Loaded equipment model or null if not found
+     */
+    async loadEquipmentItem(classPath, equipmentType, className = null, gender = 'male') {
+        // Handle both capitalized and lowercase folder names
+        // EquipmentType can be 'Armour' (capitalized) or 'weapon' (lowercase)
+        // Folders are capitalized, so we need to capitalize the equipment type for the path
+        const equipmentTypeCapitalized = equipmentType.charAt(0).toUpperCase() + equipmentType.slice(1);
+        const equipmentPath = `${classPath}/${equipmentTypeCapitalized}/`;
+        const classNameCapitalized = className ? className.charAt(0).toUpperCase() + className.slice(1) : '';
+        const genderCapitalized = gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : '';
+        
+        try {
+            // Try multiple naming patterns based on common conventions
+            // New structure uses: "{Class} {EquipmentType} {Gender}.glb" (e.g., "Warrior Armour Male.glb")
+            const possibleNames = [];
+            
+            // Add gender-specific class names (e.g., "Warrior Armour Male.glb", "Warrior Armour Female.glb")
+            if (className && gender) {
+                possibleNames.push(`${classNameCapitalized} ${equipmentTypeCapitalized} ${genderCapitalized}.glb`);
+            }
+            
+            // Add class-specific names without gender (e.g., "Warrior Armour.glb")
+            if (className) {
+                possibleNames.push(`${classNameCapitalized} ${equipmentTypeCapitalized}.glb`);
+            }
+            
+            // Add generic capitalized names
+            possibleNames.push(`${equipmentTypeCapitalized}.glb`);
+            
+            // Add specific variations for each equipment type
+            if (equipmentType === 'Armour') {
+                if (className && gender) {
+                    possibleNames.push(`${classNameCapitalized} Armour ${genderCapitalized}.glb`);
+                    possibleNames.push(`${classNameCapitalized} Armor ${genderCapitalized}.glb`);
+                }
+                if (className) {
+                    possibleNames.push(`${classNameCapitalized} Armour.glb`);
+                    possibleNames.push(`${classNameCapitalized} Armor.glb`);
+                }
+                possibleNames.push('Armour.glb');
+                possibleNames.push('Armor.glb');
+            } else if (equipmentType.toLowerCase() === 'weapon' || equipmentType === 'Weapon') {
+                // Add weapon-specific names
+                if (className) {
+                    possibleNames.push(`${classNameCapitalized} Sword.glb`);
+                    possibleNames.push(`${classNameCapitalized} Weapon.glb`);
+                }
+                if (className === 'mage') {
+                    possibleNames.push('Mage Staff.glb');
+                    possibleNames.push('Staff.glb');
+                }
+                possibleNames.push('Sword.glb');
+                possibleNames.push('Weapon.glb');
+            } else if (equipmentType === 'Helmet') {
+                possibleNames.push('Helmet.glb');
+                possibleNames.push('Hat.glb');
+            } else if (equipmentType === 'Boots') {
+                possibleNames.push('Boots.glb');
+                possibleNames.push('Shoes.glb');
+            } else if (equipmentType === 'Cape') {
+                possibleNames.push('Cape.glb');
+                possibleNames.push('Cloak.glb');
+            }
+            
+            // Try lowercase version
+            const equipmentTypeLower = equipmentType.toLowerCase();
+            possibleNames.push(`${equipmentTypeLower}.glb`);
+
+            for (const fileName of possibleNames) {
+                try {
+                    const gltf = await new Promise((resolve, reject) => {
+                        this.loader.setPath(equipmentPath);
+                        this.loader.load(
+                            fileName,
+                            (gltf) => resolve(gltf),
+                            undefined,
+                            (error) => reject(error)
+                        );
+                    });
+
+                    if (gltf && gltf.scene) {
+                        console.log(`Loaded equipment: ${equipmentType} from ${equipmentPath}${fileName}`);
+                        return gltf.scene;
+                    }
+                } catch (error) {
+                    // Try next filename
+                    continue;
+                }
+            }
+
+            // Equipment not found - this is OK, we'll just skip it
+            console.log(`Equipment ${equipmentType} not found in ${equipmentPath} (tried ${possibleNames.length} patterns)`);
+            return null;
+        } catch (error) {
+            console.log(`Error loading equipment ${equipmentType}:`, error.message);
+            return null;
+        }
+    }
+
+    /**
+     * Load all equipment for a class from the Classes folder
+     * @param {string} className - The class name (warrior, mage, healer)
+     * @param {string} classRank - The class rank (null or empty for C-Rank base class, or specific rank name)
+     * @param {string} gender - The character gender ('male' or 'female')
+     * @returns {Promise<Object>} Object containing loaded equipment items
+     */
+    async loadClassEquipment(className, classRank = null, gender = 'male') {
+        // Determine the class path
+        // New structure: assets/Classes/{ClassName}/{Rank}/{ClassName}/{Gender}/
+        // For base class (C-Rank), path is: assets/Classes/{ClassName}/C-Rank/{ClassName}/{Gender}/
+        // For specific ranks, it would be: assets/Classes/{ClassName}/{Rank}/{RankName}/{Gender}/
+        
+        const classNameCapitalized = className.charAt(0).toUpperCase() + className.slice(1);
+        const genderCapitalized = gender.charAt(0).toUpperCase() + gender.slice(1);
+        let classPath;
+        
+        if (!classRank || classRank === '' || classRank.toLowerCase() === 'c-rank') {
+            // Base class (C-Rank)
+            classPath = `assets/Classes/${classNameCapitalized}/C-Rank/${classNameCapitalized}/${genderCapitalized}`;
+        } else {
+            // Specific rank - extract rank name from option value
+            // Option values are like "Warrior (C-Rank)", "Knight (B-Rank)", etc.
+            const rankMatch = classRank.match(/^([^(]+)\s*\(/);
+            const rankName = rankMatch ? rankMatch[1].trim() : classRank;
+            
+            // Determine rank folder (C-Rank, B-Rank, A-Rank, etc.)
+            let rankFolder = 'C-Rank';
+            if (classRank.includes('(B-Rank)')) rankFolder = 'B-Rank';
+            else if (classRank.includes('(A-Rank)')) rankFolder = 'A-Rank';
+            else if (classRank.includes('(S-Rank)')) rankFolder = 'S-Rank';
+            else if (classRank.includes('(SS-Rank)')) rankFolder = 'SS-Rank';
+            else if (classRank.includes('(SSS-Rank)')) rankFolder = 'SSS-Rank';
+            
+            classPath = `assets/Classes/${classNameCapitalized}/${rankFolder}/${rankName}/${genderCapitalized}`;
+        }
+
+        console.log(`Loading equipment from: ${classPath}`);
+
+        // Determine base class path (without gender) for weapon (weapon is at root level, not in gender folder)
+        // classNameCapitalized is already declared above, reuse it
+        let baseClassPath;
+        if (!classRank || classRank === '' || classRank.toLowerCase() === 'c-rank') {
+            baseClassPath = `assets/Classes/${classNameCapitalized}/C-Rank/${classNameCapitalized}`;
+        } else {
+            const rankMatch = classRank.match(/^([^(]+)\s*\(/);
+            const rankName = rankMatch ? rankMatch[1].trim() : classRank;
+            let rankFolder = 'C-Rank';
+            if (classRank.includes('(B-Rank)')) rankFolder = 'B-Rank';
+            else if (classRank.includes('(A-Rank)')) rankFolder = 'A-Rank';
+            else if (classRank.includes('(S-Rank)')) rankFolder = 'S-Rank';
+            else if (classRank.includes('(SS-Rank)')) rankFolder = 'SS-Rank';
+            else if (classRank.includes('(SSS-Rank)')) rankFolder = 'SSS-Rank';
+            baseClassPath = `assets/Classes/${classNameCapitalized}/${rankFolder}/${rankName}`;
+        }
+
+        // Load all equipment types in parallel
+        // Equipment folders are now capitalized: Armour, Boots, Cape, Helmet (in gender folders)
+        // Weapon is at root level (not gender-specific)
+        const [armour, boots, cape, helmet, weapon] = await Promise.all([
+            this.loadEquipmentItem(classPath, 'Armour', className, gender),
+            this.loadEquipmentItem(classPath, 'Boots', className, gender),
+            this.loadEquipmentItem(classPath, 'Cape', className, gender),
+            this.loadEquipmentItem(classPath, 'Helmet', className, gender),
+            this.loadEquipmentItem(baseClassPath, 'weapon', className, gender) // Weapon at root level
+        ]);
+
+        return {
+            armour,
+            boots,
+            cape,
+            helmet,
+            weapon,
+            classPath // Return the path used for debugging
+        };
+    }
+
+    async updateCharacter(race, gender, hairColor, skinTone, faceType = 0, hairStyle = 0, facialFeatures = 0, eyeColor = '#4A90E2', raceFeatures = 0, className = null, classRank = null) {
         // Remove old character
         if (this.characterGroup) {
             this.scene.remove(this.characterGroup);
@@ -415,6 +598,10 @@ export class CharacterPreview {
 
         // Try to load 3D model
         const model = await this.loadModel(race, gender);
+        
+        // Store scale factor for equipment - will be set during character scaling
+        let characterScaleFactor = 1.0;
+        let characterOriginalHeight = 1.0;
         
         if (model) {
             // Use loaded 3D model
@@ -434,11 +621,15 @@ export class CharacterPreview {
             
             console.log(`Model ${race} - Size:`, size, 'Center:', center);
             
+            // Store original height before scaling
+            characterOriginalHeight = size.y;
+            
             // Check if size is valid
             if (size.y <= 0 || !isFinite(size.y) || size.y > 1000) {
                 console.warn(`Invalid model size for ${race} (${size.y}), using default scale`);
                 // If model is huge, scale it down significantly
                 const defaultScale = size.y > 1000 ? 0.01 : 1.0;
+                characterScaleFactor = defaultScale;
                 model.scale.set(defaultScale, defaultScale, defaultScale);
                 
                 // Recalculate after scaling
@@ -451,12 +642,12 @@ export class CharacterPreview {
             } else {
                 // Target height for preview (around 2.5 units)
                 const targetHeight = 2.5;
-                const scale = targetHeight / size.y;
+                characterScaleFactor = targetHeight / size.y;
                 
-                console.log(`Scaling ${race} by ${scale} (target height: ${targetHeight}, actual height: ${size.y})`);
+                console.log(`Scaling ${race} by ${characterScaleFactor} (target height: ${targetHeight}, actual height: ${size.y})`);
                 
                 // Apply scale
-                model.scale.set(scale, scale, scale);
+                model.scale.set(characterScaleFactor, characterScaleFactor, characterScaleFactor);
                 
                 // Recalculate after scaling
                 box.setFromObject(model);
@@ -563,6 +754,224 @@ export class CharacterPreview {
             });
             
             this.characterGroup.add(model);
+            
+            // Load and attach class equipment if a class is specified
+            if (className) {
+                try {
+                    const equipment = await this.loadClassEquipment(className, classRank, gender);
+                    
+                    // Helper function to find skeleton in a model
+                    const findSkeleton = (model) => {
+                        let skeleton = null;
+                        model.traverse((child) => {
+                            if (child.isSkinnedMesh && child.skeleton) {
+                                skeleton = child.skeleton;
+                            }
+                        });
+                        return skeleton;
+                    };
+                    
+                    // Helper function to find all skinned meshes in a model
+                    const findSkinnedMeshes = (model) => {
+                        const meshes = [];
+                        model.traverse((child) => {
+                            if (child.isSkinnedMesh) {
+                                meshes.push(child);
+                            }
+                        });
+                        return meshes;
+                    };
+                    
+                    // Helper function to find a bone by name (case-insensitive partial match)
+                    const findBone = (skeleton, boneNamePattern) => {
+                        if (!skeleton) return null;
+                        const bones = skeleton.bones;
+                        const lowerPattern = boneNamePattern.toLowerCase();
+                        for (let i = 0; i < bones.length; i++) {
+                            if (bones[i].name.toLowerCase().includes(lowerPattern)) {
+                                return bones[i];
+                            }
+                        }
+                        return null;
+                    };
+                    
+                    // Get character skeleton for equipment binding
+                    const characterSkeleton = findSkeleton(model);
+                    const characterSkinnedMeshes = findSkinnedMeshes(model);
+                    
+                    // Helper function to bind equipment meshes to character skeleton
+                    // This is the proper way to attach rigged equipment to rigged characters
+                    const bindEquipmentToSkeleton = (equipmentClone, charSkeleton) => {
+                        if (!charSkeleton) return false;
+                        
+                        let bound = false;
+                        const equipmentMeshes = findSkinnedMeshes(equipmentClone);
+                        
+                        for (const eqMesh of equipmentMeshes) {
+                            // Check if equipment mesh has skeleton and bones
+                            if (eqMesh.skeleton && eqMesh.skeleton.bones) {
+                                const eqBones = eqMesh.skeleton.bones;
+                                const charBones = charSkeleton.bones;
+                                
+                                // Try to map equipment bones to character bones by name
+                                const boneMap = new Map();
+                                for (let i = 0; i < eqBones.length; i++) {
+                                    const eqBoneName = eqBones[i].name.toLowerCase();
+                                    // Find matching character bone
+                                    for (let j = 0; j < charBones.length; j++) {
+                                        const charBoneName = charBones[j].name.toLowerCase();
+                                        if (eqBoneName === charBoneName || 
+                                            (eqBoneName.includes('mixamorig') && charBoneName.includes('mixamorig'))) {
+                                            boneMap.set(i, j);
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                // If we found matching bones, try to bind
+                                if (boneMap.size > 0 && boneMap.size >= eqBones.length * 0.5) {
+                                    // Update skeleton reference and bone indices
+                                    try {
+                                        eqMesh.bind(charSkeleton, eqMesh.matrixWorld);
+                                        bound = true;
+                                        console.log(`Bound ${boneMap.size} bones from equipment to character skeleton`);
+                                    } catch (e) {
+                                        console.warn('Failed to bind equipment skeleton:', e);
+                                    }
+                                }
+                            }
+                        }
+                        
+                        return bound;
+                    };
+                    
+                    // Helper function to attach equipment to character
+                    // For rigged models, we need to bind equipment meshes to character skeleton
+                    const attachEquipment = (equipmentMesh, equipmentName) => {
+                        if (!equipmentMesh) return null;
+                        
+                        const equipmentClone = equipmentMesh.clone(true);
+                        
+                        // Reset equipment to base scale (1,1,1) first
+                        equipmentClone.scale.set(1, 1, 1);
+                        equipmentClone.position.set(0, 0, 0);
+                        equipmentClone.rotation.set(0, 0, 0);
+                        equipmentClone.updateMatrixWorld(true);
+                        
+                        // Try to bind equipment skeleton to character skeleton
+                        let skeletonBound = false;
+                        if (characterSkeleton) {
+                            skeletonBound = bindEquipmentToSkeleton(equipmentClone, characterSkeleton);
+                        }
+                        
+                        let normalizationScale = 1.0;
+                        
+                        // If skeleton binding worked, we still need to match scale
+                        // Calculate scale based on bounding box comparison
+                        const equipmentBox = new THREE.Box3();
+                        equipmentBox.expandByObject(equipmentClone);
+                        const equipmentOriginalSize = equipmentBox.getSize(new THREE.Vector3());
+                        const equipmentOriginalHeight = equipmentOriginalSize.y;
+                        const equipmentOriginalWidth = equipmentOriginalSize.x;
+                        const equipmentOriginalDepth = equipmentOriginalSize.z;
+                        
+                        // Get character's original dimensions (before applying scale factor)
+                        // We need to measure character at scale 1,1,1
+                        const tempCharScale = model.scale.clone();
+                        model.scale.set(1, 1, 1);
+                        model.updateMatrixWorld(true);
+                        const charBox = new THREE.Box3();
+                        charBox.expandByObject(model);
+                        const charOriginalSize = charBox.getSize(new THREE.Vector3());
+                        const charOriginalHeight = charOriginalSize.y;
+                        const charOriginalWidth = charOriginalSize.x;
+                        const charOriginalDepth = charOriginalSize.z;
+                        // Restore character scale
+                        model.scale.copy(tempCharScale);
+                        model.updateMatrixWorld(true);
+                        
+                        // Use average of height, width, and depth for more accurate scaling
+                        if (equipmentOriginalHeight > 0 && charOriginalHeight > 0 &&
+                            equipmentOriginalWidth > 0 && charOriginalWidth > 0) {
+                            const heightRatio = charOriginalHeight / equipmentOriginalHeight;
+                            const widthRatio = charOriginalWidth / equipmentOriginalWidth;
+                            // Use weighted average (height is more important for humanoid models)
+                            normalizationScale = (heightRatio * 0.6 + widthRatio * 0.4);
+                            
+                            // Clamp to reasonable range
+                            if (normalizationScale < 0.1 || normalizationScale > 10) {
+                                // Fallback to height only
+                                normalizationScale = heightRatio;
+                            }
+                        } else if (equipmentOriginalHeight > 0 && charOriginalHeight > 0) {
+                            normalizationScale = charOriginalHeight / equipmentOriginalHeight;
+                        }
+                        
+                        // Ensure scale is reasonable
+                        if (!isFinite(normalizationScale) || normalizationScale <= 0 || normalizationScale > 10 || normalizationScale < 0.1) {
+                            console.warn(`Invalid normalization scale for ${equipmentName}, using 1.0`);
+                            normalizationScale = 1.0;
+                        }
+                        
+                        // Apply normalization scale first (to match base sizes), then character scale factor
+                        let finalScale = normalizationScale * characterScaleFactor;
+                        
+                        // Apply manual scale override if configured
+                        const scaleOverride = getEquipmentScaleOverride(className || '', equipmentName, gender);
+                        if (scaleOverride !== 1.0) {
+                            finalScale *= scaleOverride;
+                            console.log(`Applied scale override for ${equipmentName}: ${scaleOverride.toFixed(3)}`);
+                        }
+                        
+                        equipmentClone.scale.set(finalScale, finalScale, finalScale);
+                        
+                        // Reset position and rotation relative to character model
+                        equipmentClone.position.set(0, 0, 0);
+                        equipmentClone.rotation.set(0, 0, 0);
+                        
+                        // Update matrices
+                        equipmentClone.updateMatrixWorld(true);
+                        
+                        // Parent to character model for proper alignment
+                        model.add(equipmentClone);
+                        
+                        console.log(`Attached ${equipmentName}:`, {
+                            skeletonBound: skeletonBound,
+                            normalizationScale: normalizationScale.toFixed(3),
+                            characterScaleFactor: characterScaleFactor.toFixed(3),
+                            finalScale: finalScale.toFixed(3),
+                            charSize: [charOriginalWidth.toFixed(3), charOriginalHeight.toFixed(3), charOriginalDepth.toFixed(3)],
+                            eqSize: [equipmentOriginalWidth.toFixed(3), equipmentOriginalHeight.toFixed(3), equipmentOriginalDepth.toFixed(3)]
+                        });
+                        
+                        return equipmentClone;
+                    };
+                    
+                    // Attach each equipment item that was successfully loaded
+                    if (equipment.armour) {
+                        attachEquipment(equipment.armour, 'armour');
+                    }
+                    
+                    if (equipment.boots) {
+                        attachEquipment(equipment.boots, 'boots');
+                    }
+                    
+                    if (equipment.cape) {
+                        attachEquipment(equipment.cape, 'cape');
+                    }
+                    
+                    if (equipment.helmet) {
+                        attachEquipment(equipment.helmet, 'helmet');
+                    }
+                    
+                    if (equipment.weapon) {
+                        attachEquipment(equipment.weapon, 'weapon');
+                    }
+                } catch (error) {
+                    console.error('Error loading class equipment:', error);
+                    // Continue without equipment if loading fails
+                }
+            }
         } else {
             // Fallback to simple geometry if model not found
             this.createFallbackCharacter(race, gender, hairColor, skinTone, faceType, hairStyle, facialFeatures, eyeColor, raceFeatures);
