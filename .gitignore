@@ -63,6 +63,8 @@ ADMIN_USERS.md
 *.fbx
 *.bin
 *.tga
-# Keep only essential small assets
-!assets/characters/README.md
+
+# Entire assets folder excluded (contains large 3D models and textures)
+# All files in assets/ are ignored to prevent pushing large files to GitHub
+assets/
 
