@@ -2949,6 +2949,46 @@
             text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
         }
         
+        /* Class Rank Dropdown (Admin Only) */
+        .wow-class-rank-dropdown {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .wow-class-rank-select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        .wow-class-rank-select:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: rgba(255, 215, 0, 0.8);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .wow-class-rank-select:focus {
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        .wow-class-rank-select option {
+            background: #1a1a1a;
+            color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+        }
+        
         /* Customization Panel */
         .wow-customization-panel {
             position: absolute;
@@ -5464,6 +5504,13 @@
                                 <div class="wow-class-icon"><i class="fas fa-heart"></i></div>
                                 <div class="wow-class-name">Healer</div>
                             </div>
+                        </div>
+                        <!-- Class Rank Selection (Admin Only) -->
+                        <div id="wowClassRankDropdown" class="wow-class-rank-dropdown hidden">
+                            <div class="wow-panel-header">CLASS RANK</div>
+                            <select id="classRankSelect" class="wow-class-rank-select">
+                                <option value="">Base Class (C-Rank)</option>
+                            </select>
                         </div>
                     </div>
                 </div>

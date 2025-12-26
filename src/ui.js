@@ -16,6 +16,8 @@ export class UI {
         this.skillsSystem = null;
         this.skillCooldowns = {}; // Track cooldowns for each skill slot
         this.userRole = 'user'; // User role (admin or user) - loaded from auth
+        this.selectedClassRank = null; // Selected class rank (for admin users)
+        this.classRankSelectListenerAdded = false; // Flag to track if class rank select listener has been added
         this.setupEventListeners();
         this.initializeInventory();
         this.onboardingStep = 0;
@@ -174,32 +176,62 @@ export class UI {
                 // Update race-specific features UI
                 this.updateRaceSpecificFeatures();
                 
-                // Apply race-specific default stats
-                const raceStats = this.getRaceDefaultStats(this.selectedRace);
-                const healthStat = document.getElementById('healthStat');
-                const strengthStat = document.getElementById('strengthStat');
-                const magicStat = document.getElementById('magicStat');
-                const speedStat = document.getElementById('speedStat');
-                
-                if (healthStat) {
-                    healthStat.value = raceStats.health;
-                    const healthValue = document.getElementById('healthValue');
-                    if (healthValue) healthValue.textContent = raceStats.health;
-                }
-                if (strengthStat) {
-                    strengthStat.value = raceStats.strength;
-                    const strengthValue = document.getElementById('strengthValue');
-                    if (strengthValue) strengthValue.textContent = raceStats.strength;
-                }
-                if (magicStat) {
-                    magicStat.value = raceStats.magic;
-                    const magicValue = document.getElementById('magicValue');
-                    if (magicValue) magicValue.textContent = raceStats.magic;
-                }
-                if (speedStat) {
-                    speedStat.value = raceStats.speed;
-                    const speedValue = document.getElementById('speedValue');
-                    if (speedValue) speedValue.textContent = raceStats.speed;
+                // Apply stats based on user role
+                if (this.userRole === 'admin') {
+                    // Admin users keep max level stats (don't change on race selection)
+                    const healthStat = document.getElementById('healthStat');
+                    const strengthStat = document.getElementById('strengthStat');
+                    const magicStat = document.getElementById('magicStat');
+                    const speedStat = document.getElementById('speedStat');
+                    
+                    if (healthStat) {
+                        healthStat.value = 1000;
+                        const healthValue = document.getElementById('healthValue');
+                        if (healthValue) healthValue.textContent = 1000;
+                    }
+                    if (strengthStat) {
+                        strengthStat.value = 500;
+                        const strengthValue = document.getElementById('strengthValue');
+                        if (strengthValue) strengthValue.textContent = 500;
+                    }
+                    if (magicStat) {
+                        magicStat.value = 800;
+                        const magicValue = document.getElementById('magicValue');
+                        if (magicValue) magicValue.textContent = 800;
+                    }
+                    if (speedStat) {
+                        speedStat.value = 500;
+                        const speedValue = document.getElementById('speedValue');
+                        if (speedValue) speedValue.textContent = 500;
+                    }
+                } else {
+                    // Regular users get race-specific default stats
+                    const raceStats = this.getRaceDefaultStats(this.selectedRace);
+                    const healthStat = document.getElementById('healthStat');
+                    const strengthStat = document.getElementById('strengthStat');
+                    const magicStat = document.getElementById('magicStat');
+                    const speedStat = document.getElementById('speedStat');
+                    
+                    if (healthStat) {
+                        healthStat.value = raceStats.health;
+                        const healthValue = document.getElementById('healthValue');
+                        if (healthValue) healthValue.textContent = raceStats.health;
+                    }
+                    if (strengthStat) {
+                        strengthStat.value = raceStats.strength;
+                        const strengthValue = document.getElementById('strengthValue');
+                        if (strengthValue) strengthValue.textContent = raceStats.strength;
+                    }
+                    if (magicStat) {
+                        magicStat.value = raceStats.magic;
+                        const magicValue = document.getElementById('magicValue');
+                        if (magicValue) magicValue.textContent = raceStats.magic;
+                    }
+                    if (speedStat) {
+                        speedStat.value = raceStats.speed;
+                        const speedValue = document.getElementById('speedValue');
+                        if (speedValue) speedValue.textContent = raceStats.speed;
+                    }
                 }
                 
                 await this.updatePreview();
@@ -222,6 +254,7 @@ export class UI {
         
         // Class selection (WoW-style) - Only 3 starter classes: Warrior, Mage, Healer
         this.selectedClass = 'warrior'; // Default class
+        this.selectedClassRank = null; // Default class rank (null = base class)
         document.querySelectorAll('.wow-class-item').forEach(button => {
             button.addEventListener('click', () => {
                 // Remove selected class from all
@@ -230,6 +263,13 @@ export class UI {
                 button.classList.add('selected');
                 this.selectedClass = button.dataset.class;
                 console.log(`Class selected: ${this.selectedClass}`);
+                
+                // Show class rank dropdown for admin users
+                if (this.userRole === 'admin') {
+                    this.showClassRankDropdown(this.selectedClass);
+                } else {
+                    this.hideClassRankDropdown();
+                }
             });
         });
         
@@ -1248,9 +1288,17 @@ export class UI {
         
         // Set default class selection (Warrior as first starter class)
         this.selectedClass = 'warrior';
+        this.selectedClassRank = null;
         document.querySelectorAll('.wow-class-item').forEach(b => b.classList.remove('selected'));
         const warriorClass = document.querySelector('.wow-class-item[data-class="warrior"]');
         if (warriorClass) warriorClass.classList.add('selected');
+        
+        // Show/hide class rank dropdown for admin users
+        if (this.userRole === 'admin') {
+            this.showClassRankDropdown(this.selectedClass);
+        } else {
+            this.hideClassRankDropdown();
+        }
         
         // Set default character type
         this.characterType = 'new';
@@ -1283,16 +1331,29 @@ export class UI {
         document.getElementById('bodyShape').value = 0.5;
         document.getElementById('bodyShapeValue').textContent = '0.5';
         
-        // Apply race-specific default stats
-        const raceStats = this.getRaceDefaultStats(this.selectedRace);
-        document.getElementById('healthStat').value = raceStats.health;
-        document.getElementById('healthValue').textContent = raceStats.health;
-        document.getElementById('strengthStat').value = raceStats.strength;
-        document.getElementById('strengthValue').textContent = raceStats.strength;
-        document.getElementById('magicStat').value = raceStats.magic;
-        document.getElementById('magicValue').textContent = raceStats.magic;
-        document.getElementById('speedStat').value = raceStats.speed;
-        document.getElementById('speedValue').textContent = raceStats.speed;
+        // Apply stats based on user role
+        if (this.userRole === 'admin') {
+            // Admin users get max level stats
+            document.getElementById('healthStat').value = 1000;
+            document.getElementById('healthValue').textContent = 1000;
+            document.getElementById('strengthStat').value = 500;
+            document.getElementById('strengthValue').textContent = 500;
+            document.getElementById('magicStat').value = 800;
+            document.getElementById('magicValue').textContent = 800;
+            document.getElementById('speedStat').value = 500;
+            document.getElementById('speedValue').textContent = 500;
+        } else {
+            // Regular users get race-specific default stats
+            const raceStats = this.getRaceDefaultStats(this.selectedRace);
+            document.getElementById('healthStat').value = raceStats.health;
+            document.getElementById('healthValue').textContent = raceStats.health;
+            document.getElementById('strengthStat').value = raceStats.strength;
+            document.getElementById('strengthValue').textContent = raceStats.strength;
+            document.getElementById('magicStat').value = raceStats.magic;
+            document.getElementById('magicValue').textContent = raceStats.magic;
+            document.getElementById('speedStat').value = raceStats.speed;
+            document.getElementById('speedValue').textContent = raceStats.speed;
+        }
         
         // Check if this is a new player and show tip (WoW-style)
         this.checkAndShowNewPlayerTip();
@@ -1898,11 +1959,40 @@ export class UI {
         const magicStatInput = document.getElementById('magicStat');
         const speedStatInput = document.getElementById('speedStat');
         
+        // Check if user is admin - if so, use max level stats
+        const isAdmin = this.userRole === 'admin';
+        let finalStats;
+        
+        if (isAdmin) {
+            // Admin users get max level stats regardless of characterType
+            finalStats = {
+                level: 1000,
+                health: 1000,
+                maxHealth: 1000,
+                strength: 500,
+                magic: 800,
+                speed: 500,
+                defense: 100
+            };
+        } else {
+            // Regular users get stats based on characterType
+            finalStats = {
+                level: this.characterType === 'new' ? 1 : (this.characterType === 'dev' ? 500 : 1),
+                health: (healthStatInput && parseInt(healthStatInput.value)) || raceStats.health,
+                maxHealth: (healthStatInput && parseInt(healthStatInput.value)) || raceStats.health,
+                strength: (strengthStatInput && parseInt(strengthStatInput.value)) || raceStats.strength,
+                magic: (magicStatInput && parseInt(magicStatInput.value)) || raceStats.magic,
+                speed: (speedStatInput && parseInt(speedStatInput.value)) || raceStats.speed,
+                defense: raceStats.defense
+            };
+        }
+        
         const characterData = {
             name: (nameInput && nameInput.value) || 'Unnamed Character',
             race: this.selectedRace,
             gender: this.selectedGender,
             class: this.selectedClass || 'warrior',
+            classRank: this.selectedClassRank || null, // Include class rank if selected
             characterType: this.characterType || 'new',
             appearance: {
                 hairColor: (hairColorInput && hairColorInput.value) || '#8B4513',
@@ -1914,15 +2004,7 @@ export class UI {
                 facialFeatures: (facialFeaturesInput && parseInt(facialFeaturesInput.value)) || 0,
                 raceFeatures: (raceFeaturesInput && parseInt(raceFeaturesInput.value)) || 0
             },
-            stats: {
-                level: this.characterType === 'new' ? 1 : (this.characterType === 'dev' ? (this.userRole === 'admin' ? 1000 : 500) : 1),
-                health: (healthStatInput && parseInt(healthStatInput.value)) || raceStats.health,
-                maxHealth: (healthStatInput && parseInt(healthStatInput.value)) || raceStats.health,
-                strength: (strengthStatInput && parseInt(strengthStatInput.value)) || raceStats.strength,
-                magic: (magicStatInput && parseInt(magicStatInput.value)) || raceStats.magic,
-                speed: (speedStatInput && parseInt(speedStatInput.value)) || raceStats.speed,
-                defense: raceStats.defense
-            },
+            stats: finalStats,
             equipment: {
                 weapon: null,
                 armor: null,
@@ -2349,6 +2431,98 @@ export class UI {
         }, 3000);
     }
 
+    /**
+     * Shows the class rank dropdown for admin users
+     * @param {string} baseClass - The base class (warrior, mage, healer)
+     */
+    showClassRankDropdown(baseClass) {
+        const dropdown = document.getElementById('wowClassRankDropdown');
+        const select = document.getElementById('classRankSelect');
+        if (!dropdown || !select) return;
+        
+        dropdown.classList.remove('hidden');
+        this.populateClassRankDropdown(baseClass);
+    }
+    
+    /**
+     * Hides the class rank dropdown
+     */
+    hideClassRankDropdown() {
+        const dropdown = document.getElementById('wowClassRankDropdown');
+        if (dropdown) {
+            dropdown.classList.add('hidden');
+        }
+        this.selectedClassRank = null;
+    }
+    
+    /**
+     * Populates the class rank dropdown with available ranks for the selected class
+     * @param {string} baseClass - The base class (warrior, mage, healer)
+     */
+    populateClassRankDropdown(baseClass) {
+        const select = document.getElementById('classRankSelect');
+        if (!select) return;
+        
+        // Clear existing options (except the base class option)
+        select.innerHTML = '<option value="">Base Class (C-Rank)</option>';
+        
+        // Define class ranks based on the Classes folder structure
+        const classRanks = {
+            warrior: {
+                'C-Rank': ['Warrior'],
+                'B-Rank': ['Knight', 'Berserker', 'Paladin', 'Thief', 'Ranger'],
+                'A-Rank': ['Arch Knight', 'Hunter', 'Warlord', 'Gladiator'],
+                'S-Rank': ['Assassin', 'Demon Hunter', 'Ninja', 'Samurai'],
+                'SS-Rank': ['Death Knight', 'Holy Knight', 'Sword Master', 'Sword Saint', 'Blood Knight'],
+                'SSS-Rank': ['Magic Swordsman', 'Dragon Knight']
+            },
+            mage: {
+                'C-Rank': ['Mage'],
+                'B-Rank': ['Battle Mage', 'Enchanter'],
+                'A-Rank': ['Wizard', 'Witch', 'Warlock', 'Fire Mage', 'Water Mage', 'Wind Mage', 'Earth Mage', 'Light Mage', 'Dark Mage', 'Chronomancer'],
+                'S-Rank': ['Fire Arch Mage', 'Water Arch Mage', 'Wind Arch Mage', 'Earth Arch Mage', 'Light Arch Mage', 'Dark Arch Mage'],
+                'SS-Rank': ['Card Caster', 'Illusionist', 'Shaman', 'Spell Master', 'Sword Caster', 'Vampire'],
+                'SSS-Rank': ['Akashic Caster', 'Omni Caster', 'Spell Breaker', 'Reality Architect']
+            },
+            healer: {
+                'C-Rank': ['Healer'],
+                'B-Rank': ['Cleric', 'Bard'],
+                'A-Rank': ['Priest'],
+                'S-Rank': ['Divine Priest', 'Necromancer', 'Potion Master'],
+                'SS-Rank': ['Angel', 'Demon', 'Druid', 'Monk'],
+                'SSS-Rank': ['Arch Angel', 'Arch Demon', 'Sage', 'Summoner', 'Avatar']
+            }
+        };
+        
+        const ranks = classRanks[baseClass] || {};
+        
+        // Add options grouped by rank
+        Object.keys(ranks).forEach(rankName => {
+            const rankClasses = ranks[rankName];
+            if (rankClasses && rankClasses.length > 0) {
+                // Add optgroup for this rank
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = rankName;
+                rankClasses.forEach(className => {
+                    const option = document.createElement('option');
+                    option.value = `${rankName}:${className}`;
+                    option.textContent = `${className} (${rankName})`;
+                    optgroup.appendChild(option);
+                });
+                select.appendChild(optgroup);
+            }
+        });
+        
+        // Set up event listener for rank selection if not already set up
+        if (!this.classRankSelectListenerAdded) {
+            select.addEventListener('change', (e) => {
+                this.selectedClassRank = e.target.value || null;
+                console.log(`Class rank selected: ${this.selectedClassRank}`);
+            });
+            this.classRankSelectListenerAdded = true;
+        }
+    }
+    
     getRaceDefaultStats(race) {
         const stats = {
             human: { health: 50, strength: 10, magic: 10, speed: 10, defense: 10 },
