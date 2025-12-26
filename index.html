@@ -3906,13 +3906,13 @@
 
         /* Legacy responsive rules removed - now handled by mobile-first approach above */
 
-        /* HUD - MMORPG Style (WoW-inspired bottom-left positioning) */
+        /* HUD - Gothic Style */
         #hud {
             position: absolute;
             top: 15px;
             left: 12px;
-            width: 277px;
-            height: 200px;
+            width: 320px;
+            height: 180px;
             display: none;
             z-index: 150;
         }
@@ -4097,6 +4097,209 @@
             0% { transform: scale(1); }
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
+        }
+
+        /* Gothic HUD Styles */
+        .gothic-hud-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            height: 100%;
+        }
+
+        /* Left Side: Level Hexagon and Crest */
+        .gothic-hud-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .gothic-level-hexagon {
+            width: 80px;
+            height: 92px;
+            position: relative;
+            background: #2a2a2a;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            border: 3px solid #5a5a5a;
+            box-shadow: 
+                0 0 10px rgba(0, 0, 0, 0.8),
+                inset 0 0 20px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(150, 150, 150, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 30% 30%, rgba(100, 100, 100, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(80, 80, 80, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+        }
+
+        .gothic-level-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #d4d4d4;
+            text-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 10px rgba(255, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            letter-spacing: -1px;
+        }
+
+        .gothic-crest {
+            width: 70px;
+            height: 50px;
+            background: #2a2a2a;
+            border: 2px solid #5a5a5a;
+            position: relative;
+            clip-path: polygon(20% 0%, 80% 0%, 100% 30%, 90% 70%, 50% 100%, 10% 70%, 0% 30%);
+            box-shadow: 
+                0 0 8px rgba(0, 0, 0, 0.8),
+                inset 0 0 15px rgba(0, 0, 0, 0.5);
+            background-image: 
+                linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%),
+                radial-gradient(ellipse at center, rgba(150, 150, 150, 0.1) 0%, transparent 70%);
+        }
+
+        .gothic-crest::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(100, 100, 100, 0.2) 0%, transparent 70%);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        /* Right Side: Resource Bars */
+        .gothic-hud-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            height: 100%;
+        }
+
+        .gothic-bar-container {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .gothic-bar-frame {
+            width: 100%;
+            height: 100%;
+            min-height: 45px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #5a5a5a;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 
+                0 0 10px rgba(0, 0, 0, 0.8),
+                inset 0 2px 4px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(150, 150, 150, 0.2);
+        }
+
+        .gothic-bar-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.1) 2px,
+                    rgba(0, 0, 0, 0.1) 4px
+                );
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .gothic-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease;
+            z-index: 1;
+        }
+
+        .gothic-health-fill {
+            background: linear-gradient(90deg, 
+                #1a4a7a 0%,
+                #2a5a9a 30%,
+                #4a90e2 60%,
+                #5aa0f2 100%
+            );
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 0 15px rgba(74, 144, 226, 0.6);
+        }
+
+        .gothic-mana-fill {
+            background: linear-gradient(90deg,
+                #4a1a6a 0%,
+                #6a2a8a 30%,
+                #9a4aca 60%,
+                #aa5ada 100%
+            );
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 0 15px rgba(154, 74, 202, 0.6);
+        }
+
+        .gothic-stamina-fill {
+            background: linear-gradient(90deg,
+                #6a5a1a 0%,
+                #8a7a2a 30%,
+                #caaa4a 60%,
+                #daba5a 100%
+            );
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 0 15px rgba(202, 170, 74, 0.6);
+        }
+
+        .gothic-bar-glow {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 30%;
+            height: 100%;
+            opacity: 0.6;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .gothic-health-glow {
+            background: linear-gradient(90deg, 
+                transparent 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(100, 180, 255, 0.8) 100%
+            );
+        }
+
+        .gothic-mana-glow {
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(200, 100, 255, 0.8) 100%
+            );
+        }
+
+        .gothic-stamina-glow {
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(255, 220, 100, 0.8) 100%
+            );
         }
 
         /* Minimap */
@@ -5312,51 +5515,41 @@
                 </div>
             </div>
 
-            <!-- HUD -->
+            <!-- HUD - Gothic Style -->
             <div id="hud">
-                <!-- Health Bar -->
-                <div class="hud-bar-container">
-                    <div class="hud-bar-icon health-icon">
-                        <i class="fas fa-heart"></i>
+                <div class="gothic-hud-container">
+                    <!-- Left Side: Level Hexagon and Crest -->
+                    <div class="gothic-hud-left">
+                        <div class="gothic-level-hexagon">
+                            <div class="gothic-level-number" id="hudLevel">1000</div>
+                        </div>
+                        <div class="gothic-crest"></div>
                     </div>
-                    <div class="hud-bar-wrapper">
-                        <div class="hud-bar-label">Health</div>
-                        <div class="hud-bar">
-                            <div class="hud-bar-fill health-fill" id="healthBarFill"></div>
-                            <div class="hud-bar-text">
-                                <span id="hudHealth">100</span> / <span id="hudMaxHealth">100</span>
+                    
+                    <!-- Right Side: Resource Bars -->
+                    <div class="gothic-hud-right">
+                        <!-- Health Bar (Top) -->
+                        <div class="gothic-bar-container">
+                            <div class="gothic-bar-frame">
+                                <div class="gothic-bar-fill gothic-health-fill" id="gothicHealthBarFill"></div>
+                                <div class="gothic-bar-glow gothic-health-glow"></div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Magic/Mana Bar -->
-                <div class="hud-bar-container">
-                    <div class="hud-bar-icon magic-icon">
-                        <i class="fas fa-gem"></i>
-                    </div>
-                    <div class="hud-bar-wrapper">
-                        <div class="hud-bar-label">Magic</div>
-                        <div class="hud-bar">
-                            <div class="hud-bar-fill magic-fill" id="magicBarFill"></div>
-                            <div class="hud-bar-text">
-                                <span id="hudMagic">10</span> / <span id="hudMaxMagic">10</span>
+                        
+                        <!-- Mana Bar (Middle) -->
+                        <div class="gothic-bar-container">
+                            <div class="gothic-bar-frame">
+                                <div class="gothic-bar-fill gothic-mana-fill" id="gothicManaBarFill"></div>
+                                <div class="gothic-bar-glow gothic-mana-glow"></div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Stats Row -->
-                <div class="hud-stats-row">
-                    <div class="hud-stat-item">
-                        <i class="fas fa-sword"></i>
-                        <span class="hud-stat-value" id="hudStrength">10</span>
-                    </div>
-                    <div class="hud-stat-item energy-stat-item">
-                        <i class="fas fa-bolt energy-normal" id="energyIcon"></i>
-                        <div class="energy-display">
-                            <span class="hud-stat-value" id="hudEnergy">100</span>
-                            <div class="energy-timer" id="energyTimer">10s</div>
+                        
+                        <!-- Stamina Bar (Bottom) -->
+                        <div class="gothic-bar-container">
+                            <div class="gothic-bar-frame">
+                                <div class="gothic-bar-fill gothic-stamina-fill" id="gothicStaminaBarFill"></div>
+                                <div class="gothic-bar-glow gothic-stamina-glow"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

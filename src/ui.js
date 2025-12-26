@@ -2178,30 +2178,39 @@ export class UI {
 
     updateHUD(characterData) {
         if (characterData) {
+            // Update level (1000 for dev account)
+            const level = characterData.level || characterData.stats?.level || 1000;
+            const levelEl = document.getElementById('hudLevel');
+            if (levelEl) {
+                levelEl.textContent = level.toString();
+            }
+            
             // Update health bar
             const health = characterData.stats.health || 0;
             const maxHealth = characterData.stats.maxHealth || 100;
             const healthPercent = maxHealth > 0 ? (health / maxHealth) * 100 : 0;
             
-            document.getElementById('hudHealth').textContent = health;
-            document.getElementById('hudMaxHealth').textContent = maxHealth;
-            document.getElementById('healthBarFill').style.width = `${healthPercent}%`;
+            const healthBarFill = document.getElementById('gothicHealthBarFill');
+            if (healthBarFill) {
+                healthBarFill.style.width = `${healthPercent}%`;
+            }
             
-            // Update magic bar (using magic stat as current, max is same as magic stat for now)
+            // Update mana bar (using magic stat as current, max is same as magic stat for now)
             const magic = characterData.stats.magic || 0;
             const maxMagic = characterData.stats.magic || 10; // Use magic stat as max for now
             const magicPercent = maxMagic > 0 ? (magic / maxMagic) * 100 : 0;
             
-            document.getElementById('hudMagic').textContent = magic;
-            document.getElementById('hudMaxMagic').textContent = maxMagic;
-            document.getElementById('magicBarFill').style.width = `${magicPercent}%`;
+            const manaBarFill = document.getElementById('gothicManaBarFill');
+            if (manaBarFill) {
+                manaBarFill.style.width = `${magicPercent}%`;
+            }
             
-            // Update stats
-            document.getElementById('hudStrength').textContent = characterData.stats.strength || 10;
-            
-            // Initialize energy display (starts at 100)
-            const energy = characterData.stats.speed || 100;
-            document.getElementById('hudEnergy').textContent = 100;
+            // Update stamina bar (using energy system, starts at 100)
+            const staminaPercent = 100; // Full stamina initially
+            const staminaBarFill = document.getElementById('gothicStaminaBarFill');
+            if (staminaBarFill) {
+                staminaBarFill.style.width = `${staminaPercent}%`;
+            }
         }
     }
     
@@ -2209,30 +2218,12 @@ export class UI {
         if (!character) return;
         
         const energyData = character.getEnergy();
-        const energyIcon = document.getElementById('energyIcon');
-        const energyTimer = document.getElementById('energyTimer');
+        const staminaPercent = energyData.max > 0 ? (energyData.current / energyData.max) * 100 : 0;
         
-        // Update energy value
-        document.getElementById('hudEnergy').textContent = energyData.current;
-        
-        // Update timer display (countdown from 10s to 0s)
-        const timeRemaining = Math.ceil(energyData.regenInterval - energyData.regenTimer);
-        if (energyData.current < energyData.max) {
-            energyTimer.textContent = `${timeRemaining}s`;
-        } else {
-            energyTimer.textContent = '';
-        }
-        
-        // Update icon color based on state
-        if (character.isRunning && character.isMoving) {
-            // Running and depleting - red
-            energyIcon.className = 'fas fa-bolt energy-depleting';
-        } else if (!character.isRunning && energyData.current < energyData.max) {
-            // Regenerating - green
-            energyIcon.className = 'fas fa-bolt energy-regenerating';
-        } else {
-            // Normal state - default color
-            energyIcon.className = 'fas fa-bolt energy-normal';
+        // Update stamina bar fill
+        const staminaBarFill = document.getElementById('gothicStaminaBarFill');
+        if (staminaBarFill) {
+            staminaBarFill.style.width = `${staminaPercent}%`;
         }
     }
 
