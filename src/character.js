@@ -18,11 +18,13 @@ export class Character {
         this.targetPosition = null; // Target position for click-to-move
         this.moveThreshold = 0.1; // Distance threshold to stop moving
         this.baseSpeed = 3.0 * (0.5 + (this.data.stats.speed / 100.0) * 1.5); // Base speed (reduced from 3.5)
-        this.speed = this.baseSpeed; // Current speed (can be modified for running)
+        this.runningSpeed = this.baseSpeed * 1.0; // Running speed (100% of base)
+        this.walkingSpeed = this.runningSpeed * 0.5; // Walking speed is 50% of running speed
+        this.speed = this.walkingSpeed; // Current speed (can be modified for running)
         
-        // Energy system (starts at 100, uses speed stat as max)
-        this.energy = 100;
-        this.maxEnergy = 100;
+        // Energy system (starts at max, uses speed stat as max)
+        this.maxEnergy = this.data.stats.speed || 100;
+        this.energy = this.maxEnergy;
         this.energyDepletionRate = 100 / 300; // Energy per second when running (0.33/sec = 300 seconds/5 minutes from full to empty)
         this.energyRegenRate = 1; // Energy per 10 seconds
         this.energyRegenInterval = 10; // seconds
@@ -755,9 +757,9 @@ export class Character {
         // Set running state and adjust speed
         this.isRunning = isRunning;
         if (isRunning) {
-            this.speed = this.baseSpeed * 1.5;
+            this.speed = this.runningSpeed; // Running at base speed
         } else {
-            this.speed = this.baseSpeed;
+            this.speed = this.walkingSpeed; // Walking at 50% of running speed
         }
         
         this.velocity.x = direction.x * this.speed;
@@ -789,9 +791,9 @@ export class Character {
         
         // Adjust speed for running
         if (isRunning) {
-            this.speed = this.baseSpeed * 1.5;
+            this.speed = this.runningSpeed; // Running at base speed
         } else {
-            this.speed = this.baseSpeed;
+            this.speed = this.walkingSpeed; // Walking at 50% of running speed
         }
         
         // Update animation immediately
@@ -897,7 +899,7 @@ export class Character {
                 // Reached target
                 this.targetPosition = null;
                 this.isRunning = false;
-                this.speed = this.baseSpeed; // Reset to base speed
+                this.speed = this.walkingSpeed; // Reset to walking speed
                 this.velocity.x = 0;
                 this.velocity.z = 0;
                 if (this.isMoving) {
@@ -940,7 +942,7 @@ export class Character {
                 this.energy = 0;
                 // Force stop running if energy depleted
                 this.isRunning = false;
-                this.speed = this.baseSpeed;
+                this.speed = this.walkingSpeed;
                 this.updateAnimation();
             }
         }

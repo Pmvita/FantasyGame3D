@@ -50,16 +50,7 @@ export class Controls {
         document.addEventListener('keyup', (e) => {
             const key = e.key.toLowerCase();
             this.keys[key] = false;
-            
-            // Stop running when movement key is released
-            const movementKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
-            if (movementKeys.includes(key)) {
-                // Check if any movement key is still pressed
-                const anyMovementKeyPressed = movementKeys.some(k => this.keys[k]);
-                if (!anyMovementKeyPressed) {
-                    this.isRunning = false;
-                }
-            }
+            // Running is disabled for keyboard movement, so no need to handle it here
         });
 
         // Mouse controls (WoW-style)
@@ -151,25 +142,8 @@ export class Controls {
     }
 
     handleKeyPress(key) {
-        // Detect double-tap for WASD/Arrow keys to trigger running
-        const movementKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
-        
-        if (movementKeys.includes(key)) {
-            const currentTime = Date.now();
-            const lastPress = this.lastKeyPress[key];
-            
-            // Check if this is a double-tap (same key pressed within doubleTapDelay)
-            if (lastPress && (currentTime - lastPress) < this.doubleTapDelay) {
-                // Double-tap detected - enable running only if enough energy
-                if (this.character && this.character.energy >= this.character.minEnergyToRun) {
-                    this.isRunning = true;
-                }
-                this.lastKeyPress[key] = 0; // Reset to prevent triple-tap
-            } else {
-                // Single tap - normal movement (running will be disabled if key is released)
-                this.lastKeyPress[key] = currentTime;
-            }
-        }
+        // Running is disabled for keyboard movement - only click-to-move can activate running
+        // This function is kept for potential future use but doesn't enable running
     }
 
     update(deltaTime) {
@@ -242,18 +216,12 @@ export class Controls {
                 this.character.mesh.rotation.y += angleDiff * 0.4; // Faster rotation for better responsiveness
             }
             
-            // Check energy before allowing running
-            if (this.isRunning && this.character && this.character.energy < this.character.minEnergyToRun) {
-                this.isRunning = false;
-            }
-            
-            // Move character with running state (in world space direction)
-            this.character.move(moveVector, this.isRunning);
+            // Keyboard movement always uses walking (running disabled for keyboard)
+            // Move character with walking only (isRunning = false)
+            this.character.move(moveVector, false);
         } else {
-            // No movement keys pressed - stop running
-            if (this.isRunning) {
-                this.isRunning = false;
-            }
+            // No movement keys pressed - character will stop automatically
+            // Running is disabled for keyboard movement
         }
     }
 }

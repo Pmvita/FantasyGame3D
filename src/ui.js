@@ -2226,6 +2226,12 @@ export class UI {
                 healthBarFill.style.width = `${healthPercent}%`;
             }
             
+            // Update health bar text
+            const healthBarText = document.getElementById('gothicHealthBarText');
+            if (healthBarText) {
+                healthBarText.textContent = `${health}/${maxHealth}`;
+            }
+            
             // Update mana bar (using magic stat as current, max is same as magic stat for now)
             const magic = characterData.stats.magic || 0;
             const maxMagic = characterData.stats.magic || 10; // Use magic stat as max for now
@@ -2236,11 +2242,48 @@ export class UI {
                 manaBarFill.style.width = `${magicPercent}%`;
             }
             
-            // Update stamina bar (using energy system, starts at 100)
-            const staminaPercent = 100; // Full stamina initially
+            // Update mana bar text
+            const manaBarText = document.getElementById('gothicManaBarText');
+            if (manaBarText) {
+                manaBarText.textContent = `${magic}/${maxMagic}`;
+            }
+            
+            // Update stamina bar (using speed stat as max, energy system for current)
+            const speedStat = characterData.stats.speed || 100;
+            let currentStamina = speedStat;
+            let maxStamina = speedStat;
+            if (this.game && this.game.character) {
+                const energyData = this.game.character.getEnergy();
+                currentStamina = energyData.current || speedStat;
+                maxStamina = energyData.max || speedStat;
+            }
+            const staminaPercent = maxStamina > 0 ? (currentStamina / maxStamina) * 100 : 0;
+            
             const staminaBarFill = document.getElementById('gothicStaminaBarFill');
             if (staminaBarFill) {
                 staminaBarFill.style.width = `${staminaPercent}%`;
+            }
+            
+            // Update stamina bar text
+            const staminaBarText = document.getElementById('gothicStaminaBarText');
+            if (staminaBarText) {
+                staminaBarText.textContent = `${currentStamina}/${maxStamina}`;
+            }
+            
+            // Update strength bar (using strength stat)
+            const strength = characterData.stats.strength || 0;
+            const maxStrength = characterData.stats.strength || 100; // Strength stat is both current and max
+            const strengthPercent = maxStrength > 0 ? 100 : 0; // Always full since it's a stat, not a resource
+            
+            const strengthBarFill = document.getElementById('gothicStrengthBarFill');
+            if (strengthBarFill) {
+                strengthBarFill.style.width = `${strengthPercent}%`;
+            }
+            
+            // Update strength bar text
+            const strengthBarText = document.getElementById('gothicStrengthBarText');
+            if (strengthBarText) {
+                strengthBarText.textContent = `${strength}/${maxStrength}`;
             }
         }
     }
@@ -2255,6 +2298,12 @@ export class UI {
         const staminaBarFill = document.getElementById('gothicStaminaBarFill');
         if (staminaBarFill) {
             staminaBarFill.style.width = `${staminaPercent}%`;
+        }
+        
+        // Update stamina bar text
+        const staminaBarText = document.getElementById('gothicStaminaBarText');
+        if (staminaBarText) {
+            staminaBarText.textContent = `${energyData.current}/${energyData.max}`;
         }
     }
 

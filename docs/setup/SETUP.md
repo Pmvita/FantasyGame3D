@@ -63,10 +63,21 @@ FantasyGame3D/
 
 ## Controls
 
-- **Arrow Keys / WASD**: Move character
-- **Q / E**: Rotate camera
-- **Mouse**: Interact with objects
+### Movement
+- **Arrow Keys / WASD**: Move character (walking speed - 50% of running speed)
+- **Single Click on Map**: Move to location (walking)
+- **Double Click on Map**: Run to location (2x walking speed, consumes energy)
+- **Q / E**: Rotate character left/right
+
+### Camera
+- **Left-click + Drag**: Rotate camera around character
+- **Right-click + Drag**: Rotate both camera and character
+- **Mouse Wheel**: Zoom in/out
+
+### Actions
 - **B Key**: Open inventory
+- **ESC**: Close menus
+- **1-0 Keys**: Activate skills
 - **ESC**: Close menus
 - **1-0 Keys**: Activate skills
 

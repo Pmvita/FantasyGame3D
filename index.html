@@ -4220,7 +4220,7 @@
             display: flex;
             flex-direction: column;
             gap: 0px;
-            height: 76px;
+            height: 100px;
         }
 
         .gothic-bar-container {
@@ -4335,11 +4335,49 @@
             );
         }
 
+        .gothic-bar-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.9),
+                0 0 6px rgba(0, 0, 0, 0.7),
+                0 0 10px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+            z-index: 4;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+        }
+
         .gothic-stamina-glow {
             background: linear-gradient(90deg,
                 transparent 0%,
                 rgba(255, 255, 255, 0.4) 50%,
                 rgba(255, 220, 100, 0.8) 100%
+            );
+        }
+
+        .gothic-strength-fill {
+            background: linear-gradient(90deg,
+                #1a6a2a 0%,
+                #2a8a3a 30%,
+                #4aca5a 60%,
+                #5ada6a 100%
+            );
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 0 15px rgba(74, 202, 90, 0.6);
+        }
+
+        .gothic-strength-glow {
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(100, 255, 150, 0.8) 100%
             );
         }
 
@@ -5574,6 +5612,7 @@
                             <div class="gothic-bar-frame">
                                 <div class="gothic-bar-fill gothic-health-fill" id="gothicHealthBarFill"></div>
                                 <div class="gothic-bar-glow gothic-health-glow"></div>
+                                <div class="gothic-bar-text" id="gothicHealthBarText">1000/1000</div>
                             </div>
                         </div>
                         
@@ -5582,6 +5621,7 @@
                             <div class="gothic-bar-frame">
                                 <div class="gothic-bar-fill gothic-mana-fill" id="gothicManaBarFill"></div>
                                 <div class="gothic-bar-glow gothic-mana-glow"></div>
+                                <div class="gothic-bar-text" id="gothicManaBarText">800/800</div>
                             </div>
                         </div>
                         
@@ -5590,6 +5630,16 @@
                             <div class="gothic-bar-frame">
                                 <div class="gothic-bar-fill gothic-stamina-fill" id="gothicStaminaBarFill"></div>
                                 <div class="gothic-bar-glow gothic-stamina-glow"></div>
+                                <div class="gothic-bar-text" id="gothicStaminaBarText">500/500</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Strength Bar -->
+                        <div class="gothic-bar-container">
+                            <div class="gothic-bar-frame">
+                                <div class="gothic-bar-fill gothic-strength-fill" id="gothicStrengthBarFill"></div>
+                                <div class="gothic-bar-glow gothic-strength-glow"></div>
+                                <div class="gothic-bar-text" id="gothicStrengthBarText">500/500</div>
                             </div>
                         </div>
                     </div>
@@ -5654,23 +5704,24 @@
                         <div class="instruction-section">
                             <h3><i class="fas fa-keyboard"></i> Movement Controls (WoW-style)</h3>
                             <ul>
-                                <li><strong>W / ↑ Arrow:</strong> Move forward (in character's facing direction)</li>
-                                <li><strong>S / ↓ Arrow:</strong> Move backward</li>
-                                <li><strong>A / ← Arrow:</strong> Strafe left (move left while maintaining facing direction)</li>
-                                <li><strong>D / → Arrow:</strong> Strafe right (move right while maintaining facing direction)</li>
-                                <li><strong>Double-tap movement key:</strong> Run (1.5x speed, consumes energy)</li>
+                                <li><strong>W / ↑ Arrow:</strong> Move forward (walking speed)</li>
+                                <li><strong>S / ↓ Arrow:</strong> Move backward (walking speed)</li>
+                                <li><strong>A / ← Arrow:</strong> Strafe left (walking speed)</li>
+                                <li><strong>D / → Arrow:</strong> Strafe right (walking speed)</li>
                                 <li><strong>Q:</strong> Rotate character left</li>
                                 <li><strong>E:</strong> Rotate character right</li>
+                                <li><strong>Note:</strong> Keyboard movement always uses walking speed (50% of running speed)</li>
                             </ul>
                         </div>
                         
                         <div class="instruction-section">
-                            <h3><i class="fas fa-mouse"></i> Camera Controls (WoW-style)</h3>
+                            <h3><i class="fas fa-mouse"></i> Mouse Controls (WoW-style)</h3>
                             <ul>
                                 <li><strong>Left-click + Drag:</strong> Rotate camera around character (camera only)</li>
                                 <li><strong>Right-click + Drag:</strong> Rotate both camera and character together</li>
                                 <li><strong>Mouse Wheel:</strong> Zoom camera in/out</li>
-                                <li><strong>Click:</strong> Interact with objects and create ripple effects</li>
+                                <li><strong>Single Click on Map:</strong> Move to location (walking speed)</li>
+                                <li><strong>Double Click on Map:</strong> Run to location (2x walking speed, consumes energy)</li>
                                 <li><strong>Hover:</strong> Cursor changes when over interactive objects</li>
                             </ul>
                         </div>
@@ -5681,7 +5732,8 @@
                                 <li><strong>B Key:</strong> Open/close inventory</li>
                                 <li><strong>ESC:</strong> Close menus</li>
                                 <li><strong>1-0 Keys:</strong> Activate skills and abilities</li>
-                                <li><strong>Energy System:</strong> Running consumes energy, regenerates over time</li>
+                                <li><strong>Energy System:</strong> Running (double-click on map) consumes energy, regenerates over time</li>
+                                <li><strong>Speed:</strong> Walking speed is 50% of running speed</li>
                             </ul>
                         </div>
                         
@@ -5689,7 +5741,7 @@
                             <h3><i class="fas fa-map"></i> Navigation</h3>
                             <ul>
                                 <li><strong>Minimap:</strong> Top-right corner shows your location</li>
-                                <li><strong>HUD:</strong> Top-left shows health, magic, and item counters</li>
+                                <li><strong>HUD:</strong> Top-left shows level, health, mana, stamina, and strength bars</li>
                             </ul>
                         </div>
                     </div>
