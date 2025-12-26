@@ -385,9 +385,9 @@ export class UI {
         }
         
         // Character selection button in settings menu
-        const characterSelectButton = document.getElementById('characterSelectButton');
-        if (characterSelectButton) {
-            characterSelectButton.addEventListener('click', () => {
+        const characterSelectButtonSettings = document.getElementById('characterSelectButtonSettings');
+        if (characterSelectButtonSettings) {
+            characterSelectButtonSettings.addEventListener('click', () => {
                 this.returnToCharacterSelection();
             });
         }
@@ -1162,6 +1162,9 @@ export class UI {
         characterSelection.classList.remove('hidden');
         characterSelection.style.display = 'flex';
         
+        // Update server population to 0 (no players in game)
+        this.updateServerPopulation(0);
+        
         // Get all elements we need
         const placeholder = document.getElementById('characterPreviewPlaceholder');
         const canvas = document.getElementById('characterSelectionPreviewCanvas');
@@ -1628,6 +1631,13 @@ export class UI {
         // Close settings menu
         this.closeAllMenus();
         
+        // Hide game canvas
+        const gameCanvas = document.getElementById('gameCanvas');
+        if (gameCanvas) {
+            gameCanvas.style.display = 'none';
+            gameCanvas.style.opacity = '0';
+        }
+        
         // Stop the game if running
         if (this.game && this.game.character) {
             // Clean up game state
@@ -2046,7 +2056,20 @@ export class UI {
         const characters = await this.getAllCharacters();
         if (characters[index]) {
             const character = characters[index];
+            // Update server population to 1 (player entering game)
+            this.updateServerPopulation(1);
             this.game.startGame(character);
+        }
+    }
+    
+    /**
+     * Updates the server population display
+     * @param {number} population - Number of players currently in the game
+     */
+    updateServerPopulation(population) {
+        const populationElement = document.getElementById('serverPopulation');
+        if (populationElement) {
+            populationElement.textContent = population.toString();
         }
     }
 

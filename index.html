@@ -172,6 +172,7 @@
             height: 100%;
             overflow: hidden;
             z-index: 1;
+            pointer-events: none; /* Ensure background doesn't block clicks */
         }
         
         .floating-particles {
@@ -238,6 +239,7 @@
         .landing-content {
             position: relative;
             z-index: 2;
+            pointer-events: auto; /* Ensure content is clickable */
             text-align: center;
             padding: 40px;
             max-width: 1400px;
@@ -410,6 +412,8 @@
         /* Call to Action Buttons */
         .landing-cta {
             margin: 60px 0;
+            position: relative;
+            z-index: 500; /* Ensure CTA container is above background elements */
         }
         
         .landing-buttons-container {
@@ -418,6 +422,9 @@
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 501; /* Above CTA container */
+            pointer-events: auto !important;
         }
         
         .landing-cta-button {
@@ -428,13 +435,16 @@
             color: #fff;
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50px;
-            cursor: pointer;
-            overflow: hidden;
+            cursor: pointer !important;
+            overflow: visible;
             transition: all 0.4s ease;
             text-transform: uppercase;
             letter-spacing: 2px;
             min-width: 180px;
             animation: buttonPulse 2s ease-in-out infinite;
+            pointer-events: auto !important;
+            z-index: 500 !important; /* Higher z-index to ensure buttons are on top */
+            user-select: none;
         }
         
         .landing-signup-button {
@@ -486,6 +496,7 @@
             position: relative;
             z-index: 2;
             display: inline-block;
+            pointer-events: auto; /* Ensure text is clickable */
         }
         
         .button-arrow,
@@ -495,6 +506,7 @@
             display: inline-block;
             margin-left: 15px;
             transition: transform 0.3s ease;
+            pointer-events: auto; /* Ensure icons/arrows are clickable */
         }
         
         .landing-cta-button:hover .button-arrow {
@@ -515,6 +527,8 @@
             background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent);
             border-radius: 50%;
             transition: width 0.6s ease, height 0.6s ease;
+            pointer-events: none; /* Allow clicks to pass through to button */
+            z-index: 1; /* Keep behind button text */
         }
         
         .landing-cta-button:hover .button-glow {
@@ -4805,12 +4819,12 @@
                     <!-- Call to Action -->
                     <div class="landing-cta">
                         <div class="landing-buttons-container">
-                            <button id="signUpButton" class="landing-cta-button landing-signup-button">
+                            <button id="signUpButton" class="landing-cta-button landing-signup-button" type="button">
                                 <span class="button-text">Sign Up</span>
                                 <span class="button-icon">✨</span>
                                 <div class="button-glow"></div>
                             </button>
-                            <button id="signInButton" class="landing-cta-button landing-signin-button">
+                            <button id="signInButton" class="landing-cta-button landing-signin-button" type="button">
                                 <span class="button-text">Sign In</span>
                                 <span class="button-arrow">→</span>
                                 <div class="button-glow"></div>
@@ -5034,7 +5048,7 @@
                             </div>
                             <div class="wow-server-item">
                                 <div class="wow-server-label">Population:</div>
-                                <div class="wow-server-value">Medium</div>
+                                <div class="wow-server-value" id="serverPopulation">0</div>
                             </div>
                         </div>
                         
@@ -5384,7 +5398,7 @@
                     <button id="instructionsButton" class="settings-menu-button">
                         <i class="fas fa-book"></i> Instructions
                     </button>
-                    <button id="characterSelectButton" class="settings-menu-button">
+                    <button id="characterSelectButtonSettings" class="settings-menu-button">
                         <i class="fas fa-user"></i> Character Selection
                     </button>
                     <button id="logoutButton" class="settings-menu-button logout-button">
