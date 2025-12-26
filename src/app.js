@@ -90,7 +90,7 @@ class Fantasy3D {
         // Log character selection to server (via console)
         const raceName = (characterData.race || 'human').charAt(0).toUpperCase() + (characterData.race || 'human').slice(1);
         const genderName = (characterData.gender || 'male').charAt(0).toUpperCase() + (characterData.gender || 'male').slice(1);
-        const level = characterData.level || characterData.stats?.level || 1;
+        const level = characterData.stats?.level || characterData.level || 1;
         
         console.log('\n⚔️  === CHARACTER SELECTED - GAME STARTING ===');
         console.log(`👤 Character Name: ${characterData.name || 'Unnamed'}`);

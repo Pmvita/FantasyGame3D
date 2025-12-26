@@ -3,7 +3,7 @@
 
 import { getCollection } from '../../lib/utils/mongodb.js';
 import { ObjectId } from 'mongodb';
-import { validateCharacterData } from '../../lib/utils/validation.js';
+import { validateCharacterData, capLevel } from '../../lib/utils/validation.js';
 import { ValidationError, DatabaseError } from '../../lib/utils/errors.js';
 import { asyncHandler, errorHandler } from '../../lib/middleware/errorHandler.js';
 import { corsMiddleware } from '../../lib/middleware/cors.js';
@@ -42,12 +42,24 @@ async function createCharacterHandler(req, res) {
     }
 
     const userId = decoded.userId;
+    const userRole = decoded.role || 'user'; // Get user role from token
       const characterData = req.body;
 
       // Validate character data
       const validation = validateCharacterData(characterData);
       if (!validation.valid) {
         throw new ValidationError(validation.error);
+      }
+
+      // Cap level based on user role (admin: 1000, user: 500)
+      if (characterData.stats && characterData.stats.level !== undefined) {
+        characterData.stats.level = capLevel(characterData.stats.level, userRole);
+      } else {
+        // If level not provided, default to 1 for new characters
+        if (!characterData.stats) {
+          characterData.stats = {};
+        }
+        characterData.stats.level = 1;
       }
 
       const charactersCollection = await getCollection('characters');

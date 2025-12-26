@@ -3,7 +3,7 @@
 
 import { getCollection } from '../../lib/utils/mongodb.js';
 import { ObjectId } from 'mongodb';
-import { validateCharacterData } from '../../lib/utils/validation.js';
+import { validateCharacterData, capLevel } from '../../lib/utils/validation.js';
 import { ValidationError, NotFoundError, DatabaseError } from '../../lib/utils/errors.js';
 import { asyncHandler, errorHandler } from '../../lib/middleware/errorHandler.js';
 import { corsMiddleware } from '../../lib/middleware/cors.js';
@@ -42,6 +42,7 @@ async function updateCharacterHandler(req, res) {
     }
 
     const userId = decoded.userId;
+    const userRole = decoded.role || 'user'; // Get user role from token
       const characterId = req.query.id || req.body.id;
 
       if (!characterId) {
@@ -70,6 +71,17 @@ async function updateCharacterHandler(req, res) {
       const validation = validateCharacterData(characterData);
       if (!validation.valid) {
         throw new ValidationError(validation.error);
+      }
+
+      // Cap level based on user role (admin: 1000, user: 500)
+      if (characterData.stats && characterData.stats.level !== undefined) {
+        characterData.stats.level = capLevel(characterData.stats.level, userRole);
+      } else if (existingCharacter.stats && existingCharacter.stats.level !== undefined) {
+        // If level not in update but exists in existing character, cap it
+        if (!characterData.stats) {
+          characterData.stats = { ...existingCharacter.stats };
+        }
+        characterData.stats.level = capLevel(existingCharacter.stats.level, userRole);
       }
 
       // Check if name is being changed and if new name already exists

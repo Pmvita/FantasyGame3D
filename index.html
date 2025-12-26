@@ -4105,6 +4105,47 @@
             align-items: flex-start;
             gap: 15px;
             height: 100%;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 3px solid #5a5a5a;
+            border-radius: 8px;
+            box-shadow: 
+                0 0 15px rgba(0, 0, 0, 0.9),
+                inset 0 0 20px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(150, 150, 150, 0.2),
+                inset 0 1px 0 rgba(200, 200, 200, 0.1);
+            position: relative;
+        }
+
+        .gothic-hud-container::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(135deg, 
+                rgba(100, 100, 100, 0.3) 0%,
+                transparent 30%,
+                transparent 70%,
+                rgba(100, 100, 100, 0.3) 100%
+            );
+            border-radius: 8px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .gothic-hud-container::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            right: 3px;
+            bottom: 3px;
+            border: 1px solid rgba(100, 100, 100, 0.2);
+            border-radius: 5px;
+            pointer-events: none;
+            z-index: 1;
         }
 
         /* Left Side: Level Hexagon and Crest */
@@ -4136,14 +4177,14 @@
         }
 
         .gothic-level-number {
-            font-size: 32px;
+            font-size: 16px;
             font-weight: bold;
             color: #d4d4d4;
             text-shadow: 
                 0 2px 4px rgba(0, 0, 0, 0.9),
                 0 0 10px rgba(255, 255, 255, 0.2),
                 inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
         }
 
         .gothic-crest {
@@ -4178,8 +4219,8 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            height: 100%;
+            gap: 0px;
+            height: 76px;
         }
 
         .gothic-bar-container {
@@ -4190,7 +4231,7 @@
         .gothic-bar-frame {
             width: 100%;
             height: 100%;
-            min-height: 45px;
+            min-height: 28px;
             position: relative;
             background: rgba(0, 0, 0, 0.7);
             border: 2px solid #5a5a5a;

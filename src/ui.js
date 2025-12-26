@@ -15,6 +15,7 @@ export class UI {
         this.inventorySystem = null;
         this.skillsSystem = null;
         this.skillCooldowns = {}; // Track cooldowns for each skill slot
+        this.userRole = 'user'; // User role (admin or user) - loaded from auth
         this.setupEventListeners();
         this.initializeInventory();
         this.onboardingStep = 0;
@@ -516,6 +517,18 @@ export class UI {
             // Store username for display (always, regardless of remember checkbox)
             localStorage.setItem('fantasy3DUsername', username);
             
+            // Store user role if present
+            if (response.user && response.user.role) {
+                this.userRole = response.user.role;
+                localStorage.setItem('fantasy3DUserRole', response.user.role);
+            } else if (response.role) {
+                this.userRole = response.role;
+                localStorage.setItem('fantasy3DUserRole', response.role);
+            } else {
+                this.userRole = 'user';
+                localStorage.setItem('fantasy3DUserRole', 'user');
+            }
+            
             // Store remember preference
             if (remember) {
                 localStorage.setItem('fantasy3DRemember', 'true');
@@ -656,6 +669,7 @@ export class UI {
             
             // The verify endpoint returns { userId, username, role } directly, not nested in user
             const username = userData?.username || userData?.user?.username;
+            const role = userData?.role || userData?.user?.role || 'user';
             
             if (userData && username) {
                 // Token is valid, auto-login successful
@@ -663,6 +677,10 @@ export class UI {
                 
                 // Store username for display
                 localStorage.setItem('fantasy3DUsername', username);
+                
+                // Store user role
+                this.userRole = role;
+                localStorage.setItem('fantasy3DUserRole', role);
                 
                 // Clear logged out flag since we successfully auto-logged in
                 localStorage.removeItem('fantasy3DLoggedOut');
@@ -955,6 +973,10 @@ export class UI {
                     // Store username for display
                     localStorage.setItem('fantasy3DUsername', username);
                     
+                    // Store user role (new users default to 'user')
+                    this.userRole = loginResponse.user?.role || loginResponse.role || 'user';
+                    localStorage.setItem('fantasy3DUserRole', this.userRole);
+                    
                     // Clear logged out flag since user just registered and logged in
                     localStorage.removeItem('fantasy3DLoggedOut');
                     
@@ -1072,6 +1094,14 @@ export class UI {
         const mainMenu = document.getElementById('mainMenu');
         mainMenu.classList.remove('hidden');
         mainMenu.style.display = 'flex';
+        
+        // Load user role from localStorage if not already set
+        if (!this.userRole || this.userRole === 'user') {
+            const storedRole = localStorage.getItem('fantasy3DUserRole');
+            if (storedRole) {
+                this.userRole = storedRole;
+            }
+        }
         
         // Update username display
         this.updateMainMenuUsername();
@@ -1885,6 +1915,7 @@ export class UI {
                 raceFeatures: (raceFeaturesInput && parseInt(raceFeaturesInput.value)) || 0
             },
             stats: {
+                level: this.characterType === 'new' ? 1 : (this.characterType === 'dev' ? (this.userRole === 'admin' ? 1000 : 500) : 1),
                 health: (healthStatInput && parseInt(healthStatInput.value)) || raceStats.health,
                 maxHealth: (healthStatInput && parseInt(healthStatInput.value)) || raceStats.health,
                 strength: (strengthStatInput && parseInt(strengthStatInput.value)) || raceStats.strength,
@@ -2178,11 +2209,11 @@ export class UI {
 
     updateHUD(characterData) {
         if (characterData) {
-            // Update level (1000 for dev account)
-            const level = characterData.level || characterData.stats?.level || 1000;
+            // Update level from database (stats.level)
+            const level = characterData.stats?.level || characterData.level || 1;
             const levelEl = document.getElementById('hudLevel');
             if (levelEl) {
-                levelEl.textContent = level.toString();
+                levelEl.textContent = `Lv. ${level.toString()}`;
             }
             
             // Update health bar
