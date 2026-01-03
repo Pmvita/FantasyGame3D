@@ -48,7 +48,7 @@ export class UI {
             // Set initial state
             toggleAutoRotateBtn.classList.add('active'); // Auto-rotate enabled by default
         }
-        
+
         // Reset camera
         const resetCameraBtn = document.getElementById('resetCamera');
         if (resetCameraBtn && this.characterPreview) {
@@ -62,7 +62,7 @@ export class UI {
             });
         }
     }
-    
+
     setupEventListeners() {
         // Landing page buttons
         const signUpButton = document.getElementById('signUpButton');
@@ -75,7 +75,7 @@ export class UI {
                 }, 800);
             });
         }
-        
+
         const signInButton = document.getElementById('signInButton');
         if (signInButton) {
             signInButton.addEventListener('click', () => {
@@ -83,7 +83,7 @@ export class UI {
                 this.showLoginScreen();
             });
         }
-        
+
         // Login screen buttons
         document.getElementById('loginButton').addEventListener('click', () => {
             this.handleLogin();
@@ -170,12 +170,12 @@ export class UI {
                 // Add to clicked
                 button.classList.add('selected');
                 this.selectedRace = button.dataset.race;
-                
+
                 console.log(`Race selected: ${this.selectedRace}`);
-                
+
                 // Update race-specific features UI
                 this.updateRaceSpecificFeatures();
-                
+
                 // Apply stats based on user role
                 if (this.userRole === 'admin') {
                     // Admin users keep max level stats (don't change on race selection)
@@ -183,7 +183,7 @@ export class UI {
                     const strengthStat = document.getElementById('strengthStat');
                     const magicStat = document.getElementById('magicStat');
                     const speedStat = document.getElementById('speedStat');
-                    
+
                     if (healthStat) {
                         healthStat.value = 1000;
                         const healthValue = document.getElementById('healthValue');
@@ -211,7 +211,7 @@ export class UI {
                     const strengthStat = document.getElementById('strengthStat');
                     const magicStat = document.getElementById('magicStat');
                     const speedStat = document.getElementById('speedStat');
-                    
+
                     if (healthStat) {
                         healthStat.value = raceStats.health;
                         const healthValue = document.getElementById('healthValue');
@@ -233,7 +233,7 @@ export class UI {
                         if (speedValue) speedValue.textContent = raceStats.speed;
                     }
                 }
-                
+
                 await this.updatePreview();
             });
         });
@@ -246,12 +246,12 @@ export class UI {
                 // Add to clicked
                 button.classList.add('selected');
                 this.selectedGender = button.dataset.gender;
-                
+
                 console.log(`Gender selected: ${this.selectedGender}`);
                 await this.updatePreview();
             });
         });
-        
+
         // Class selection (WoW-style) - Only 3 starter classes: Warrior, Mage, Healer
         this.selectedClass = 'warrior'; // Default class
         this.selectedClassRank = null; // Default class rank (null = base class)
@@ -263,21 +263,21 @@ export class UI {
                 button.classList.add('selected');
                 this.selectedClass = button.dataset.class;
                 console.log(`Class selected: ${this.selectedClass}`);
-                
+
                 // Show class rank dropdown for admin users
                 if (this.userRole === 'admin') {
                     this.showClassRankDropdown(this.selectedClass);
                 } else {
                     this.hideClassRankDropdown();
                 }
-                
+
                 // Update character preview to show class equipment
                 if (this.characterPreview) {
                     this.updateCharacterPreview();
                 }
             });
         });
-        
+
         // Character type selection
         this.characterType = 'new'; // Default: New Level 1
         document.querySelectorAll('.wow-type-button').forEach(button => {
@@ -288,10 +288,10 @@ export class UI {
                 console.log(`Character type selected: ${this.characterType}`);
             });
         });
-        
+
         // Save button is now in the footer (replaced customize button)
         // The saveCharacterButton event listener is already set up below
-        
+
         // Back button
         const backBtn = document.getElementById('wowBackButton');
         if (backBtn) {
@@ -299,7 +299,7 @@ export class UI {
                 this.showMainMenu();
             });
         }
-        
+
         // More Info button
         const moreInfoBtn = document.getElementById('wowMoreInfoButton');
         if (moreInfoBtn) {
@@ -363,7 +363,7 @@ export class UI {
                 this.saveCharacter();
             });
         }
-        
+
         // Also allow saving via Enter key in name input
         const nameInput = document.getElementById('characterName');
         if (nameInput) {
@@ -380,7 +380,7 @@ export class UI {
                 this.showMainMenu();
             });
         }
-        
+
         // Save button in customization panel
         const customSaveBtn = document.getElementById('wowCustomSaveButton');
         if (customSaveBtn) {
@@ -413,7 +413,7 @@ export class UI {
         document.getElementById('settingsButton').addEventListener('click', () => {
             this.toggleSettings();
         });
-        
+
         // Instructions button in settings menu
         const instructionsButton = document.getElementById('instructionsButton');
         if (instructionsButton) {
@@ -421,7 +421,7 @@ export class UI {
                 this.showInstructionsModal();
             });
         }
-        
+
         // Character selection button in settings menu
         const characterSelectButtonSettings = document.getElementById('characterSelectButtonSettings');
         if (characterSelectButtonSettings) {
@@ -429,7 +429,7 @@ export class UI {
                 this.returnToCharacterSelection();
             });
         }
-        
+
         // Logout button in settings menu
         const logoutButtonFromSettings = document.getElementById('logoutButton');
         if (logoutButtonFromSettings) {
@@ -437,7 +437,7 @@ export class UI {
                 this.handleLogout();
             });
         }
-        
+
         // Close instructions modal button
         const closeInstructionsButton = document.getElementById('closeInstructionsButton');
         if (closeInstructionsButton) {
@@ -445,7 +445,7 @@ export class UI {
                 this.hideInstructionsModal();
             });
         }
-        
+
         // Close instructions modal when clicking outside
         const instructionsModal = document.getElementById('instructionsModal');
         if (instructionsModal) {
@@ -460,8 +460,8 @@ export class UI {
         document.addEventListener('click', (e) => {
             const settingsMenu = document.getElementById('settingsMenu');
             const settingsButton = document.getElementById('settingsButton');
-            if (settingsMenu && settingsButton && 
-                !settingsMenu.contains(e.target) && 
+            if (settingsMenu && settingsButton &&
+                !settingsMenu.contains(e.target) &&
                 !settingsButton.contains(e.target) &&
                 settingsMenu.style.display !== 'none') {
                 settingsMenu.style.display = 'none';
@@ -477,8 +477,8 @@ export class UI {
         document.addEventListener('click', (e) => {
             const inventoryMenu = document.getElementById('inventoryMenu');
             const inventoryButton = document.getElementById('inventoryButton');
-            if (inventoryMenu && inventoryButton && 
-                !inventoryMenu.contains(e.target) && 
+            if (inventoryMenu && inventoryButton &&
+                !inventoryMenu.contains(e.target) &&
                 !inventoryButton.contains(e.target) &&
                 inventoryMenu.style.display !== 'none') {
                 inventoryMenu.style.display = 'none';
@@ -553,7 +553,7 @@ export class UI {
 
             // Store username for display (always, regardless of remember checkbox)
             localStorage.setItem('fantasy3DUsername', username);
-            
+
             // Store user role if present
             if (response.user && response.user.role) {
                 this.userRole = response.user.role;
@@ -565,7 +565,7 @@ export class UI {
                 this.userRole = 'user';
                 localStorage.setItem('fantasy3DUserRole', 'user');
             }
-            
+
             // Store remember preference
             if (remember) {
                 localStorage.setItem('fantasy3DRemember', 'true');
@@ -575,21 +575,21 @@ export class UI {
 
             // Clear logged out flag since user just logged in
             localStorage.removeItem('fantasy3DLoggedOut');
-            
+
             // Ensure token is stored (should already be done by authAPI.login)
             const { getToken, setToken } = await import('./api/client.js');
             if (response.token) {
                 setToken(response.token);
                 console.log('✅ Token stored in localStorage');
             }
-            
+
             // Verify token was actually stored
             const storedToken = getToken();
             if (!storedToken) {
                 console.error('❌ Token was not stored! This is a critical error.');
                 throw new Error('Failed to store authentication token. Please try again.');
             }
-            
+
             console.log('✅ Login successful! Token stored:', storedToken.substring(0, 20) + '...');
             console.log('✅ User will stay logged in on page refresh');
 
@@ -617,12 +617,14 @@ export class UI {
         if (landingPage) {
             landingPage.classList.remove('hidden');
             landingPage.style.display = 'flex';
-            
+            // Reset animation to fadeIn
+            landingPage.style.animation = 'fadeIn 1s ease-in';
+
             // Animate stats counter
             this.animateStats();
         }
     }
-    
+
     hideLandingPage() {
         const landingPage = document.getElementById('landingPage');
         if (landingPage) {
@@ -633,7 +635,7 @@ export class UI {
             }, 800);
         }
     }
-    
+
     animateStats() {
         const statNumbers = document.querySelectorAll('.stat-number');
         statNumbers.forEach(stat => {
@@ -641,7 +643,7 @@ export class UI {
             const duration = 2000; // 2 seconds
             const increment = target / (duration / 16); // 60fps
             let current = 0;
-            
+
             const updateStat = () => {
                 current += increment;
                 if (current < target) {
@@ -651,22 +653,22 @@ export class UI {
                     stat.textContent = target.toLocaleString();
                 }
             };
-            
+
             updateStat();
         });
     }
-    
+
     showLoginScreen() {
         // Hide landing page if visible
         this.hideLandingPage();
-        
+
         // Show login screen with delay for smooth transition
         setTimeout(() => {
             document.getElementById('loginScreen').classList.remove('hidden');
             // Load saved username if exists
             const savedUsername = localStorage.getItem('fantasy3DUsername');
             const remember = localStorage.getItem('fantasy3DRemember') === 'true';
-            
+
             if (savedUsername) {
                 document.getElementById('usernameInput').value = savedUsername;
                 document.getElementById('rememberCheckbox').checked = remember;
@@ -682,7 +684,7 @@ export class UI {
      */
     async checkAutoLogin() {
         console.log('🔍 Checking for auto-login...');
-        
+
         // Check if user explicitly logged out (don't auto-login)
         const loggedOut = localStorage.getItem('fantasy3DLoggedOut');
         if (loggedOut === 'true') {
@@ -695,7 +697,7 @@ export class UI {
             console.log('❌ No token found in localStorage, showing login screen');
             return false;
         }
-        
+
         console.log('✅ Token found:', token.substring(0, 20) + '...');
 
         try {
@@ -703,34 +705,34 @@ export class UI {
             console.log('🔐 Verifying token...');
             const { verifyToken } = await import('./api/auth.js');
             const userData = await verifyToken();
-            
+
             // The verify endpoint returns { userId, username, role } directly, not nested in user
             const username = userData?.username || userData?.user?.username;
             const role = userData?.role || userData?.user?.role || 'user';
-            
+
             if (userData && username) {
                 // Token is valid, auto-login successful
                 console.log('✅ Auto-login successful for user:', username);
-                
+
                 // Store username for display
                 localStorage.setItem('fantasy3DUsername', username);
-                
+
                 // Store user role
                 this.userRole = role;
                 localStorage.setItem('fantasy3DUserRole', role);
-                
+
                 // Clear logged out flag since we successfully auto-logged in
                 localStorage.removeItem('fantasy3DLoggedOut');
-                
+
                 // Check for LocalStorage characters to migrate
                 await this.checkForLocalStorageMigration();
-                
+
                 // Hide login screen (no transition for auto-login)
                 this.hideLoginScreen(false);
-                
+
                 // Show main menu
                 this.showMainMenu();
-                
+
                 return true;
             } else {
                 console.error('❌ Auto-login failed: Invalid user data returned from verifyToken');
@@ -755,14 +757,14 @@ export class UI {
     hideLoginScreen(useTransition = false) {
         const loginScreen = document.getElementById('loginScreen');
         const gameCanvas = document.getElementById('gameCanvas');
-        
+
         if (useTransition) {
             // Trigger WoW-style transition animation
             this.playWowTransition(() => {
                 // After transition completes, hide login screen
                 loginScreen.classList.add('hidden');
                 loginScreen.classList.remove('transitioning');
-                
+
                 // Fade in game canvas
                 if (gameCanvas) {
                     gameCanvas.classList.add('fadeIn');
@@ -781,7 +783,7 @@ export class UI {
     playWowTransition(callback) {
         const loginScreen = document.getElementById('loginScreen');
         const gameContainer = document.getElementById('gameContainer');
-        
+
         if (!loginScreen) {
             if (callback) callback();
             return;
@@ -820,28 +822,28 @@ export class UI {
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.className = 'wow-particle';
-            
+
             // Random position around center
             const angle = (Math.PI * 2 * i) / particleCount;
             const distance = 100 + Math.random() * 200;
             const startX = window.innerWidth / 2 + Math.cos(angle) * 50;
             const startY = window.innerHeight / 2 + Math.sin(angle) * 50;
-            
+
             // Random end position
             const endX = (Math.random() - 0.5) * window.innerWidth;
             const endY = (Math.random() - 0.5) * window.innerHeight - 100;
-            
+
             particle.style.left = startX + 'px';
             particle.style.top = startY + 'px';
             particle.style.background = colors[Math.floor(Math.random() * colors.length)];
             particle.style.setProperty('--particle-x', endX + 'px');
             particle.style.setProperty('--particle-y', endY + 'px');
-            
+
             // Random delay for staggered effect
             particle.style.animationDelay = (Math.random() * 0.5) + 's';
-            
+
             document.body.appendChild(particle);
-            
+
             // Remove particle after animation
             setTimeout(() => {
                 if (particle.parentNode) {
@@ -1006,23 +1008,23 @@ export class UI {
                 try {
                     // Login with the new credentials
                     const loginResponse = await authAPI.login(username, password);
-                    
+
                     // Store username for display
                     localStorage.setItem('fantasy3DUsername', username);
-                    
+
                     // Store user role (new users default to 'user')
                     this.userRole = loginResponse.user?.role || loginResponse.role || 'user';
                     localStorage.setItem('fantasy3DUserRole', this.userRole);
-                    
+
                     // Clear logged out flag since user just registered and logged in
                     localStorage.removeItem('fantasy3DLoggedOut');
-                    
+
                     // Ensure token is stored
                     if (loginResponse.token) {
                         const { setToken } = await import('./api/client.js');
                         setToken(loginResponse.token);
                     }
-                    
+
                     console.log('✅ Registration and login successful. User will stay logged in on refresh.');
 
                     // Check for LocalStorage migration
@@ -1074,7 +1076,7 @@ export class UI {
 
             // Check if user already has characters in MongoDB
             const cloudCharacters = await charactersAPI.getCharacters();
-            
+
             if (cloudCharacters.length > 0) {
                 // User already has cloud characters, ask if they want to merge
                 const shouldMerge = confirm(
@@ -1131,7 +1133,7 @@ export class UI {
         const mainMenu = document.getElementById('mainMenu');
         mainMenu.classList.remove('hidden');
         mainMenu.style.display = 'flex';
-        
+
         // Load user role from localStorage if not already set
         if (!this.userRole || this.userRole === 'user') {
             const storedRole = localStorage.getItem('fantasy3DUserRole');
@@ -1139,10 +1141,10 @@ export class UI {
                 this.userRole = storedRole;
             }
         }
-        
+
         // Update username display
         this.updateMainMenuUsername();
-        
+
         // Check if we should show onboarding (only for new users)
         const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
         const hasCharacters = localStorage.getItem('fantasy3DCharacters') || getToken();
@@ -1181,10 +1183,10 @@ export class UI {
 
     async handleLogout() {
         console.log('User logging out...');
-        
+
         // Close all menus
         this.closeAllMenus();
-        
+
         // Stop the game if running
         if (this.game && this.game.character) {
             // Clean up game state
@@ -1198,23 +1200,24 @@ export class UI {
                 this.game.character = null;
             }
         }
-        
+
         // Set logged out flag to prevent auto-login
         localStorage.setItem('fantasy3DLoggedOut', 'true');
-        
+
         // Clear token
         const { removeToken } = await import('./api/client.js');
         removeToken();
-        
+
         // Clear username
         localStorage.removeItem('fantasy3DUsername');
-        
+
         console.log('✅ Logged out. User will need to log in again on next visit.');
-        
-        // Hide all menus and show login screen
+
+        // Hide all menus and show landing page
         this.hideAllMenus();
-        this.showLoginScreen();
-        
+        this.hideLoginScreen();
+        this.showLandingPage();
+
         // Clear any error messages
         const errorMessage = document.getElementById('errorMessage');
         if (errorMessage) {
@@ -1228,31 +1231,31 @@ export class UI {
         const characterSelection = document.getElementById('characterSelection');
         characterSelection.classList.remove('hidden');
         characterSelection.style.display = 'flex';
-        
+
         // Update server population to 0 (no players in game)
         this.updateServerPopulation(0);
-        
+
         // Get all elements we need
         const placeholder = document.getElementById('characterPreviewPlaceholder');
         const canvas = document.getElementById('characterSelectionPreviewCanvas');
         const infoPanel = document.getElementById('wowCharacterInfo');
         const enterWorldBtn = document.getElementById('enterWorldButton');
         const deleteBtn = document.getElementById('deleteCharacterButton');
-        
+
         // Reset preview placeholder
         if (placeholder) placeholder.style.display = 'flex';
         if (canvas) canvas.style.display = 'none';
-        
+
         // Clear any selected character cards (WoW-style)
         document.querySelectorAll('.wow-character-card').forEach(card => {
             card.classList.remove('selected');
         });
-        
+
         // Hide character info panel and buttons
         if (infoPanel) infoPanel.classList.add('hidden');
         if (enterWorldBtn) enterWorldBtn.style.display = 'none';
         if (deleteBtn) deleteBtn.style.display = 'none';
-        
+
         this.selectedCharacterIndex = null;
         await this.loadCharacterList();
     }
@@ -1262,54 +1265,54 @@ export class UI {
         const characterCreation = document.getElementById('characterCreation');
         characterCreation.classList.remove('hidden');
         characterCreation.style.display = 'flex';
-        
+
         // Initialize preview if not already created
         if (!this.characterPreview) {
             this.characterPreview = new CharacterPreview('characterPreviewCanvas');
         }
-        
+
         // Setup character preview controls
         this.setupCharacterPreviewControls();
-        
+
         // Set default race selection (WoW-style)
         this.selectedRace = 'human';
         document.querySelectorAll('.wow-race-item').forEach(b => b.classList.remove('selected'));
         const humanRace = document.querySelector('.wow-race-item[data-race="human"]');
         if (humanRace) humanRace.classList.add('selected');
-        
+
         // Set default gender selection (WoW-style)
         this.selectedGender = 'male';
         document.querySelectorAll('.wow-gender-icon').forEach(b => b.classList.remove('selected'));
         const maleGender = document.getElementById('genderMale');
         if (maleGender) maleGender.classList.add('selected');
-        
+
         // Set default class selection (Warrior as first starter class)
         this.selectedClass = 'warrior';
         this.selectedClassRank = null;
         document.querySelectorAll('.wow-class-item').forEach(b => b.classList.remove('selected'));
         const warriorClass = document.querySelector('.wow-class-item[data-class="warrior"]');
         if (warriorClass) warriorClass.classList.add('selected');
-        
+
         // Show/hide class rank dropdown for admin users
         if (this.userRole === 'admin') {
             this.showClassRankDropdown(this.selectedClass);
         } else {
             this.hideClassRankDropdown();
         }
-        
+
         // Set default character type
         this.characterType = 'new';
         document.querySelectorAll('.wow-type-button').forEach(b => b.classList.remove('selected'));
         const newType = document.getElementById('charTypeNew');
         if (newType) newType.classList.add('selected');
-        
+
         // Hide customization panel by default
         const customPanel = document.getElementById('wowCustomizationPanel');
         if (customPanel) customPanel.classList.add('hidden');
-        
+
         // Update race-specific features UI
         this.updateRaceSpecificFeatures();
-        
+
         // Reset form to defaults
         document.getElementById('characterName').value = '';
         document.getElementById('hairColor').value = '#8B4513';
@@ -1327,7 +1330,7 @@ export class UI {
         document.getElementById('skinToneValue').textContent = '0.5';
         document.getElementById('bodyShape').value = 0.5;
         document.getElementById('bodyShapeValue').textContent = '0.5';
-        
+
         // Apply stats based on user role
         if (this.userRole === 'admin') {
             // Admin users get max level stats
@@ -1351,10 +1354,10 @@ export class UI {
             document.getElementById('speedStat').value = raceStats.speed;
             document.getElementById('speedValue').textContent = raceStats.speed;
         }
-        
+
         // Check if this is a new player and show tip (WoW-style)
         this.checkAndShowNewPlayerTip();
-        
+
         // Update preview with initial values - use setTimeout to ensure canvas is visible
         // Use requestAnimationFrame to ensure DOM is ready
         requestAnimationFrame(() => {
@@ -1369,7 +1372,7 @@ export class UI {
     checkAndShowNewPlayerTip() {
         const hasCreatedCharacter = localStorage.getItem('hasCreatedCharacter');
         const tipElement = document.getElementById('newPlayerTip');
-        
+
         if (!hasCreatedCharacter && tipElement) {
             // Show tip for new players
             tipElement.style.display = 'block';
@@ -1448,7 +1451,7 @@ export class UI {
         const prevBtn = document.getElementById(prevId);
         const nextBtn = document.getElementById(nextId);
         const valueDisplay = document.getElementById(valueId);
-        
+
         if (!slider || !prevBtn || !nextBtn || !valueDisplay) return;
 
         prevBtn.addEventListener('click', () => {
@@ -1475,7 +1478,7 @@ export class UI {
             console.error('Character preview not initialized!');
             return;
         }
-        
+
         const hairColor = document.getElementById('hairColor')?.value || '#8B4513';
         const eyeColor = document.getElementById('eyeColor')?.value || '#4A90E2';
         const skinTone = parseFloat(document.getElementById('skinTone')?.value || 0.5);
@@ -1483,7 +1486,7 @@ export class UI {
         const hairStyle = parseInt(document.getElementById('hairStyle')?.value || 0);
         const facialFeatures = parseInt(document.getElementById('facialFeatures')?.value || 0);
         const raceFeatures = parseInt(document.getElementById('raceFeatures')?.value || 0);
-        
+
         console.log('Updating character preview:', {
             race: this.selectedRace,
             gender: this.selectedGender,
@@ -1492,15 +1495,15 @@ export class UI {
             faceType,
             hairStyle
         });
-        
+
         try {
             await this.characterPreview.updateCharacter(
-                this.selectedRace || 'human', 
-                this.selectedGender || 'male', 
-                hairColor, 
-                skinTone, 
-                faceType, 
-                hairStyle, 
+                this.selectedRace || 'human',
+                this.selectedGender || 'male',
+                hairColor,
+                skinTone,
+                faceType,
+                hairStyle,
                 facialFeatures,
                 eyeColor,
                 raceFeatures,
@@ -1512,7 +1515,7 @@ export class UI {
             console.error('Error updating character preview:', error);
         }
     }
-    
+
     /**
      * Wrapper method for updating character preview (called from event listeners)
      */
@@ -1532,18 +1535,18 @@ export class UI {
             'Zephyr', 'Alara', 'Brienne', 'Celeste', 'Dara', 'Elara', 'Fiona', 'Gwen',
             'Hazel', 'Iris', 'Jade', 'Kira', 'Luna', 'Mara', 'Nyx', 'Opal'
         ];
-        
+
         const lastNameList = [
             'Stoneheart', 'Shadowbane', 'Brightblade', 'Stormwind', 'Ironforge',
             'Moonwhisper', 'Dawnbreaker', 'Nightshade', 'Goldleaf', 'Silverwing',
             'Darkthorn', 'Lightbringer', 'Firebrand', 'Icewind', 'Starweaver',
             'Thunderclap', 'Frostweaver', 'Emberheart', 'Willowbrook', 'Ravenwood'
         ];
-        
+
         const firstName = firstNameList[Math.floor(Math.random() * firstNameList.length)];
         const lastName = lastNameList[Math.floor(Math.random() * lastNameList.length)];
         const randomName = `${firstName} ${lastName}`;
-        
+
         nameInput.value = randomName;
     }
 
@@ -1555,16 +1558,16 @@ export class UI {
         const labelText = document.getElementById('raceFeaturesLabelText');
         const typeText = document.getElementById('raceFeaturesType');
         const container = document.getElementById('raceFeaturesContainer');
-        
+
         if (!label || !container) return;
-        
+
         const raceFeatures = {
             human: { label: 'Tattoos', show: true },
             elf: { label: 'Markings', show: true },
             dwarf: { label: 'Beard Style', show: true },
             demon: { label: 'Horn Style', show: true }
         };
-        
+
         const feature = raceFeatures[this.selectedRace];
         if (feature && feature.show) {
             label.style.display = 'block';
@@ -1583,33 +1586,33 @@ export class UI {
         document.getElementById('skillsSection').style.display = 'flex';
         document.getElementById('inventoryButton').style.display = 'flex';
         document.getElementById('minimapContainer').style.display = 'block';
-        
+
         // Ensure game canvas is visible
         const gameCanvas = document.getElementById('gameCanvas');
         if (gameCanvas) {
             gameCanvas.classList.add('fadeIn');
             gameCanvas.style.opacity = '1'; // Force visible immediately
         }
-        
+
         // Initialize inventory and skills systems
         if (this.game.character) {
             this.inventorySystem = new InventorySystem(this.game.character);
             this.skillsSystem = new SkillsSystem(this.game.character);
         }
-        
+
         // Setup click handlers for skill slots
         this.setupSkillSlotClicks();
     }
-    
+
     setupSkillSlotClicks() {
         // Get all skill slots (excluding auto-attack)
         const skillSlots = document.querySelectorAll('.skill-slot[data-slot]:not([data-slot="auto"])');
-        
+
         skillSlots.forEach(slot => {
             slot.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent event bubbling
                 const slotIdentifier = slot.dataset.slot;
-                
+
                 // Handle numeric slots (1-0) and string slots (potion1, potion2, elixir1, elixir2)
                 let skillKey = null;
                 if (slotIdentifier === '0') {
@@ -1620,28 +1623,28 @@ export class UI {
                     // Handle potion/elixir slots (potion1, potion2, elixir1, elixir2)
                     skillKey = slotIdentifier;
                 }
-                
+
                 if (skillKey !== null) {
                     this.activateSkill(skillKey);
                 }
             });
         });
     }
-    
+
     activateSkill(skillKey) {
         if (!this.game || !this.game.character) return;
-        
+
         // Check if skill is on cooldown
         if (this.isSkillOnCooldown(skillKey)) {
             return; // Don't activate if on cooldown
         }
-        
+
         // Start cooldown
         this.startSkillCooldown(skillKey);
-        
+
         // Trigger mystical animation on the corresponding skill slot
         this.triggerSkillAnimation(skillKey);
-        
+
         // Only use skills system for numeric slots (1-0)
         if (this.skillsSystem && typeof skillKey === 'number') {
             this.skillsSystem.useSkill(skillKey);
@@ -1658,7 +1661,7 @@ export class UI {
             landingPage.style.display = 'none';
             landingPage.classList.add('hidden');
         }
-        
+
         const mainMenu = document.getElementById('mainMenu');
         if (mainMenu) {
             mainMenu.style.display = 'none';
@@ -1707,7 +1710,7 @@ export class UI {
         document.getElementById('inventoryMenu').style.display = 'none';
         this.hideInstructionsModal();
     }
-    
+
     showInstructionsModal() {
         const instructionsModal = document.getElementById('instructionsModal');
         if (instructionsModal) {
@@ -1716,25 +1719,25 @@ export class UI {
             this.toggleSettings();
         }
     }
-    
+
     hideInstructionsModal() {
         const instructionsModal = document.getElementById('instructionsModal');
         if (instructionsModal) {
             instructionsModal.style.display = 'none';
         }
     }
-    
+
     returnToCharacterSelection() {
         // Close settings menu
         this.closeAllMenus();
-        
+
         // Hide game canvas
         const gameCanvas = document.getElementById('gameCanvas');
         if (gameCanvas) {
             gameCanvas.style.display = 'none';
             gameCanvas.style.opacity = '0';
         }
-        
+
         // Stop the game if running
         if (this.game && this.game.character) {
             // Clean up game state
@@ -1748,7 +1751,7 @@ export class UI {
                 this.game.character = null;
             }
         }
-        
+
         // Show character selection screen
         this.showCharacterSelection();
     }
@@ -1787,17 +1790,17 @@ export class UI {
             console.error('Character list container not found');
             return;
         }
-        
+
         list.innerHTML = '';
 
         const characters = await this.getAllCharacters();
-        
+
         // Update character slots display
         const slotsUsed = document.getElementById('wowSlotsUsed');
         if (slotsUsed) {
             slotsUsed.textContent = characters.length;
         }
-        
+
         if (characters.length === 0) {
             list.innerHTML = `
                 <div class="wow-empty-state">
@@ -1827,19 +1830,19 @@ export class UI {
             card.className = 'wow-character-card';
             card.dataset.characterIndex = index;
             card.dataset.characterId = char.id || char._id || index; // Store API ID if available
-            
+
             const raceIcon = {
                 human: '<i class="fas fa-user"></i>',
                 elf: '<i class="fas fa-leaf"></i>',
                 dwarf: '<i class="fas fa-hammer"></i>',
                 demon: '<i class="fas fa-fire"></i>'
             }[char.race] || '<i class="fas fa-user"></i>';
-            
+
             const raceName = char.race ? char.race.charAt(0).toUpperCase() + char.race.slice(1) : 'Human';
             const genderIcon = char.gender === 'female' ? '<i class="fas fa-venus"></i>' : '<i class="fas fa-mars"></i>';
             const level = char.stats?.level || char.level || 1;
             const className = char.class || 'Warrior';
-            
+
             card.innerHTML = `
                 <button class="wow-character-card-delete" data-character-index="${index}" aria-label="Delete character">
                     <i class="fas fa-times"></i>
@@ -1855,7 +1858,7 @@ export class UI {
                     </div>
                 </div>
             `;
-            
+
             // Add click handler for card selection (but not when clicking delete button)
             card.addEventListener('click', (e) => {
                 // Don't select if clicking the delete button
@@ -1863,7 +1866,7 @@ export class UI {
                     this.selectCharacter(index);
                 }
             });
-            
+
             // Add click handler for delete button
             const deleteButton = card.querySelector('.wow-character-card-delete');
             if (deleteButton) {
@@ -1872,7 +1875,7 @@ export class UI {
                     this.showDeleteConfirmation(index, char.name || 'Unnamed Character');
                 });
             }
-            
+
             list.appendChild(card);
         });
     }
@@ -1907,7 +1910,7 @@ export class UI {
             console.log('Fetching characters from API for logged-in user...');
             const characters = await charactersAPI.getCharacters();
             console.log('✅ Loaded characters from API:', characters.length, 'characters');
-            
+
             if (characters && characters.length > 0) {
                 // Log character details for debugging
                 characters.forEach((char, idx) => {
@@ -1916,7 +1919,7 @@ export class UI {
             } else {
                 console.log('No characters found in database for this user');
             }
-            
+
             return characters || [];
         } catch (error) {
             console.error('❌ Error loading characters from API:', error);
@@ -1924,7 +1927,7 @@ export class UI {
                 message: error.message,
                 stack: error.stack
             });
-            
+
             // Only fallback to LocalStorage if it's a network/server error, not auth error
             if (error.message && !error.message.includes('401') && !error.message.includes('Unauthorized')) {
                 try {
@@ -1940,7 +1943,7 @@ export class UI {
                     return [];
                 }
             }
-            
+
             // For auth errors, return empty array (user needs to log in)
             return [];
         }
@@ -1949,7 +1952,7 @@ export class UI {
     async saveCharacter() {
         // Get race-specific default stats
         const raceStats = this.getRaceDefaultStats(this.selectedRace);
-        
+
         // Get all form values safely
         const nameInput = document.getElementById('characterName');
         const hairColorInput = document.getElementById('hairColor');
@@ -1964,11 +1967,11 @@ export class UI {
         const strengthStatInput = document.getElementById('strengthStat');
         const magicStatInput = document.getElementById('magicStat');
         const speedStatInput = document.getElementById('speedStat');
-        
+
         // Check if user is admin - if so, use max level stats
         const isAdmin = this.userRole === 'admin';
         let finalStats;
-        
+
         if (isAdmin) {
             // Admin users get max level stats regardless of characterType
             finalStats = {
@@ -1992,7 +1995,7 @@ export class UI {
                 defense: raceStats.defense
             };
         }
-        
+
         const characterData = {
             name: (nameInput && nameInput.value) || 'Unnamed Character',
             race: this.selectedRace,
@@ -2045,7 +2048,7 @@ export class UI {
                 this.showMainMenu();
                 alert('Character saved locally! Create an account to sync across devices.');
             }
-            
+
             // Mark that user has created a character (for hiding new player tips)
             localStorage.setItem('hasCreatedCharacter', 'true');
         } catch (error) {
@@ -2066,13 +2069,13 @@ export class UI {
             console.error('Invalid character index:', index, 'Total characters:', characters?.length || 0);
             return;
         }
-        
+
         const character = characters[index];
         this.selectedCharacterIndex = index;
         this.selectedCharacter = character; // Store selected character
-        
+
         console.log('Selected character:', character.name, 'at index:', index);
-        
+
         // Update visual selection state (WoW-style)
         document.querySelectorAll('.wow-character-card').forEach((card, i) => {
             if (i === index) {
@@ -2081,10 +2084,10 @@ export class UI {
                 card.classList.remove('selected');
             }
         });
-        
+
         // Show character preview in selection screen (WoW-style)
         await this.showCharacterSelectionPreview(character);
-        
+
         // Show "Enter World" and "Delete" buttons
         const enterWorldBtn = document.getElementById('enterWorldButton');
         const deleteBtn = document.getElementById('deleteCharacterButton');
@@ -2101,7 +2104,7 @@ export class UI {
             };
         }
     }
-    
+
     /**
      * Shows character preview in the character selection screen (WoW-style)
      * @param {Object} character - Character data to preview
@@ -2110,21 +2113,21 @@ export class UI {
         const placeholder = document.getElementById('characterPreviewPlaceholder');
         const canvas = document.getElementById('characterSelectionPreviewCanvas');
         const infoPanel = document.getElementById('wowCharacterInfo');
-        
+
         if (!placeholder || !canvas) return;
-        
+
         // Hide placeholder, show canvas and info panel
         placeholder.style.display = 'none';
         canvas.style.display = 'block';
         if (infoPanel) {
             infoPanel.classList.remove('hidden');
         }
-        
+
         // Initialize or reuse CharacterPreview instance for selection screen
         if (!this.characterSelectionPreview) {
             this.characterSelectionPreview = new CharacterPreview('characterSelectionPreviewCanvas');
         }
-        
+
         // Update character preview with character data
         const appearance = character.appearance || {};
         await this.characterSelectionPreview.updateCharacter(
@@ -2138,7 +2141,7 @@ export class UI {
             appearance.eyeColor || '#4A90E2',
             appearance.raceFeatures || 0
         );
-        
+
         // Update character info panel (WoW-style)
         if (infoPanel) {
             const nameEl = document.getElementById('wowCharacterInfoName');
@@ -2149,7 +2152,7 @@ export class UI {
             const strengthEl = document.getElementById('wowCharacterInfoStrength');
             const magicEl = document.getElementById('wowCharacterInfoMagic');
             const speedEl = document.getElementById('wowCharacterInfoSpeed');
-            
+
             if (nameEl) nameEl.textContent = character.name || 'Unnamed Character';
             if (raceEl) {
                 const race = (character.race || 'Human');
@@ -2166,7 +2169,7 @@ export class UI {
             if (speedEl) speedEl.textContent = character.stats?.speed || 10;
         }
     }
-    
+
     /**
      * Starts the game with the selected character
      * @param {number} index - Character index to start with
@@ -2180,7 +2183,7 @@ export class UI {
             this.game.startGame(character);
         }
     }
-    
+
     /**
      * Updates the server population display
      * @param {number} population - Number of players currently in the game
@@ -2201,7 +2204,7 @@ export class UI {
         const confirmed = confirm(
             `Are you sure you want to delete "${characterName}"?\n\nThis action cannot be undone.`
         );
-        
+
         if (confirmed) {
             this.deleteCharacter(characterIndex);
         }
@@ -2215,19 +2218,19 @@ export class UI {
     async deleteCharacter(characterIndex) {
         try {
             const characters = await this.getAllCharacters();
-            
+
             // Validate index
             if (characterIndex < 0 || characterIndex >= characters.length) {
                 console.error('Invalid character index for deletion:', characterIndex);
                 alert('Error: Invalid character index. Please refresh the page and try again.');
                 return false;
             }
-            
+
             // Store character info for feedback
             const characterToDelete = characters[characterIndex];
             const deletedCharacterName = characterToDelete.name || 'Unnamed Character';
             const characterId = characterToDelete.id || characterToDelete._id; // Support both id and _id
-            
+
             // Check if user is authenticated
             const token = getToken();
             if (token && characterId) {
@@ -2241,28 +2244,28 @@ export class UI {
                 }
             } else {
                 // Fallback to LocalStorage
-            characters.splice(characterIndex, 1);
-            try {
+                characters.splice(characterIndex, 1);
+                try {
                     localStorage.setItem('fantasy3DCharacters', JSON.stringify(characters));
-            } catch (storageError) {
-                console.error('Failed to save characters to localStorage:', storageError);
-                alert('Error: Failed to save changes. Please check your browser storage settings.');
-                return false;
+                } catch (storageError) {
+                    console.error('Failed to save characters to localStorage:', storageError);
+                    alert('Error: Failed to save changes. Please check your browser storage settings.');
+                    return false;
                 }
             }
-            
+
             // Clear selected character if it was deleted
             if (this.selectedCharacterIndex === characterIndex) {
                 this.selectedCharacterIndex = null;
                 this.selectedCharacter = null;
-                
+
                 // Reset preview
                 const placeholder = document.getElementById('characterPreviewPlaceholder');
                 const canvas = document.getElementById('characterSelectionPreviewCanvas');
                 const infoPanel = document.getElementById('wowCharacterInfo');
                 const enterWorldBtn = document.getElementById('enterWorldButton');
                 const deleteBtn = document.getElementById('deleteCharacterButton');
-                
+
                 if (placeholder) placeholder.style.display = 'flex';
                 if (canvas) canvas.style.display = 'none';
                 if (infoPanel) infoPanel.classList.add('hidden');
@@ -2272,10 +2275,10 @@ export class UI {
                 // Adjust selected index if a character before it was deleted
                 this.selectedCharacterIndex--;
             }
-            
+
             // Reload character list to reflect changes
             await this.loadCharacterList();
-            
+
             // Show feedback
             console.log(`Character "${deletedCharacterName}" deleted successfully`);
             return true;
@@ -2303,39 +2306,39 @@ export class UI {
             if (levelEl) {
                 levelEl.textContent = `Lv. ${level.toString()}`;
             }
-            
+
             // Update health bar
             const health = characterData.stats.health || 0;
             const maxHealth = characterData.stats.maxHealth || 100;
             const healthPercent = maxHealth > 0 ? (health / maxHealth) * 100 : 0;
-            
+
             const healthBarFill = document.getElementById('gothicHealthBarFill');
             if (healthBarFill) {
                 healthBarFill.style.width = `${healthPercent}%`;
             }
-            
+
             // Update health bar text
             const healthBarText = document.getElementById('gothicHealthBarText');
             if (healthBarText) {
                 healthBarText.textContent = `${health}/${maxHealth}`;
             }
-            
+
             // Update mana bar (using magic stat as current, max is same as magic stat for now)
             const magic = characterData.stats.magic || 0;
             const maxMagic = characterData.stats.magic || 10; // Use magic stat as max for now
             const magicPercent = maxMagic > 0 ? (magic / maxMagic) * 100 : 0;
-            
+
             const manaBarFill = document.getElementById('gothicManaBarFill');
             if (manaBarFill) {
                 manaBarFill.style.width = `${magicPercent}%`;
             }
-            
+
             // Update mana bar text
             const manaBarText = document.getElementById('gothicManaBarText');
             if (manaBarText) {
                 manaBarText.textContent = `${magic}/${maxMagic}`;
             }
-            
+
             // Update stamina bar (using speed stat as max, energy system for current)
             const speedStat = characterData.stats.speed || 100;
             let currentStamina = speedStat;
@@ -2346,28 +2349,28 @@ export class UI {
                 maxStamina = energyData.max || speedStat;
             }
             const staminaPercent = maxStamina > 0 ? (currentStamina / maxStamina) * 100 : 0;
-            
+
             const staminaBarFill = document.getElementById('gothicStaminaBarFill');
             if (staminaBarFill) {
                 staminaBarFill.style.width = `${staminaPercent}%`;
             }
-            
+
             // Update stamina bar text
             const staminaBarText = document.getElementById('gothicStaminaBarText');
             if (staminaBarText) {
                 staminaBarText.textContent = `${currentStamina}/${maxStamina}`;
             }
-            
+
             // Update strength bar (using strength stat)
             const strength = characterData.stats.strength || 0;
             const maxStrength = characterData.stats.strength || 100; // Strength stat is both current and max
             const strengthPercent = maxStrength > 0 ? 100 : 0; // Always full since it's a stat, not a resource
-            
+
             const strengthBarFill = document.getElementById('gothicStrengthBarFill');
             if (strengthBarFill) {
                 strengthBarFill.style.width = `${strengthPercent}%`;
             }
-            
+
             // Update strength bar text
             const strengthBarText = document.getElementById('gothicStrengthBarText');
             if (strengthBarText) {
@@ -2375,19 +2378,19 @@ export class UI {
             }
         }
     }
-    
+
     updateEnergyDisplay(character) {
         if (!character) return;
-        
+
         const energyData = character.getEnergy();
         const staminaPercent = energyData.max > 0 ? (energyData.current / energyData.max) * 100 : 0;
-        
+
         // Update stamina bar fill
         const staminaBarFill = document.getElementById('gothicStaminaBarFill');
         if (staminaBarFill) {
             staminaBarFill.style.width = `${staminaPercent}%`;
         }
-        
+
         // Update stamina bar text
         const staminaBarText = document.getElementById('gothicStaminaBarText');
         if (staminaBarText) {
@@ -2399,16 +2402,16 @@ export class UI {
         // Find the skill slot element by data-slot attribute
         const skillSlot = document.querySelector(`.skill-slot[data-slot="${slotNumber}"]`);
         if (!skillSlot) return;
-        
+
         // Remove any existing animation class
         skillSlot.classList.remove('activated');
-        
+
         // Force reflow to restart animation
         void skillSlot.offsetWidth;
-        
+
         // Add the activated class to trigger animation
         skillSlot.classList.add('activated');
-        
+
         // Remove the class after animation completes
         setTimeout(() => {
             skillSlot.classList.remove('activated');
@@ -2423,13 +2426,13 @@ export class UI {
         // Find the skill slot element
         const skillSlot = document.querySelector(`.skill-slot[data-slot="${slotNumber}"]`);
         if (!skillSlot) return;
-        
+
         // Mark as on cooldown
         this.skillCooldowns[slotNumber] = true;
-        
+
         // Add cooldown class to show visual effect
         skillSlot.classList.add('on-cooldown');
-        
+
         // Remove cooldown after 3 seconds
         setTimeout(() => {
             this.skillCooldowns[slotNumber] = false;
@@ -2445,11 +2448,11 @@ export class UI {
         const dropdown = document.getElementById('wowClassRankDropdown');
         const select = document.getElementById('classRankSelect');
         if (!dropdown || !select) return;
-        
+
         dropdown.classList.remove('hidden');
         this.populateClassRankDropdown(baseClass);
     }
-    
+
     /**
      * Hides the class rank dropdown
      */
@@ -2460,7 +2463,7 @@ export class UI {
         }
         this.selectedClassRank = null;
     }
-    
+
     /**
      * Populates the class rank dropdown with available ranks for the selected class
      * @param {string} baseClass - The base class (warrior, mage, healer)
@@ -2468,10 +2471,10 @@ export class UI {
     populateClassRankDropdown(baseClass) {
         const select = document.getElementById('classRankSelect');
         if (!select) return;
-        
+
         // Clear existing options (except the base class option)
         select.innerHTML = '<option value="">Base Class (C-Rank)</option>';
-        
+
         // Define class ranks based on the Classes folder structure
         const classRanks = {
             warrior: {
@@ -2499,9 +2502,9 @@ export class UI {
                 'SSS-Rank': ['Arch Angel', 'Arch Demon', 'Sage', 'Summoner', 'Avatar']
             }
         };
-        
+
         const ranks = classRanks[baseClass] || {};
-        
+
         // Add options grouped by rank
         Object.keys(ranks).forEach(rankName => {
             const rankClasses = ranks[rankName];
@@ -2518,13 +2521,13 @@ export class UI {
                 select.appendChild(optgroup);
             }
         });
-        
+
         // Set up event listener for rank selection if not already set up
         if (!this.classRankSelectListenerAdded) {
             select.addEventListener('change', (e) => {
                 this.selectedClassRank = e.target.value || null;
                 console.log(`Class rank selected: ${this.selectedClassRank}`);
-                
+
                 // Update character preview to show class equipment for selected rank
                 if (this.characterPreview) {
                     this.updateCharacterPreview();
@@ -2533,7 +2536,7 @@ export class UI {
             this.classRankSelectListenerAdded = true;
         }
     }
-    
+
     getRaceDefaultStats(race) {
         const stats = {
             human: { health: 50, strength: 10, magic: 10, speed: 10, defense: 10 },
