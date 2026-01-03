@@ -17,6 +17,7 @@ export class UI {
         this.skillCooldowns = {}; // Track cooldowns for each skill slot
         this.userRole = 'user'; // User role (admin or user) - loaded from auth
         this.selectedClassRank = null; // Selected class rank (for admin users)
+        this.selectedRealm = 'Fantasy Realm'; // Default realm
         this.classRankSelectListenerAdded = false; // Flag to track if class rank select listener has been added
         this.setupEventListeners();
         this.initializeInventory();
@@ -162,6 +163,14 @@ export class UI {
             });
         }
 
+        // Realm Selection (WoW-style)
+        document.querySelectorAll('.wow-realm-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const realmName = item.querySelector('.wow-realm-name').textContent;
+                this.selectRealm(item, realmName);
+            });
+        });
+
         // Race selection (WoW-style)
         document.querySelectorAll('.wow-race-item').forEach(button => {
             button.addEventListener('click', async () => {
@@ -176,65 +185,23 @@ export class UI {
                 // Update race-specific features UI
                 this.updateRaceSpecificFeatures();
 
-                // Apply stats based on user role
-                if (this.userRole === 'admin') {
-                    // Admin users keep max level stats (don't change on race selection)
-                    const healthStat = document.getElementById('healthStat');
-                    const strengthStat = document.getElementById('strengthStat');
-                    const magicStat = document.getElementById('magicStat');
-                    const speedStat = document.getElementById('speedStat');
-
-                    if (healthStat) {
-                        healthStat.value = 1000;
-                        const healthValue = document.getElementById('healthValue');
-                        if (healthValue) healthValue.textContent = 1000;
-                    }
-                    if (strengthStat) {
-                        strengthStat.value = 500;
-                        const strengthValue = document.getElementById('strengthValue');
-                        if (strengthValue) strengthValue.textContent = 500;
-                    }
-                    if (magicStat) {
-                        magicStat.value = 800;
-                        const magicValue = document.getElementById('magicValue');
-                        if (magicValue) magicValue.textContent = 800;
-                    }
-                    if (speedStat) {
-                        speedStat.value = 500;
-                        const speedValue = document.getElementById('speedValue');
-                        if (speedValue) speedValue.textContent = 500;
-                    }
+                // Apply stats based on mode
+                if (this.characterType === 'dev' || this.userRole === 'admin') {
+                    this.applyDevStats();
                 } else {
-                    // Regular users get race-specific default stats
-                    const raceStats = this.getRaceDefaultStats(this.selectedRace);
-                    const healthStat = document.getElementById('healthStat');
-                    const strengthStat = document.getElementById('strengthStat');
-                    const magicStat = document.getElementById('magicStat');
-                    const speedStat = document.getElementById('speedStat');
-
-                    if (healthStat) {
-                        healthStat.value = raceStats.health;
-                        const healthValue = document.getElementById('healthValue');
-                        if (healthValue) healthValue.textContent = raceStats.health;
-                    }
-                    if (strengthStat) {
-                        strengthStat.value = raceStats.strength;
-                        const strengthValue = document.getElementById('strengthValue');
-                        if (strengthValue) strengthValue.textContent = raceStats.strength;
-                    }
-                    if (magicStat) {
-                        magicStat.value = raceStats.magic;
-                        const magicValue = document.getElementById('magicValue');
-                        if (magicValue) magicValue.textContent = raceStats.magic;
-                    }
-                    if (speedStat) {
-                        speedStat.value = raceStats.speed;
-                        const speedValue = document.getElementById('speedValue');
-                        if (speedValue) speedValue.textContent = raceStats.speed;
-                    }
+                    this.applyBaseStats();
                 }
 
                 await this.updatePreview();
+
+                // Update faction theme based on race selection
+                const faction = button.dataset.faction;
+                const creationScreen = document.getElementById('characterCreation');
+                if (creationScreen && faction) {
+                    creationScreen.classList.remove('faction-alliance', 'faction-horde');
+                    creationScreen.classList.add(`faction-${faction}`);
+                    console.log(`✅ Faction theme updated to: ${faction}`);
+                }
             });
         });
 
@@ -286,6 +253,13 @@ export class UI {
                 button.classList.add('selected');
                 this.characterType = button.dataset.type;
                 console.log(`Character type selected: ${this.characterType}`);
+
+                // If Dev Mode selected, update stats
+                if (this.characterType === 'dev') {
+                    this.applyDevStats();
+                } else if (this.characterType === 'new') {
+                    this.applyBaseStats();
+                }
             });
         });
 
@@ -308,28 +282,87 @@ export class UI {
             });
         }
 
-        // Customization slider controls
-        this.setupSliderControls('hairStyle', 'hairStylePrev', 'hairStyleNext', 'hairStyleValue');
-        this.setupSliderControls('faceType', 'faceTypePrev', 'faceTypeNext', 'faceTypeValue');
-        this.setupSliderControls('facialFeatures', 'facialFeaturesPrev', 'facialFeaturesNext', 'facialFeaturesValue');
+        // Customization Tab Switching
+        document.querySelectorAll('.wow-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.dataset.tab;
+                console.log(`Switching to tab: ${targetTab}`);
 
-        // Customization sliders
-        ['hairStyle', 'faceType', 'facialFeatures', 'skinTone', 'bodyShape'].forEach(id => {
-            const slider = document.getElementById(id);
-            if (slider) {
-                slider.addEventListener('input', () => {
-                    const valueDisplay = document.getElementById(id + 'Value');
-                    if (valueDisplay) {
-                        if (id === 'skinTone' || id === 'bodyShape') {
-                            valueDisplay.textContent = parseFloat(slider.value).toFixed(1);
-                        } else {
-                            valueDisplay.textContent = parseInt(slider.value) + 1;
-                        }
+                // Update active button state
+                document.querySelectorAll('.wow-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update panel visibility
+                const panels = {
+                    'CHARACTER': 'wowCustomizationPanel',
+                    'STATS': 'wowStatsPanel'
+                };
+
+                Object.entries(panels).forEach(([tab, panelId]) => {
+                    const panel = document.getElementById(panelId);
+                    if (panel) {
+                        panel.classList.toggle('hidden', tab !== targetTab);
                     }
+                });
+            });
+        });
+
+        // Customization slider controls (with +/- buttons support)
+        const setupSliderButtons = (sliderId, prevBtnId, nextBtnId, valueId) => {
+            const slider = document.getElementById(sliderId);
+            const prevBtn = document.getElementById(prevBtnId);
+            const nextBtn = document.getElementById(nextBtnId);
+            const valueDisplay = document.getElementById(valueId);
+
+            if (!slider) return;
+
+            const update = () => {
+                if (valueDisplay) {
+                    if (sliderId === 'skinTone' || sliderId === 'bodyShape') {
+                        valueDisplay.textContent = parseFloat(slider.value).toFixed(1);
+                    } else if (sliderId.includes('Stat')) {
+                        // Raw values for stats
+                        valueDisplay.textContent = parseInt(slider.value);
+                    } else {
+                        // +1 for appearance indices
+                        valueDisplay.textContent = parseInt(slider.value) + 1;
+                    }
+                }
+                // Only update character preview for appearance sliders
+                if (!sliderId.includes('Stat')) {
                     this.updatePreview();
+                }
+            };
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    slider.value = Math.max(parseFloat(slider.min), parseFloat(slider.value) - (sliderId.includes('Tone') || sliderId.includes('Shape') ? 0.1 : 1));
+                    update();
                 });
             }
-        });
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    slider.value = Math.min(parseFloat(slider.max), parseFloat(slider.value) + (sliderId.includes('Tone') || sliderId.includes('Shape') ? 0.1 : 1));
+                    update();
+                });
+            }
+
+            slider.addEventListener('input', update);
+        };
+
+        setupSliderButtons('hairStyle', 'hairStylePrev', 'hairStyleNext', 'hairStyleValue');
+        setupSliderButtons('faceType', 'faceTypePrev', 'faceTypeNext', 'faceTypeValue');
+        setupSliderButtons('facialFeatures', 'facialFeaturesPrev', 'facialFeaturesNext', 'facialFeaturesValue');
+        setupSliderButtons('raceFeatures', 'raceFeaturesPrev', 'raceFeaturesNext', 'raceFeaturesValue');
+        setupSliderButtons('skinTone', 'skinTonePrev', 'skinToneNext', 'skinToneValue');
+        setupSliderButtons('bodyShape', 'bodyShapePrev', 'bodyShapeNext', 'bodyShapeValue');
+
+        // Stat sliders
+        setupSliderButtons('healthStat', 'healthStatPrev', 'healthStatNext', 'healthValue');
+        setupSliderButtons('strengthStat', 'strengthStatPrev', 'strengthStatNext', 'strengthValue');
+        setupSliderButtons('magicStat', 'magicStatPrev', 'magicStatNext', 'magicValue');
+        setupSliderButtons('speedStat', 'speedStatPrev', 'speedStatNext', 'speedValue');
 
         // Hair color change
         document.getElementById('hairColor').addEventListener('input', async () => {
@@ -341,20 +374,13 @@ export class UI {
             await this.updatePreview();
         });
 
-        // Randomize name button (WoW feature)
+        // Randomize name button (WoW-style feature)
         const randomizeBtn = document.getElementById('randomizeNameButton');
         if (randomizeBtn) {
             randomizeBtn.addEventListener('click', () => {
                 this.randomizeCharacterName();
             });
         }
-
-        // Race-specific features slider
-        this.setupSliderControls('raceFeatures', 'raceFeaturesPrev', 'raceFeaturesNext', 'raceFeaturesValue');
-        document.getElementById('raceFeatures').addEventListener('input', async (e) => {
-            document.getElementById('raceFeaturesValue').textContent = parseInt(e.target.value) + 1;
-            await this.updatePreview();
-        });
 
         // Character creation - Save button (triggered from customization panel or footer)
         const saveBtn = document.getElementById('saveCharacterButton');
@@ -1306,9 +1332,16 @@ export class UI {
         const newType = document.getElementById('charTypeNew');
         if (newType) newType.classList.add('selected');
 
-        // Hide customization panel by default
+        // Initialize customization tabs state
         const customPanel = document.getElementById('wowCustomizationPanel');
-        if (customPanel) customPanel.classList.add('hidden');
+        const statsPanel = document.getElementById('wowStatsPanel');
+        if (customPanel) customPanel.classList.remove('hidden');
+        if (statsPanel) statsPanel.classList.add('hidden');
+
+        // Reset tab buttons
+        document.querySelectorAll('.wow-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === 'CHARACTER');
+        });
 
         // Update race-specific features UI
         this.updateRaceSpecificFeatures();
@@ -1324,35 +1357,18 @@ export class UI {
         document.getElementById('facialFeatures').value = 0;
         document.getElementById('facialFeaturesValue').textContent = '1';
         document.getElementById('raceFeatures').value = 0;
-        document.getElementById('raceFeaturesValue').textContent = '0';
+        document.getElementById('raceFeaturesValue').textContent = '1';
         document.getElementById('eyeColor').value = '#4A90E2';
         document.getElementById('skinTone').value = 0.5;
         document.getElementById('skinToneValue').textContent = '0.5';
         document.getElementById('bodyShape').value = 0.5;
         document.getElementById('bodyShapeValue').textContent = '0.5';
 
-        // Apply stats based on user role
-        if (this.userRole === 'admin') {
-            // Admin users get max level stats
-            document.getElementById('healthStat').value = 1000;
-            document.getElementById('healthValue').textContent = 1000;
-            document.getElementById('strengthStat').value = 500;
-            document.getElementById('strengthValue').textContent = 500;
-            document.getElementById('magicStat').value = 800;
-            document.getElementById('magicValue').textContent = 800;
-            document.getElementById('speedStat').value = 500;
-            document.getElementById('speedValue').textContent = 500;
+        // Apply stats based on user role or selection
+        if (this.characterType === 'dev' || this.userRole === 'admin') {
+            this.applyDevStats();
         } else {
-            // Regular users get race-specific default stats
-            const raceStats = this.getRaceDefaultStats(this.selectedRace);
-            document.getElementById('healthStat').value = raceStats.health;
-            document.getElementById('healthValue').textContent = raceStats.health;
-            document.getElementById('strengthStat').value = raceStats.strength;
-            document.getElementById('strengthValue').textContent = raceStats.strength;
-            document.getElementById('magicStat').value = raceStats.magic;
-            document.getElementById('magicValue').textContent = raceStats.magic;
-            document.getElementById('speedStat').value = raceStats.speed;
-            document.getElementById('speedValue').textContent = raceStats.speed;
+            this.applyBaseStats();
         }
 
         // Check if this is a new player and show tip (WoW-style)
@@ -1479,6 +1495,11 @@ export class UI {
             return;
         }
 
+        const loadingOverlay = document.getElementById('previewLoadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.remove('hidden');
+        }
+
         const hairColor = document.getElementById('hairColor')?.value || '#8B4513';
         const eyeColor = document.getElementById('eyeColor')?.value || '#4A90E2';
         const skinTone = parseFloat(document.getElementById('skinTone')?.value || 0.5);
@@ -1513,6 +1534,10 @@ export class UI {
             console.log('Character preview updated successfully');
         } catch (error) {
             console.error('Error updating character preview:', error);
+        } finally {
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('hidden');
+            }
         }
     }
 
@@ -1547,15 +1572,14 @@ export class UI {
         const lastName = lastNameList[Math.floor(Math.random() * lastNameList.length)];
         const randomName = `${firstName} ${lastName}`;
 
-        nameInput.value = randomName;
+        if (nameInput) {
+            nameInput.value = randomName;
+            console.log(`✅ Random name generated: ${randomName}`);
+        }
     }
 
-    /**
-     * Updates race-specific features UI based on selected race (WoW feature)
-     */
     updateRaceSpecificFeatures() {
         const label = document.getElementById('raceFeaturesLabel');
-        const labelText = document.getElementById('raceFeaturesLabelText');
         const typeText = document.getElementById('raceFeaturesType');
         const container = document.getElementById('raceFeaturesContainer');
 
@@ -1570,14 +1594,45 @@ export class UI {
 
         const feature = raceFeatures[this.selectedRace];
         if (feature && feature.show) {
-            label.style.display = 'block';
             container.style.display = 'block';
-            labelText.textContent = `${this.selectedRace.charAt(0).toUpperCase() + this.selectedRace.slice(1)} Features`;
-            typeText.textContent = feature.label;
+            if (label) label.style.display = 'block';
+            if (typeText) typeText.textContent = feature.label;
         } else {
-            label.style.display = 'none';
             container.style.display = 'none';
+            if (label) label.style.display = 'none';
         }
+    }
+
+    /**
+     * Handles realm selection logic (WoW-style)
+     * @param {HTMLElement} element - The clicked realm element
+     * @param {string} realmName - The name of the selected realm
+     */
+    selectRealm(element, realmName) {
+        // Remove selected class from all realm items
+        document.querySelectorAll('.wow-realm-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+
+        // Add selected class to the clicked item
+        if (element) {
+            element.classList.add('selected');
+        }
+
+        this.selectedRealm = realmName;
+        console.log(`✅ Realm selected: ${realmName}`);
+
+        // Update server population display (simulated)
+        const popMap = {
+            'Azeroth': 85,
+            'Kalimdor': 45,
+            'Northrend': 20,
+            'Fantasy Realm': 100,
+            'Outland': 60,
+            'Pandaria': 30,
+            'Classic': 90
+        };
+        this.updateServerPopulation(popMap[realmName] || 0);
     }
 
     showHUD() {
@@ -2545,6 +2600,30 @@ export class UI {
             demon: { health: 55, strength: 12, magic: 12, speed: 10, defense: 12 }
         };
         return stats[race] || stats.human;
+    }
+
+    applyDevStats() {
+        console.log('🚀 Applying Dev Mode Stats (Level 1000)');
+        this.setStatValue('health', 1000);
+        this.setStatValue('strength', 500);
+        this.setStatValue('magic', 800);
+        this.setStatValue('speed', 500);
+    }
+
+    applyBaseStats() {
+        console.log(`🛡️ Applying Base Stats for race: ${this.selectedRace}`);
+        const raceStats = this.getRaceDefaultStats(this.selectedRace);
+        this.setStatValue('health', raceStats.health);
+        this.setStatValue('strength', raceStats.strength);
+        this.setStatValue('magic', raceStats.magic);
+        this.setStatValue('speed', raceStats.speed);
+    }
+
+    setStatValue(statName, value) {
+        const slider = document.getElementById(`${statName}Stat`);
+        const display = document.getElementById(`${statName}Value`);
+        if (slider) slider.value = value;
+        if (display) display.textContent = value;
     }
 }
 

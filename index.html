@@ -98,6 +98,10 @@
         }
 
         /* Background overlay for better canvas visibility */
+        .hidden {
+            display: none !important;
+        }
+
         #gameContainer::before {
             content: '';
             position: absolute;
@@ -2811,42 +2815,7 @@
             z-index: 1;
         }
 
-        /* Name Input */
-        .wow-character-name-input {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 215, 0, 0.5);
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-        }
-
-        #characterName {
-            background: transparent;
-            border: none;
-            color: #FFD700;
-            font-family: 'Cinzel', serif;
-            font-size: 20px;
-            text-align: center;
-            outline: none;
-            width: 250px;
-        }
-
-        #characterName::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        .wow-random-name-btn {
-            background: none;
-            border: none;
-            color: #FFD700;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.3s ease;
-        }
+        /* Name Input - Consolidated in character creation section below */
 
         .wow-random-name-btn:hover {
             transform: rotate(180deg);
@@ -2945,6 +2914,112 @@
             width: clamp(45px, 12vw, 55px);
             height: clamp(45px, 12vw, 55px);
         }
+
+        /* ==========================================================================
+           Character Creation - Round 2 (MMORPG Premium)
+           ========================================================================== */
+
+        #characterCreation {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, rgba(20, 20, 35, 0.95) 0%, rgba(10, 10, 15, 1) 100%);
+            z-index: 1000;
+            color: #fff;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        /* Faction Themes (Dynamic) */
+        #characterCreation.faction-alliance {
+            --faction-primary: #0070dd;
+            --faction-secondary: #ffcc00;
+            --faction-glow: rgba(0, 112, 221, 0.4);
+            --faction-bg: radial-gradient(circle at center, rgba(0, 40, 100, 0.3) 0%, transparent 70%);
+        }
+
+        #characterCreation.faction-horde {
+            --faction-primary: #cc0000;
+            --faction-secondary: #00ff00;
+            /* Fel Green accents for Demon */
+            --faction-glow: rgba(204, 0, 0, 0.4);
+            --faction-bg: radial-gradient(circle at center, rgba(100, 0, 0, 0.3) 0%, transparent 70%);
+        }
+
+        #characterCreation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--faction-bg, none);
+            pointer-events: none;
+            z-index: 0;
+            transition: background 0.5s ease;
+        }
+
+        /* Layout Structure */
+        .wow-creation-main-content {
+            display: grid;
+            grid-template-columns: 340px 1fr 340px;
+            gap: 30px;
+            padding: 20px 40px;
+            flex: 1;
+            min-height: 0;
+            z-index: 1;
+        }
+
+        /* Sidebar Styling */
+        .wow-selection-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 24px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.6),
+                inset 0 0 25px rgba(255, 255, 255, 0.05);
+            scrollbar-width: thin;
+            scrollbar-color: var(--faction-primary) rgba(0, 0, 0, 0.2);
+        }
+
+        .wow-selection-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .wow-selection-sidebar::-webkit-scrollbar-thumb {
+            background: var(--faction-primary);
+            border-radius: 3px;
+        }
+
+        /* Premium Bevel Effect */
+        .wow-selection-sidebar::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            pointer-events: none;
+        }
+
+        /* Left/Right specific styles */
+        .left-sidebar {
+            border-left: 3px solid var(--faction-primary, #ffd700);
+        }
+
+        .right-sidebar {
+            border-right: 3px solid var(--faction-primary, #ffd700);
         }
 
         @media (min-width: 481px) and (max-width: 768px) {
@@ -3496,20 +3571,293 @@
             gap: 8px;
         }
 
-        .preview-control-btn {
-            width: 40px;
-            height: 40px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(0, 0, 0, 0.7);
-            color: rgba(255, 255, 255, 0.8);
-            border-radius: 6px;
+        /* Sidebar Tabs */
+        .wow-sidebar-tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .wow-tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 0.75em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
             cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .wow-tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .wow-tab-btn.active {
+            color: var(--faction-primary, #ffd700);
+            background: rgba(var(--faction-primary-rgb), 0.15);
+            box-shadow: inset 0 0 10px rgba(var(--faction-primary-rgb), 0.1);
+        }
+
+        .wow-tab-panel.hidden {
+            display: none;
+        }
+
+        /* Customization Controls */
+        .wow-custom-section {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.3s ease;
+        }
+
+        .wow-custom-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(var(--faction-primary-rgb), 0.2);
+        }
+
+        .wow-custom-section-title {
+            font-size: 1.1em;
+            font-weight: 800;
+            color: var(--faction-primary, #ffd700);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .wow-custom-item {
+            margin-bottom: 22px;
+        }
+
+        .wow-custom-item label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            color: #aaa;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .wow-custom-item label span {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-family: 'Inter', monospace;
+            font-size: 0.85em;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Character Preview Loading Overlay */
+        .wow-preview-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-radius: 12px;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+
+        .wow-preview-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(193, 163, 102, 0.1);
+            border-left-color: #c1a366;
+            border-radius: 50%;
+            animation: wow-spin 1.2s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(193, 163, 102, 0.5));
+            margin-bottom: 20px;
+        }
+
+        .wow-preview-loading-text {
+            color: #c1a366;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(193, 163, 102, 0.5);
+            animation: wow-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes wow-spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes wow-pulse {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Range Sliders */
+        .wow-range-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .wow-slider-btn {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 14px;
+        }
+
+        .wow-slider-btn:hover {
+            background: var(--faction-primary, #ffd700);
+            color: #000;
+            border-color: transparent;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--faction-glow);
+        }
+
+        .wow-range-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 5px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            outline: none;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .wow-range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 4px solid var(--faction-primary, #ffd700);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--faction-glow);
+            transition: all 0.2s ease;
+        }
+
+        .wow-range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+            background: var(--faction-secondary, #fff);
+        }
+
+        .wow-stat-item {
+            background: rgba(0, 0, 0, 0.45);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .wow-stat-item:hover {
+            background: rgba(var(--faction-primary-rgb), 0.08);
+            border-color: rgba(var(--faction-primary-rgb), 0.3);
+            transform: translateX(5px);
+        }
+
+        .wow-stat-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .wow-stat-label span:first-child {
+            font-size: 0.85em;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wow-stat-label i {
+            color: var(--faction-primary, #ffd700);
+            width: 16px;
+            text-align: center;
+        }
+
+        .wow-stat-value {
+            font-size: 1.1em;
+            font-weight: 800;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-family: 'Inter', monospace;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .wow-stats-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .preview-control-btn {
+            width: 44px;
+            height: 44px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1.5px solid rgba(255, 215, 0, 0.4);
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
             backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         .preview-control-btn:hover {
@@ -3571,13 +3919,15 @@
 
         .wow-character-name-input {
             position: absolute;
-            bottom: 30px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 10px;
+            gap: 15px;
             align-items: center;
-            z-index: 5;
+            z-index: 10;
+            width: auto;
+            max-width: 90%;
         }
 
         @media (max-width: 768px) {
@@ -3594,40 +3944,53 @@
         }
 
         .wow-character-name-input input {
-            padding: 12px 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid rgba(255, 215, 0, 0.5);
-            border-radius: 6px;
+            padding: 16px 28px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid var(--faction-primary, rgba(255, 215, 0, 0.5));
+            border-radius: 10px;
             color: #fff;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 1.25em;
+            font-weight: 700;
             text-align: center;
-            min-width: 250px;
+            width: 450px;
+            max-width: 100%;
+            font-family: var(--font-primary, 'Inter', sans-serif);
+            letter-spacing: 1px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
         }
 
         .wow-character-name-input input:focus {
             outline: none;
-            border-color: #FFD700;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            border-color: var(--faction-primary, #FFD700);
+            box-shadow:
+                0 0 20px var(--faction-glow),
+                0 0 0 4px rgba(var(--faction-primary-rgb), 0.1);
+            background: rgba(0, 0, 0, 0.95);
         }
 
         .wow-random-name-btn {
-            width: 45px;
-            height: 45px;
-            border: 2px solid rgba(255, 215, 0, 0.5);
-            background: rgba(0, 0, 0, 0.8);
-            color: #FFD700;
-            border-radius: 6px;
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--faction-primary, rgba(255, 215, 0, 0.5));
+            background: rgba(0, 0, 0, 0.85);
+            color: var(--faction-primary, #FFD700);
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
         }
 
         .wow-random-name-btn:hover {
-            background: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            background: var(--faction-primary);
+            color: #000;
+            transform: rotate(15deg) scale(1.1);
+            box-shadow: 0 0 20px var(--faction-glow);
         }
 
         /* Right Panel: Class Selection */
@@ -6171,37 +6534,37 @@
                         </div>
 
                         <div class="wow-realm-list" id="wowRealmList">
-                            <div class="wow-realm-item" onclick="selectRealm(this, 'Azeroth')">
+                            <div class="wow-realm-item">
                                 <span class="wow-realm-name">Azeroth</span>
                                 <span class="wow-realm-type">PvP</span>
                                 <span class="wow-realm-pop wow-pop-high">High</span>
                             </div>
-                            <div class="wow-realm-item" onclick="selectRealm(this, 'Kalimdor')">
+                            <div class="wow-realm-item">
                                 <span class="wow-realm-name">Kalimdor</span>
                                 <span class="wow-realm-type">PvE</span>
                                 <span class="wow-realm-pop wow-pop-med">Med</span>
                             </div>
-                            <div class="wow-realm-item" onclick="selectRealm(this, 'Northrend')">
+                            <div class="wow-realm-item">
                                 <span class="wow-realm-name">Northrend</span>
                                 <span class="wow-realm-type">RP</span>
                                 <span class="wow-realm-pop wow-pop-low">Low</span>
                             </div>
-                            <div class="wow-realm-item selected" onclick="selectRealm(this, 'Fantasy Realm')">
+                            <div class="wow-realm-item selected">
                                 <span class="wow-realm-name">Fantasy Realm</span>
                                 <span class="wow-realm-type">PvE</span>
                                 <span class="wow-realm-pop wow-pop-high">Full</span>
                             </div>
-                            <div class="wow-realm-item" onclick="selectRealm(this, 'Outland')">
+                            <div class="wow-realm-item">
                                 <span class="wow-realm-name">Outland</span>
                                 <span class="wow-realm-type">PvP</span>
                                 <span class="wow-realm-pop wow-pop-med">Med</span>
                             </div>
-                            <div class="wow-realm-item" onclick="selectRealm(this, 'Pandaria')">
+                            <div class="wow-realm-item">
                                 <span class="wow-realm-name">Pandaria</span>
                                 <span class="wow-realm-type">RP</span>
                                 <span class="wow-realm-pop wow-pop-low">Low</span>
                             </div>
-                            <div class="wow-realm-item" onclick="selectRealm(this, 'Classic')">
+                            <div class="wow-realm-item">
                                 <span class="wow-realm-name">Classic</span>
                                 <span class="wow-realm-type">PvP</span>
                                 <span class="wow-realm-pop wow-pop-high">High</span>
@@ -6257,8 +6620,8 @@
                             <button class="wow-type-button selected" data-type="new" id="charTypeNew">
                                 New Level 1
                             </button>
-                            <button class="wow-type-button" data-type="trial" id="charTypeTrial">
-                                Class Trial Level 110
+                            <button class="wow-type-button" data-type="dev" id="charTypeDev">
+                                Dev Mode Level 1000
                             </button>
                         </div>
                     </div>
@@ -6266,147 +6629,63 @@
 
                 <!-- Main Content: 3-Column Layout -->
                 <div class="wow-creation-main-content">
-                    <!-- Left Panel: Race Selection (Alliance/Horde) -->
-                    <div class="wow-race-panel">
-                        <div class="wow-faction-section alliance-faction">
-                            <div class="wow-faction-header">ALLIANCE</div>
-                            <div class="wow-race-list">
-                                <div class="wow-race-item selected" data-race="human" data-faction="alliance">
-                                    <div class="wow-race-icon"><i class="fas fa-user"></i></div>
-                                    <div class="wow-race-name">Human</div>
-                                </div>
-                                <div class="wow-race-item" data-race="elf" data-faction="alliance">
-                                    <div class="wow-race-icon"><i class="fas fa-leaf"></i></div>
-                                    <div class="wow-race-name">Elf</div>
-                                </div>
-                                <div class="wow-race-item" data-race="dwarf" data-faction="alliance">
-                                    <div class="wow-race-icon"><i class="fas fa-hammer"></i></div>
-                                    <div class="wow-race-name">Dwarf</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="wow-faction-section horde-faction">
-                            <div class="wow-faction-header">HORDE</div>
-                            <div class="wow-race-list">
-                                <div class="wow-race-item" data-race="demon" data-faction="horde">
-                                    <div class="wow-race-icon"><i class="fas fa-fire"></i></div>
-                                    <div class="wow-race-name">Demon</div>
+                    <!-- Left Panel: Race & Class Selection -->
+                    <div class="wow-selection-sidebar left-sidebar">
+                        <div class="wow-race-selection-panel">
+                            <div class="wow-panel-header">RACE</div>
+                            <div class="wow-faction-section alliance-faction">
+                                <div class="wow-faction-header">ALLIANCE</div>
+                                <div class="wow-race-list">
+                                    <div class="wow-race-item selected" data-race="human" data-faction="alliance">
+                                        <div class="wow-race-icon"><i class="fas fa-user"></i></div>
+                                        <div class="wow-race-name">Human</div>
+                                    </div>
+                                    <div class="wow-race-item" data-race="elf" data-faction="alliance">
+                                        <div class="wow-race-icon"><i class="fas fa-leaf"></i></div>
+                                        <div class="wow-race-name">Elf</div>
+                                    </div>
+                                    <div class="wow-race-item" data-race="dwarf" data-faction="alliance">
+                                        <div class="wow-race-icon"><i class="fas fa-hammer"></i></div>
+                                        <div class="wow-race-name">Dwarf</div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Customization Sections (in race panel) -->
-                        <div class="wow-custom-section">
-                            <h3 class="wow-custom-section-title">Face & Hair</h3>
-
-                            <div class="wow-custom-item">
-                                <label>Hair Style: <span id="hairStyleValue">1</span></label>
-                                <div class="wow-slider-controls">
-                                    <button class="wow-slider-btn" id="hairStylePrev"><i
-                                            class="fas fa-chevron-left"></i></button>
-                                    <input type="range" id="hairStyle" min="0" max="9" step="1" value="0"
-                                        class="wow-range-slider">
-                                    <button class="wow-slider-btn" id="hairStyleNext"><i
-                                            class="fas fa-chevron-right"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Hair Color:</label>
-                                <input type="color" id="hairColor" value="#8B4513" class="wow-color-picker">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Eye Color:</label>
-                                <input type="color" id="eyeColor" value="#4A90E2" class="wow-color-picker">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Face Type: <span id="faceTypeValue">1</span></label>
-                                <div class="wow-slider-controls">
-                                    <button class="wow-slider-btn" id="faceTypePrev"><i
-                                            class="fas fa-chevron-left"></i></button>
-                                    <input type="range" id="faceType" min="0" max="9" step="1" value="0"
-                                        class="wow-range-slider">
-                                    <button class="wow-slider-btn" id="faceTypeNext"><i
-                                            class="fas fa-chevron-right"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Facial Features: <span id="facialFeaturesValue">1</span></label>
-                                <div class="wow-slider-controls">
-                                    <button class="wow-slider-btn" id="facialFeaturesPrev"><i
-                                            class="fas fa-chevron-left"></i></button>
-                                    <input type="range" id="facialFeatures" min="0" max="9" step="1" value="0"
-                                        class="wow-range-slider">
-                                    <button class="wow-slider-btn" id="facialFeaturesNext"><i
-                                            class="fas fa-chevron-right"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="wow-custom-item race-specific" id="raceFeaturesItem" style="display: none;">
-                                <label id="raceFeaturesLabel"><span id="raceFeaturesLabelText">Race Features</span>:
-                                    <span id="raceFeaturesValue">0</span></label>
-                                <div class="wow-slider-controls">
-                                    <button class="wow-slider-btn" id="raceFeaturesPrev"><i
-                                            class="fas fa-chevron-left"></i></button>
-                                    <input type="range" id="raceFeatures" min="0" max="9" step="1" value="0"
-                                        class="wow-range-slider">
-                                    <button class="wow-slider-btn" id="raceFeaturesNext"><i
-                                            class="fas fa-chevron-right"></i></button>
+                            <div class="wow-faction-section horde-faction">
+                                <div class="wow-faction-header">HORDE</div>
+                                <div class="wow-race-list">
+                                    <div class="wow-race-item" data-race="demon" data-faction="horde">
+                                        <div class="wow-race-icon"><i class="fas fa-fire"></i></div>
+                                        <div class="wow-race-name">Demon</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="wow-custom-section">
-                            <h3 class="wow-custom-section-title">Body & Appearance</h3>
-
-                            <div class="wow-custom-item">
-                                <label>Skin Tone: <span id="skinToneValue">0.5</span></label>
-                                <input type="range" id="skinTone" min="0" max="1" step="0.1" value="0.5"
-                                    class="wow-range-slider">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Body Shape: <span id="bodyShapeValue">0.5</span></label>
-                                <input type="range" id="bodyShape" min="0" max="1" step="0.1" value="0.5"
-                                    class="wow-range-slider">
-                            </div>
-                        </div>
-
-                        <div class="wow-custom-section">
-                            <h3 class="wow-custom-section-title">Character Stats</h3>
-
-                            <div class="wow-custom-item">
-                                <label>Health: <span id="healthValue">50</span></label>
-                                <input type="range" id="healthStat" min="0" max="100" value="50"
-                                    class="wow-range-slider">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Strength: <span id="strengthValue">10</span></label>
-                                <input type="range" id="strengthStat" min="0" max="100" value="10"
-                                    class="wow-range-slider">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Magic: <span id="magicValue">10</span></label>
-                                <input type="range" id="magicStat" min="0" max="100" value="10"
-                                    class="wow-range-slider">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Speed: <span id="speedValue">10</span></label>
-                                <input type="range" id="speedStat" min="0" max="100" value="10"
-                                    class="wow-range-slider">
+                        <div class="wow-class-selection-panel">
+                            <div class="wow-panel-header">CLASS</div>
+                            <div class="wow-class-list">
+                                <div class="wow-class-item selected" data-class="warrior">
+                                    <div class="wow-class-icon"><i class="fas fa-sword"></i></div>
+                                    <div class="wow-class-name">Warrior</div>
+                                </div>
+                                <div class="wow-class-item" data-class="mage">
+                                    <div class="wow-class-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+                                    <div class="wow-class-name">Mage</div>
+                                </div>
+                                <div class="wow-class-item" data-class="healer">
+                                    <div class="wow-class-icon"><i class="fas fa-heart"></i></div>
+                                    <div class="wow-class-name">Healer</div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Center Panel: Character Model (Large, Centered) -->
                     <div class="wow-character-preview-panel">
+                        <div id="previewLoadingOverlay" class="wow-preview-loading-overlay hidden">
+                            <div class="wow-preview-spinner"></div>
+                            <div class="wow-preview-loading-text">Loading Model...</div>
+                        </div>
                         <canvas id="characterPreviewCanvas"></canvas>
 
                         <!-- Character Preview Controls (WoW-style) -->
@@ -6433,413 +6712,414 @@
                         </div>
                     </div>
 
-                    <!-- Right Panel: Class Selection -->
-                    <div class="wow-class-panel">
-                        <div class="wow-panel-header">CLASS</div>
-                        <div class="wow-class-list">
-                            <div class="wow-class-item selected" data-class="warrior">
-                                <div class="wow-class-icon"><i class="fas fa-sword"></i></div>
-                                <div class="wow-class-name">Warrior</div>
-                            </div>
-                            <div class="wow-class-item" data-class="mage">
-                                <div class="wow-class-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
-                                <div class="wow-class-name">Mage</div>
-                            </div>
-                            <div class="wow-class-item" data-class="healer">
-                                <div class="wow-class-icon"><i class="fas fa-heart"></i></div>
-                                <div class="wow-class-name">Healer</div>
-                            </div>
+                    <!-- Right Panel: Customization Sidebar -->
+                    <div class="wow-selection-sidebar right-sidebar">
+                        <div class="wow-sidebar-tabs">
+                            <button class="wow-tab-btn active" data-tab="CHARACTER">APPEARANCE</button>
+                            <button class="wow-tab-btn" data-tab="STATS">STATS</button>
                         </div>
-                        <!-- Class Rank Selection (Admin Only) -->
-                        <div id="wowClassRankDropdown" class="wow-class-rank-dropdown hidden">
-                            <div class="wow-panel-header">CLASS RANK</div>
-                            <select id="classRankSelect" class="wow-class-rank-select">
-                                <option value="">Base Class (C-Rank)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Customization Panel (Hidden by default, shown when Customize is clicked) -->
-                <div id="wowCustomizationPanel" class="wow-customization-panel hidden">
-                    <div class="wow-customization-content">
-                        <!-- Face & Hair -->
-                        <div class="wow-custom-section">
-                            <h3 class="wow-custom-section-title">Face & Hair</h3>
-
-                            <div class="wow-custom-item">
-                                <label>Hair Style: <span id="hairStyleValue">1</span></label>
-                                <div class="wow-slider-controls">
-                                    <button class="wow-slider-btn" id="hairStylePrev"><i
-                                            class="fas fa-chevron-left"></i></button>
-                                    <input type="range" id="hairStyle" min="0" max="9" step="1" value="0"
-                                        class="wow-range-slider">
-                                    <button class="wow-slider-btn" id="hairStyleNext"><i
-                                            class="fas fa-chevron-right"></i></button>
+                        <div id="wowCustomizationPanel" class="wow-tab-panel">
+                            <div class="wow-custom-section">
+                                <h3 class="wow-custom-section-title">Face & Hair</h3>
+                                <div class="wow-custom-item">
+                                    <label>Hair Style: <span id="hairStyleValue">1</span></label>
+                                    <div class="wow-slider-controls">
+                                        <button class="wow-slider-btn" id="hairStylePrev"><i
+                                                class="fas fa-chevron-left"></i></button>
+                                        <input type="range" id="hairStyle" min="0" max="9" step="1" value="0"
+                                            class="wow-range-slider">
+                                        <button class="wow-slider-btn" id="hairStyleNext"><i
+                                                class="fas fa-chevron-right"></i></button>
+                                    </div>
+                                </div>
+                                <div class="wow-custom-item">
+                                    <label>Facial Features: <span id="facialFeaturesValue">1</span></label>
+                                    <div class="wow-slider-controls">
+                                        <button class="wow-slider-btn" id="facialFeaturesPrev"><i
+                                                class="fas fa-chevron-left"></i></button>
+                                        <input type="range" id="facialFeatures" min="0" max="9" step="1" value="0"
+                                            class="wow-range-slider">
+                                        <button class="wow-slider-btn" id="facialFeaturesNext"><i
+                                                class="fas fa-chevron-right"></i></button>
+                                    </div>
+                                </div>
+                                <div id="raceFeaturesContainer" class="wow-custom-item" style="display: none;">
+                                    <label id="raceFeaturesLabel"><span id="raceFeaturesType">Features</span>: <span
+                                            id="raceFeaturesValue">1</span></label>
+                                    <div class="wow-slider-controls">
+                                        <button class="wow-slider-btn" id="raceFeaturesPrev"><i
+                                                class="fas fa-chevron-left"></i></button>
+                                        <input type="range" id="raceFeatures" min="0" max="9" step="1" value="0"
+                                            class="wow-range-slider">
+                                        <button class="wow-slider-btn" id="raceFeaturesNext"><i
+                                                class="fas fa-chevron-right"></i></button>
+                                    </div>
+                                </div>
+                                <div class="wow-custom-item">
+                                    <label>Hair Color:</label>
+                                    <div class="wow-color-picker-wrapper">
+                                        <input type="color" id="hairColor" value="#8B4513" class="wow-color-picker">
+                                    </div>
+                                </div>
+                                <div class="wow-custom-item">
+                                    <label>Eye Color:</label>
+                                    <div class="wow-color-picker-wrapper">
+                                        <input type="color" id="eyeColor" value="#4A90E2" class="wow-color-picker">
+                                    </div>
+                                </div>
+                                <div class="wow-custom-item">
+                                    <label>Face Type: <span id="faceTypeValue">1</span></label>
+                                    <div class="wow-slider-controls">
+                                        <button class="wow-slider-btn" id="faceTypePrev"><i
+                                                class="fas fa-chevron-left"></i></button>
+                                        <input type="range" id="faceType" min="0" max="9" step="1" value="0"
+                                            class="wow-range-slider">
+                                        <button class="wow-slider-btn" id="faceTypeNext"><i
+                                                class="fas fa-chevron-right"></i></button>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="wow-custom-item">
-                                <label>Hair Color:</label>
-                                <input type="color" id="hairColor" value="#8B4513" class="wow-color-picker">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Eye Color:</label>
-                                <input type="color" id="eyeColor" value="#4A90E2" class="wow-color-picker">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Face Type: <span id="faceTypeValue">1</span></label>
-                                <div class="wow-slider-controls">
-                                    <button class="wow-slider-btn" id="faceTypePrev"><i
-                                            class="fas fa-chevron-left"></i></button>
-                                    <input type="range" id="faceType" min="0" max="9" step="1" value="0"
+                            <div class="wow-custom-section">
+                                <h3 class="wow-custom-section-title">Body Appearance</h3>
+                                <div class="wow-custom-item">
+                                    <label>Skin Tone: <span id="skinToneValue">0.5</span></label>
+                                    <input type="range" id="skinTone" min="0" max="1" step="0.1" value="0.5"
                                         class="wow-range-slider">
-                                    <button class="wow-slider-btn" id="faceTypeNext"><i
-                                            class="fas fa-chevron-right"></i></button>
+                                </div>
+                                <div class="wow-custom-item">
+                                    <label>Body Shape: <span id="bodyShapeValue">0.5</span></label>
+                                    <input type="range" id="bodyShape" min="0" max="1" step="0.1" value="0.5"
+                                        class="wow-range-slider">
                                 </div>
                             </div>
 
-                            <div class="wow-custom-item">
-                                <label>Facial Features: <span id="facialFeaturesValue">1</span></label>
-                                <div class="wow-slider-controls">
-                                    <button class="wow-slider-btn" id="facialFeaturesPrev"><i
-                                            class="fas fa-chevron-left"></i></button>
-                                    <input type="range" id="facialFeatures" min="0" max="9" step="1" value="0"
-                                        class="wow-range-slider">
-                                    <button class="wow-slider-btn" id="facialFeaturesNext"><i
-                                            class="fas fa-chevron-right"></i></button>
+                        </div>
+
+                        <!-- CHARACTER STATS TAB PANEL -->
+                        <div id="wowStatsPanel" class="wow-tab-panel hidden">
+                            <div class="wow-custom-section">
+                                <h3 class="wow-custom-section-title">Base Stats</h3>
+                                <div class="wow-stats-list">
+                                    <!-- Health -->
+                                    <div class="wow-stat-item">
+                                        <div class="wow-stat-label">
+                                            <span><i class="fas fa-heart"></i> Health</span>
+                                            <span id="healthValue" class="wow-stat-value">50</span>
+                                        </div>
+                                        <div class="wow-slider-controls">
+                                            <button class="wow-slider-btn" id="healthStatPrev"><i
+                                                    class="fas fa-minus"></i></button>
+                                            <input type="range" id="healthStat" min="0" max="1000" step="1" value="50"
+                                                class="wow-range-slider">
+                                            <button class="wow-slider-btn" id="healthStatNext"><i
+                                                    class="fas fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <!-- Strength -->
+                                    <div class="wow-stat-item">
+                                        <div class="wow-stat-label">
+                                            <span><i class="fas fa-fist-raised"></i> Strength</span>
+                                            <span id="strengthValue" class="wow-stat-value">10</span>
+                                        </div>
+                                        <div class="wow-slider-controls">
+                                            <button class="wow-slider-btn" id="strengthStatPrev"><i
+                                                    class="fas fa-minus"></i></button>
+                                            <input type="range" id="strengthStat" min="0" max="500" step="1" value="10"
+                                                class="wow-range-slider">
+                                            <button class="wow-slider-btn" id="strengthStatNext"><i
+                                                    class="fas fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <!-- Magic -->
+                                    <div class="wow-stat-item">
+                                        <div class="wow-stat-label">
+                                            <span><i class="fas fa-magic"></i> Magic</span>
+                                            <span id="magicValue" class="wow-stat-value">10</span>
+                                        </div>
+                                        <div class="wow-slider-controls">
+                                            <button class="wow-slider-btn" id="magicStatPrev"><i
+                                                    class="fas fa-minus"></i></button>
+                                            <input type="range" id="magicStat" min="0" max="800" step="1" value="10"
+                                                class="wow-range-slider">
+                                            <button class="wow-slider-btn" id="magicStatNext"><i
+                                                    class="fas fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <!-- Speed -->
+                                    <div class="wow-stat-item">
+                                        <div class="wow-stat-label">
+                                            <span><i class="fas fa-running"></i> Speed</span>
+                                            <span id="speedValue" class="wow-stat-value">10</span>
+                                        </div>
+                                        <div class="wow-slider-controls">
+                                            <button class="wow-slider-btn" id="speedStatPrev"><i
+                                                    class="fas fa-minus"></i></button>
+                                            <input type="range" id="speedStat" min="0" max="500" step="1" value="10"
+                                                class="wow-range-slider">
+                                            <button class="wow-slider-btn" id="speedStatNext"><i
+                                                    class="fas fa-plus"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="wow-custom-item race-specific" id="raceFeaturesItem" style="display: none;">
-                                <label id="raceFeaturesLabel"><span id="raceFeaturesLabelText">Race Features</span>:
-                                    <span id="raceFeaturesValue">0</span></label>
-                                <div class="wow-slider-controls">
-                                    <button class="wow-slider-btn" id="raceFeaturesPrev"><i
-                                            class="fas fa-chevron-left"></i></button>
-                                    <input type="range" id="raceFeatures" min="0" max="9" step="1" value="0"
-                                        class="wow-range-slider">
-                                    <button class="wow-slider-btn" id="raceFeaturesNext"><i
-                                            class="fas fa-chevron-right"></i></button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Body & Appearance -->
-                        <div class="wow-custom-section">
-                            <h3 class="wow-custom-section-title">Body & Appearance</h3>
-
-                            <div class="wow-custom-item">
-                                <label>Skin Tone: <span id="skinToneValue">0.5</span></label>
-                                <input type="range" id="skinTone" min="0" max="1" step="0.1" value="0.5"
-                                    class="wow-range-slider">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Body Shape: <span id="bodyShapeValue">0.5</span></label>
-                                <input type="range" id="bodyShape" min="0" max="1" step="0.1" value="0.5"
-                                    class="wow-range-slider">
-                            </div>
-                        </div>
-
-                        <!-- Character Stats -->
-                        <div class="wow-custom-section">
-                            <h3 class="wow-custom-section-title">Character Stats</h3>
-
-                            <div class="wow-custom-item">
-                                <label>Health: <span id="healthValue">50</span></label>
-                                <input type="range" id="healthStat" min="0" max="100" value="50"
-                                    class="wow-range-slider">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Strength: <span id="strengthValue">10</span></label>
-                                <input type="range" id="strengthStat" min="0" max="100" value="10"
-                                    class="wow-range-slider">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Magic: <span id="magicValue">10</span></label>
-                                <input type="range" id="magicStat" min="0" max="100" value="10"
-                                    class="wow-range-slider">
-                            </div>
-
-                            <div class="wow-custom-item">
-                                <label>Speed: <span id="speedValue">10</span></label>
-                                <input type="range" id="speedStat" min="0" max="100" value="10"
-                                    class="wow-range-slider">
-                            </div>
                         </div>
                     </div>
 
-                    <!-- Customization Panel Footer -->
-                    <div class="wow-customization-footer">
-                        <button class="wow-custom-save-btn" id="wowCustomSaveButton">
-                            <i class="fas fa-save"></i> Save Character
-                        </button>
-                        <button class="wow-custom-cancel-btn"
-                            onclick="document.getElementById('wowCustomizationPanel').classList.add('hidden')">
-                            <i class="fas fa-times"></i> Close
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Bottom Buttons: Back, Save, More Info -->
-                <div class="wow-creation-footer">
-                    <button class="wow-footer-button" id="wowBackButton">
-                        <i class="fas fa-arrow-left"></i> Back
-                    </button>
-                    <button class="wow-footer-button wow-footer-button-primary" id="saveCharacterButton">
-                        <i class="fas fa-save"></i> Save Character
-                    </button>
-                    <button class="wow-footer-button" id="wowMoreInfoButton">
-                        More Info <i class="fas fa-info-circle"></i>
-                    </button>
-                </div>
-
-                <!-- Hidden Save/Cancel buttons (for compatibility) -->
-                <div style="display: none;">
-                    <button id="saveCharacterButton"></button>
-                    <button id="cancelCreationButton"></button>
                 </div>
             </div>
 
-            <!-- HUD - Gothic Style -->
-            <div id="hud">
-                <div class="gothic-hud-container">
-                    <!-- Left Side: Level Hexagon and Crest -->
-                    <div class="gothic-hud-left">
-                        <div class="gothic-level-hexagon">
-                            <div class="gothic-level-number" id="hudLevel">1000</div>
-                        </div>
-                        <div class="gothic-crest"></div>
-                    </div>
 
-                    <!-- Right Side: Resource Bars -->
-                    <div class="gothic-hud-right">
-                        <!-- Health Bar (Top) -->
-                        <div class="gothic-bar-container">
-                            <div class="gothic-bar-frame">
-                                <div class="gothic-bar-fill gothic-health-fill" id="gothicHealthBarFill"></div>
-                                <div class="gothic-bar-glow gothic-health-glow"></div>
-                                <div class="gothic-bar-text" id="gothicHealthBarText">1000/1000</div>
-                            </div>
-                        </div>
-
-                        <!-- Mana Bar (Middle) -->
-                        <div class="gothic-bar-container">
-                            <div class="gothic-bar-frame">
-                                <div class="gothic-bar-fill gothic-mana-fill" id="gothicManaBarFill"></div>
-                                <div class="gothic-bar-glow gothic-mana-glow"></div>
-                                <div class="gothic-bar-text" id="gothicManaBarText">800/800</div>
-                            </div>
-                        </div>
-
-                        <!-- Stamina Bar (Bottom) -->
-                        <div class="gothic-bar-container">
-                            <div class="gothic-bar-frame">
-                                <div class="gothic-bar-fill gothic-stamina-fill" id="gothicStaminaBarFill"></div>
-                                <div class="gothic-bar-glow gothic-stamina-glow"></div>
-                                <div class="gothic-bar-text" id="gothicStaminaBarText">500/500</div>
-                            </div>
-                        </div>
-
-                        <!-- Strength Bar -->
-                        <div class="gothic-bar-container">
-                            <div class="gothic-bar-frame">
-                                <div class="gothic-bar-fill gothic-strength-fill" id="gothicStrengthBarFill"></div>
-                                <div class="gothic-bar-glow gothic-strength-glow"></div>
-                                <div class="gothic-bar-text" id="gothicStrengthBarText">500/500</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Bottom Buttons: Back, Save, More Info -->
+            <div class="wow-creation-footer">
+                <button class="wow-footer-button" id="wowBackButton">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button class="wow-footer-button wow-footer-button-primary" id="saveCharacterButton">
+                    <i class="fas fa-save"></i> Save Character
+                </button>
+                <button class="wow-footer-button" id="wowMoreInfoButton">
+                    More Info <i class="fas fa-info-circle"></i>
+                </button>
             </div>
-
-            <!-- Minimap -->
-            <div id="minimapContainer">
-                <canvas id="minimapCanvas"></canvas>
-            </div>
-
-            <!-- Settings Button -->
-            <button id="settingsButton" title="Settings">
-                <i class="fas fa-cog"></i>
-            </button>
-
-            <!-- Settings Menu -->
-            <div id="settingsMenu">
-                <h3><i class="fas fa-cog"></i> Settings & Controls</h3>
-                <div class="instruction-item">
-                    <i class="fas fa-keyboard"></i>
-                    <strong>WASD / Arrow Keys:</strong> Move character<br>
-                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">W/↑ Forward, S/↓ Backward, A/←
-                        Strafe Left, D/→ Strafe Right</span><br>
-                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Double-tap to run (1.5x
-                        speed)</span>
-                </div>
-                <div class="instruction-item">
-                    <i class="fas fa-mouse"></i>
-                    <strong>Mouse:</strong> Camera controls<br>
-                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Left-click drag: Rotate
-                        camera</span><br>
-                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Right-click drag: Rotate camera +
-                        character</span><br>
-                    <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Scroll wheel: Zoom in/out</span>
-                </div>
-                <div class="instruction-item">
-                    <i class="fas fa-sync-alt"></i>
-                    <strong>Q / E:</strong> Rotate character left / right
-                </div>
-
-                <!-- Settings Menu Buttons -->
-                <div class="settings-menu-buttons">
-                    <button id="instructionsButton" class="settings-menu-button">
-                        <i class="fas fa-book"></i> Instructions
-                    </button>
-                    <button id="characterSelectButtonSettings" class="settings-menu-button">
-                        <i class="fas fa-user"></i> Character Selection
-                    </button>
-                    <button id="logoutButton" class="settings-menu-button logout-button">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </div>
-            </div>
-
-            <!-- Instructions Modal -->
-            <div id="instructionsModal" class="modal-overlay" style="display: none;">
-                <div class="modal-content instructions-modal">
-                    <div class="modal-header">
-                        <h2><i class="fas fa-book"></i> Game Instructions</h2>
-                        <button id="closeInstructionsButton" class="modal-close-button">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body instructions-content">
-                        <div class="instruction-section">
-                            <h3><i class="fas fa-keyboard"></i> Movement Controls (WoW-style)</h3>
-                            <ul>
-                                <li><strong>W / ↑ Arrow:</strong> Move forward (walking speed)</li>
-                                <li><strong>S / ↓ Arrow:</strong> Move backward (walking speed)</li>
-                                <li><strong>A / ← Arrow:</strong> Strafe left (walking speed)</li>
-                                <li><strong>D / → Arrow:</strong> Strafe right (walking speed)</li>
-                                <li><strong>Q:</strong> Rotate character left</li>
-                                <li><strong>E:</strong> Rotate character right</li>
-                                <li><strong>Note:</strong> Keyboard movement always uses walking speed (50% of running
-                                    speed)</li>
-                            </ul>
-                        </div>
-
-                        <div class="instruction-section">
-                            <h3><i class="fas fa-mouse"></i> Mouse Controls (WoW-style)</h3>
-                            <ul>
-                                <li><strong>Left-click + Drag:</strong> Rotate camera around character (camera only)
-                                </li>
-                                <li><strong>Right-click + Drag:</strong> Rotate both camera and character together</li>
-                                <li><strong>Mouse Wheel:</strong> Zoom camera in/out</li>
-                                <li><strong>Single Click on Map:</strong> Move to location (walking speed)</li>
-                                <li><strong>Double Click on Map:</strong> Run to location (2x walking speed, consumes
-                                    energy)</li>
-                                <li><strong>Hover:</strong> Cursor changes when over interactive objects</li>
-                            </ul>
-                        </div>
-
-                        <div class="instruction-section">
-                            <h3><i class="fas fa-cog"></i> Game Systems</h3>
-                            <ul>
-                                <li><strong>B Key:</strong> Open/close inventory</li>
-                                <li><strong>ESC:</strong> Close menus</li>
-                                <li><strong>1-0 Keys:</strong> Activate skills and abilities</li>
-                                <li><strong>Energy System:</strong> Running (double-click on map) consumes energy,
-                                    regenerates over time</li>
-                                <li><strong>Speed:</strong> Walking speed is 50% of running speed</li>
-                            </ul>
-                        </div>
-
-                        <div class="instruction-section">
-                            <h3><i class="fas fa-map"></i> Navigation</h3>
-                            <ul>
-                                <li><strong>Minimap:</strong> Top-right corner shows your location</li>
-                                <li><strong>HUD:</strong> Top-left shows level, health, mana, stamina, and strength bars
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Skills Section -->
-            <div id="skillsSection">
-                <!-- Auto Attack (no keybind) -->
-                <div class="skill-slot auto-attack" data-slot="auto">
-                    <i class="fas fa-sword"></i>
-                </div>
-                <!-- Custom Attacks (1-2) -->
-                <div class="skill-slot empty attack-slot" data-slot="1">
-                    <div class="skill-keybind">1</div>
-                </div>
-                <div class="skill-slot empty attack-slot" data-slot="2">
-                    <div class="skill-keybind">2</div>
-                </div>
-                <!-- Custom Spells (3-4) -->
-                <div class="skill-slot empty spell-slot" data-slot="3">
-                    <div class="skill-keybind">3</div>
-                </div>
-                <div class="skill-slot empty spell-slot" data-slot="4">
-                    <div class="skill-keybind">4</div>
-                </div>
-                <!-- Other Skills (5-0) -->
-                <div class="skill-slot empty" data-slot="5">
-                    <div class="skill-keybind">5</div>
-                </div>
-                <div class="skill-slot empty" data-slot="6">
-                    <div class="skill-keybind">6</div>
-                </div>
-                <div class="skill-slot empty" data-slot="7">
-                    <div class="skill-keybind">7</div>
-                </div>
-                <div class="skill-slot empty" data-slot="8">
-                    <div class="skill-keybind">8</div>
-                </div>
-                <div class="skill-slot empty" data-slot="9">
-                    <div class="skill-keybind">9</div>
-                </div>
-                <div class="skill-slot empty" data-slot="0">
-                    <div class="skill-keybind">0</div>
-                </div>
-                <!-- Potion Slots -->
-                <div class="skill-slot empty potion-slot" data-slot="potion1">
-                    <i class="fas fa-flask"></i>
-                </div>
-                <div class="skill-slot empty potion-slot" data-slot="potion2">
-                    <i class="fas fa-flask"></i>
-                </div>
-                <!-- Elixir Slots -->
-                <div class="skill-slot empty elixir-slot" data-slot="elixir1">
-                    <i class="fas fa-vial"></i>
-                </div>
-                <div class="skill-slot empty elixir-slot" data-slot="elixir2">
-                    <i class="fas fa-vial"></i>
-                </div>
-            </div>
-
-            <!-- Inventory Button -->
-            <button id="inventoryButton" title="Inventory (B)">
-                <i class="fas fa-shopping-bag"></i>
-            </button>
-
-            <!-- Inventory Menu -->
-            <div id="inventoryMenu">
-                <h3><i class="fas fa-shopping-bag"></i> Inventory</h3>
-                <div id="inventoryGrid">
-                    <!-- Inventory slots will be generated dynamically -->
-                </div>
-            </div>
-
-            <!-- Loading -->
-            <div id="loading">Loading...</div>
         </div>
+    </div>
+
+    <!-- HUD - Gothic Style -->
+    <div id="hud">
+        <div class="gothic-hud-container">
+            <!-- Left Side: Level Hexagon and Crest -->
+            <div class="gothic-hud-left">
+                <div class="gothic-level-hexagon">
+                    <div class="gothic-level-number" id="hudLevel">1000</div>
+                </div>
+                <div class="gothic-crest"></div>
+            </div>
+
+            <!-- Right Side: Resource Bars -->
+            <div class="gothic-hud-right">
+                <!-- Health Bar (Top) -->
+                <div class="gothic-bar-container">
+                    <div class="gothic-bar-frame">
+                        <div class="gothic-bar-fill gothic-health-fill" id="gothicHealthBarFill"></div>
+                        <div class="gothic-bar-glow gothic-health-glow"></div>
+                        <div class="gothic-bar-text" id="gothicHealthBarText">1000/1000</div>
+                    </div>
+                </div>
+
+                <!-- Mana Bar (Middle) -->
+                <div class="gothic-bar-container">
+                    <div class="gothic-bar-frame">
+                        <div class="gothic-bar-fill gothic-mana-fill" id="gothicManaBarFill"></div>
+                        <div class="gothic-bar-glow gothic-mana-glow"></div>
+                        <div class="gothic-bar-text" id="gothicManaBarText">800/800</div>
+                    </div>
+                </div>
+
+                <!-- Stamina Bar (Bottom) -->
+                <div class="gothic-bar-container">
+                    <div class="gothic-bar-frame">
+                        <div class="gothic-bar-fill gothic-stamina-fill" id="gothicStaminaBarFill"></div>
+                        <div class="gothic-bar-glow gothic-stamina-glow"></div>
+                        <div class="gothic-bar-text" id="gothicStaminaBarText">500/500</div>
+                    </div>
+                </div>
+
+                <!-- Strength Bar -->
+                <div class="gothic-bar-container">
+                    <div class="gothic-bar-frame">
+                        <div class="gothic-bar-fill gothic-strength-fill" id="gothicStrengthBarFill"></div>
+                        <div class="gothic-bar-glow gothic-strength-glow"></div>
+                        <div class="gothic-bar-text" id="gothicStrengthBarText">500/500</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Minimap -->
+    <div id="minimapContainer">
+        <canvas id="minimapCanvas"></canvas>
+    </div>
+
+    <!-- Settings Button -->
+    <button id="settingsButton" title="Settings">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- Settings Menu -->
+    <div id="settingsMenu">
+        <h3><i class="fas fa-cog"></i> Settings & Controls</h3>
+        <div class="instruction-item">
+            <i class="fas fa-keyboard"></i>
+            <strong>WASD / Arrow Keys:</strong> Move character<br>
+            <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">W/↑ Forward, S/↓ Backward, A/←
+                Strafe Left, D/→ Strafe Right</span><br>
+            <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Double-tap to run (1.5x
+                speed)</span>
+        </div>
+        <div class="instruction-item">
+            <i class="fas fa-mouse"></i>
+            <strong>Mouse:</strong> Camera controls<br>
+            <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Left-click drag: Rotate
+                camera</span><br>
+            <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Right-click drag: Rotate camera +
+                character</span><br>
+            <span style="margin-left: 25px; font-size: 0.9em; opacity: 0.8;">Scroll wheel: Zoom in/out</span>
+        </div>
+        <div class="instruction-item">
+            <i class="fas fa-sync-alt"></i>
+            <strong>Q / E:</strong> Rotate character left / right
+        </div>
+
+        <!-- Settings Menu Buttons -->
+        <div class="settings-menu-buttons">
+            <button id="instructionsButton" class="settings-menu-button">
+                <i class="fas fa-book"></i> Instructions
+            </button>
+            <button id="characterSelectButtonSettings" class="settings-menu-button">
+                <i class="fas fa-user"></i> Character Selection
+            </button>
+            <button id="logoutButton" class="settings-menu-button logout-button">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div id="instructionsModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content instructions-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-book"></i> Game Instructions</h2>
+                <button id="closeInstructionsButton" class="modal-close-button">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body instructions-content">
+                <div class="instruction-section">
+                    <h3><i class="fas fa-keyboard"></i> Movement Controls (WoW-style)</h3>
+                    <ul>
+                        <li><strong>W / ↑ Arrow:</strong> Move forward (walking speed)</li>
+                        <li><strong>S / ↓ Arrow:</strong> Move backward (walking speed)</li>
+                        <li><strong>A / ← Arrow:</strong> Strafe left (walking speed)</li>
+                        <li><strong>D / → Arrow:</strong> Strafe right (walking speed)</li>
+                        <li><strong>Q:</strong> Rotate character left</li>
+                        <li><strong>E:</strong> Rotate character right</li>
+                        <li><strong>Note:</strong> Keyboard movement always uses walking speed (50% of running
+                            speed)</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section">
+                    <h3><i class="fas fa-mouse"></i> Mouse Controls (WoW-style)</h3>
+                    <ul>
+                        <li><strong>Left-click + Drag:</strong> Rotate camera around character (camera only)
+                        </li>
+                        <li><strong>Right-click + Drag:</strong> Rotate both camera and character together</li>
+                        <li><strong>Mouse Wheel:</strong> Zoom camera in/out</li>
+                        <li><strong>Single Click on Map:</strong> Move to location (walking speed)</li>
+                        <li><strong>Double Click on Map:</strong> Run to location (2x walking speed, consumes
+                            energy)</li>
+                        <li><strong>Hover:</strong> Cursor changes when over interactive objects</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section">
+                    <h3><i class="fas fa-cog"></i> Game Systems</h3>
+                    <ul>
+                        <li><strong>B Key:</strong> Open/close inventory</li>
+                        <li><strong>ESC:</strong> Close menus</li>
+                        <li><strong>1-0 Keys:</strong> Activate skills and abilities</li>
+                        <li><strong>Energy System:</strong> Running (double-click on map) consumes energy,
+                            regenerates over time</li>
+                        <li><strong>Speed:</strong> Walking speed is 50% of running speed</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section">
+                    <h3><i class="fas fa-map"></i> Navigation</h3>
+                    <ul>
+                        <li><strong>Minimap:</strong> Top-right corner shows your location</li>
+                        <li><strong>HUD:</strong> Top-left shows level, health, mana, stamina, and strength bars
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills Section -->
+    <div id="skillsSection">
+        <!-- Auto Attack (no keybind) -->
+        <div class="skill-slot auto-attack" data-slot="auto">
+            <i class="fas fa-sword"></i>
+        </div>
+        <!-- Custom Attacks (1-2) -->
+        <div class="skill-slot empty attack-slot" data-slot="1">
+            <div class="skill-keybind">1</div>
+        </div>
+        <div class="skill-slot empty attack-slot" data-slot="2">
+            <div class="skill-keybind">2</div>
+        </div>
+        <!-- Custom Spells (3-4) -->
+        <div class="skill-slot empty spell-slot" data-slot="3">
+            <div class="skill-keybind">3</div>
+        </div>
+        <div class="skill-slot empty spell-slot" data-slot="4">
+            <div class="skill-keybind">4</div>
+        </div>
+        <!-- Other Skills (5-0) -->
+        <div class="skill-slot empty" data-slot="5">
+            <div class="skill-keybind">5</div>
+        </div>
+        <div class="skill-slot empty" data-slot="6">
+            <div class="skill-keybind">6</div>
+        </div>
+        <div class="skill-slot empty" data-slot="7">
+            <div class="skill-keybind">7</div>
+        </div>
+        <div class="skill-slot empty" data-slot="8">
+            <div class="skill-keybind">8</div>
+        </div>
+        <div class="skill-slot empty" data-slot="9">
+            <div class="skill-keybind">9</div>
+        </div>
+        <div class="skill-slot empty" data-slot="0">
+            <div class="skill-keybind">0</div>
+        </div>
+        <!-- Potion Slots -->
+        <div class="skill-slot empty potion-slot" data-slot="potion1">
+            <i class="fas fa-flask"></i>
+        </div>
+        <div class="skill-slot empty potion-slot" data-slot="potion2">
+            <i class="fas fa-flask"></i>
+        </div>
+        <!-- Elixir Slots -->
+        <div class="skill-slot empty elixir-slot" data-slot="elixir1">
+            <i class="fas fa-vial"></i>
+        </div>
+        <div class="skill-slot empty elixir-slot" data-slot="elixir2">
+            <i class="fas fa-vial"></i>
+        </div>
+    </div>
+
+    <!-- Inventory Button -->
+    <button id="inventoryButton" title="Inventory (B)">
+        <i class="fas fa-shopping-bag"></i>
+    </button>
+
+    <!-- Inventory Menu -->
+    <div id="inventoryMenu">
+        <h3><i class="fas fa-shopping-bag"></i> Inventory</h3>
+        <div id="inventoryGrid">
+            <!-- Inventory slots will be generated dynamically -->
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading">Loading...</div>
+    </div>
     </div>
 
     <!-- Three.js from CDN -->

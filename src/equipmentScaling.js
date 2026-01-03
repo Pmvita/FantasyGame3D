@@ -7,19 +7,19 @@ export const EQUIPMENT_SCALE_OVERRIDES = {
     // Scale factors are applied AFTER automatic normalization
     // A value of 1.0 means use automatic scaling
     // Values < 1.0 make equipment smaller, > 1.0 make it larger
-    
+
     // Warrior equipment
-    'warrior_armour_male': 0.8,      // Armour too big, reducing significantly
-    'warrior_armour_female': 0.8,
-    'warrior_helmet_male': 0.25,     // Helmet way too big, making it much smaller
-    'warrior_helmet_female': 0.25,
+    'warrior_armour_male': 0.85,     // Armour slightly reduced
+    'warrior_armour_female': 0.85,
+    'warrior_helmet_male': 1.0,      // Resetting to let new normalization work
+    'warrior_helmet_female': 1.0,
     'warrior_boots_male': 1.0,
     'warrior_boots_female': 1.0,
     'warrior_cape_male': 1.0,
     'warrior_cape_female': 1.0,
-    'warrior_weapon_male': 1.0,
-    'warrior_weapon_female': 1.0,
-    
+    'warrior_weapon_male': 1.1,      // Slightly larger sword
+    'warrior_weapon_female': 1.1,
+
     // Add other classes as needed
     // 'mage_armour_male': 1.0,
     // etc...
