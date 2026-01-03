@@ -2001,7 +2001,124 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            margin-top: 10px;
         }
+
+        /* Realm List Styles */
+        .wow-realm-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            font-size: 12px;
+            color: #ffd700;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .wow-realm-list-header span {
+            flex: 1;
+            text-align: left;
+        }
+
+        .wow-realm-list-header span:nth-child(2) {
+            text-align: center;
+            flex: 0 0 50px;
+        }
+
+        .wow-realm-list-header span:last-child {
+            text-align: right;
+            flex: 0 0 70px;
+        }
+
+        .wow-realm-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 150px;
+            padding-right: 5px;
+            /* Space for scrollbar */
+        }
+
+        /* Custom scrollbar for list */
+        .wow-realm-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .wow-realm-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.3);
+            border-radius: 2px;
+        }
+
+        .wow-realm-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+        }
+
+        .wow-realm-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            transform: translateX(2px);
+        }
+
+        .wow-realm-item.selected {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), transparent);
+            border-left: 3px solid #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+        }
+
+        .wow-realm-name {
+            flex: 1;
+            color: #dcdccc;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .wow-realm-item.selected .wow-realm-name {
+            color: #ffd700;
+            font-weight: 700;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .wow-realm-type {
+            flex: 0 0 50px;
+            text-align: center;
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .wow-realm-pop {
+            flex: 0 0 70px;
+            text-align: right;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .wow-pop-high {
+            color: #ff6b6b;
+        }
+
+        .wow-pop-med {
+            color: #ffd700;
+        }
+
+        .wow-pop-low {
+            color: #51cf66;
+        }
+
+
 
         .wow-server-item {
             display: flex;
@@ -6045,23 +6162,53 @@
 
                     <!-- Right Panel: Server/Realm Info (WoW-style) -->
                     <div class="wow-server-info-panel">
-                        <div class="wow-panel-header">SERVER</div>
-                        <div class="wow-server-info">
-                            <div class="wow-server-item">
-                                <div class="wow-server-label">Realm:</div>
-                                <div class="wow-server-value">Fantasy Realm</div>
+                        <div class="wow-panel-header">REALM SELECTION</div>
+
+                        <div class="wow-realm-list-header">
+                            <span>Realm Name</span>
+                            <span>Type</span>
+                            <span>Pop</span>
+                        </div>
+
+                        <div class="wow-realm-list" id="wowRealmList">
+                            <div class="wow-realm-item" onclick="selectRealm(this, 'Azeroth')">
+                                <span class="wow-realm-name">Azeroth</span>
+                                <span class="wow-realm-type">PvP</span>
+                                <span class="wow-realm-pop wow-pop-high">High</span>
                             </div>
-                            <div class="wow-server-item">
-                                <div class="wow-server-label">Type:</div>
-                                <div class="wow-server-value">PvE</div>
+                            <div class="wow-realm-item" onclick="selectRealm(this, 'Kalimdor')">
+                                <span class="wow-realm-name">Kalimdor</span>
+                                <span class="wow-realm-type">PvE</span>
+                                <span class="wow-realm-pop wow-pop-med">Med</span>
                             </div>
-                            <div class="wow-server-item">
-                                <div class="wow-server-label">Population:</div>
-                                <div class="wow-server-value" id="serverPopulation">0</div>
+                            <div class="wow-realm-item" onclick="selectRealm(this, 'Northrend')">
+                                <span class="wow-realm-name">Northrend</span>
+                                <span class="wow-realm-type">RP</span>
+                                <span class="wow-realm-pop wow-pop-low">Low</span>
+                            </div>
+                            <div class="wow-realm-item selected" onclick="selectRealm(this, 'Fantasy Realm')">
+                                <span class="wow-realm-name">Fantasy Realm</span>
+                                <span class="wow-realm-type">PvE</span>
+                                <span class="wow-realm-pop wow-pop-high">Full</span>
+                            </div>
+                            <div class="wow-realm-item" onclick="selectRealm(this, 'Outland')">
+                                <span class="wow-realm-name">Outland</span>
+                                <span class="wow-realm-type">PvP</span>
+                                <span class="wow-realm-pop wow-pop-med">Med</span>
+                            </div>
+                            <div class="wow-realm-item" onclick="selectRealm(this, 'Pandaria')">
+                                <span class="wow-realm-name">Pandaria</span>
+                                <span class="wow-realm-type">RP</span>
+                                <span class="wow-realm-pop wow-pop-low">Low</span>
+                            </div>
+                            <div class="wow-realm-item" onclick="selectRealm(this, 'Classic')">
+                                <span class="wow-realm-name">Classic</span>
+                                <span class="wow-realm-type">PvP</span>
+                                <span class="wow-realm-pop wow-pop-high">High</span>
                             </div>
                         </div>
 
-                        <div class="wow-panel-header" style="margin-top: 30px;">CHARACTER SLOTS</div>
+                        <div class="wow-panel-header" style="margin-top: 20px;">CHARACTER SLOTS</div>
                         <div class="wow-slots-info">
                             <div class="wow-slots-used" id="wowSlotsUsed">0</div>
                             <div class="wow-slots-separator">/</div>
